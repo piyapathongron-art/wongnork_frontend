@@ -1,17 +1,16 @@
-import React from 'react'
-import { Outlet } from 'react-router'
+import React from "react";
+import { Outlet } from "react-router";
 
 function AuthLayout() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-6">
-            {/* Organic Glass Container */}
-            <div className="w-full max-w-[350px] bg-[#FFF8F5]/80 backdrop-blur-[12px] rounded-[32px] p-8 shadow-xl border border-[#EEE2D1]/50">
-            <h1>AuthLayout</h1>
-            {/* <Outlet /> */}
-
+    <div className="min-h-screen bg-slate-800 flex items-center justify-center p-4">
+      {/* Main Container: กล่องขาวที่เป็นฐานสำหรับทุกหน้า */}
+      <div className="bg-white w-full max-w-md rounded-[3rem] overflow-hidden shadow-2xl flex flex-col items-center pt-12 pb-16 px-8 relative">
+        {/* Outlet คือจุดที่เนื้อหาของหน้า Login จะมาแสดงผลตรงนี้ */}
+        <Outlet />
             </div>
         </div>
-    )
+  );
 }
 
-export default AuthLayout
+export default AuthLayout;
