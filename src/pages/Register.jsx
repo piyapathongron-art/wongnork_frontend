@@ -16,7 +16,7 @@ const Register = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors,isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -29,6 +29,7 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     try {
+      new Promise((resolve) => setTimeout(resolve, 5000));
       console.log("Submit Data:", data);
       const resp = await registerUser(data);
       console.log("Response:", resp);
@@ -57,7 +58,8 @@ const Register = () => {
       {/* Form Card */}
       <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] p-8 shadow-sm">
         <ToastContainer containerId="registerPage" position="top-right"/>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)}  className="space-y-5">
+          <fieldset disabled={isSubmitting}>
           {/* Full Name Input */}
           <div>
             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">
@@ -233,6 +235,7 @@ const Register = () => {
           >
             Create Account
           </button>
+          </fieldset>
         </form>
 
         {/* Divider */}

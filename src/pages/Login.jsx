@@ -13,7 +13,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -26,6 +26,7 @@ const Login = () => {
 
   const submitLogin = async (data) => {
     try {
+      new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
       toast.success("Login สำเร็จ", { containerId: "loginPage" });
     } catch (err) {
@@ -51,6 +52,7 @@ const Login = () => {
       {/* Form Card เนื้อหาหลัก */}
       <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] p-8 shadow-sm">
         <form onSubmit={handleSubmit(submitLogin)} className="space-y-6">
+          <fieldset disabled={isSubmitting}>
           {/* Email Input */}
           <div>
             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">
@@ -162,6 +164,7 @@ const Login = () => {
           >
             Sign In
           </button>
+          </fieldset>
         </form>
 
         <div className="relative flex items-center py-8">
