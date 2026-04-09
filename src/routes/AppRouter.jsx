@@ -10,7 +10,7 @@ const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำ
 // // Auth Pages
 // const Splash = lazy(() => import("./pages/Splash"));
 const Login = lazy(() => import("../pages/Login"));
-// const Register = lazy(() => import("./pages/Register"));
+const Register = lazy(() => import("../pages/Register"));
 
 // // Main Tab Pages (Bottom Nav)
 // const HomeMap = lazy(() => import("./pages/HomeMap"));
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: "/login", element: <Login /> },
-      // { path: "/register", element: <Register /> },
+      { path: "/register", element: <Register /> },
     ],
   },
 
