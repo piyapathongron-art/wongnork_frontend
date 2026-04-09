@@ -25,3 +25,11 @@ mainApi.interceptors.request.use(
 export async function apiLogin(body) {
   return await mainApi.post("/auth/login", body);
 }
+
+export async function apiRegister(body) {
+  return await mainApi.post("/auth/register", body);
+}
+
+export async function apiGetProfile() {
+  return await mainApi.get("/auth/profile");
+}
