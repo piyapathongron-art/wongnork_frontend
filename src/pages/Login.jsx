@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import useUserStore from "../stores/userStore";
+import { toast, ToastContainer } from "react-toastify";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-
-  // const loginAction = userAuthStore((state) => state.login); // zustand อย่าลืม import จาก userAuthStore และแก้สิ่งที่รับมาด้วย
+  const login = useUserStore((state) => state.login);
 
   const {
     register,
@@ -17,39 +18,22 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Email&Pw:", data);
+  const submitLogin = async (data) => {
+    try {
+      const resp = await login(data);
+      toast.success("Login สำเร็จ", { containerId: "loginPage" });
+    } catch (err) {
+      console.dir(err.response.data);
+      const errMessage = err.response?.data.error;
+      toast.error(errMessage, { containerId: "loginPage" });
+    }
   };
-
-  {
-    /* // เอาไว้ดึงตอน backend มาแล้ว
-const onSubmit = async (data) => {
-  try {
-    const response = await loginApi(data);
-    const { user, token } = response.data;
-    
-    const mockUser = { name: "Wongnork User", email: data.email };
-      const mockToken = "fake-jwt-token";
-
-      // เก็บข้อมูลเข้า Store ของ Zustand
-      loginAction(mockUser, mockToken);
-
-  } catch (err) {
-    // สมมติหลังบ้านตอบกลับมาว่า { field: "email", message: "อีเมลนี้ไม่มีในระบบ" }
-    
-    setError("email", { 
-      type: "manual", 
-      message: err.response.data.message // เอา message จากหลังบ้านมาใส่
-    });
-  }
-};
-*/
-  }
 
   return (
     <>
       {/* Logo Section */}
       <div className="text-center mb-8">
+        <ToastContainer containerId="loginPage" />
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
           <span className="text-[#A65D2E] block">NORK</span>
@@ -60,7 +44,7 @@ const onSubmit = async (data) => {
 
       {/* Form Card เนื้อหาหลัก */}
       <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] p-8 shadow-sm">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(submitLogin)} className="space-y-6">
           {/* Email Input */}
           <div>
             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">
