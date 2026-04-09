@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import {useNavigate } from "react-router";
 import useUserStore from "../stores/userStore";
+import { registerSchema } from "../validations/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast, ToastContainer } from "react-toastify";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,10 +16,9 @@ const Register = () => {
   const {
     register,
     handleSubmit,
-    setError,
-    watch,
-    formState: { errors },
+    formState: { errors,isSubmitting },
   } = useForm({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
       email: "",
@@ -25,32 +27,19 @@ const Register = () => {
     },
   });
 
-  const password = watch("password");
-
-  // ถ้าจะแก้ zod ให้อิงจากหลังบ้าน อย่าลืมแก้ value กับ message ข้างล่างจ้า
   const onSubmit = async (data) => {
     try {
+      new Promise((resolve) => setTimeout(resolve, 5000));
       console.log("Submit Data:", data);
-      const body = {
-        email: data.email,
-        password: data.password,
-        user: data.user,
-      };
-
-      const resp = await registerUser(body);
-
-      if (resp.data.status === "success") {
-        alert("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ!");
-        navigate("/");
-      } else {
-        // กรณี backend ส่ง error กลับมาแต่ status code ยังเป็น 2xx
-        setError("email", { type: "manual", message: resp.data.message });
-      }
+      const resp = await registerUser(data);
+      console.log("Response:", resp);
+      toast.success("สมัครสมาชิกสำเร็จ",{containerId:"loginPage"})
+      navigate("/login")
     } catch (err) {
-      // กรณี API Error (4xx, 5xx)
       const errorMsg =
-        err.response?.data?.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-      setError("email", { type: "manual", message: errorMsg });
+        err.response?.data?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+      console.log(errorMsg)
+      toast.error(errorMsg,{containerId:"registerPage"})
     }
   };
 
@@ -68,23 +57,25 @@ const Register = () => {
 
       {/* Form Card */}
       <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] p-8 shadow-sm">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <ToastContainer containerId="registerPage" position="top-right"/>
+        <form onSubmit={handleSubmit(onSubmit)}  className="space-y-5">
+          <fieldset disabled={isSubmitting}>
           {/* Full Name Input */}
           <div>
             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">
               Full Name
             </label>
             <input
-              {...register("fullName", { required: "กรุณากรอกชื่อ-นามสกุล" })}
+              {...register("name")}
               type="text"
               placeholder="WONGNORK"
               className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
-                errors.fullName ? "ring-2 ring-red-400" : ""
+                errors.name ? "ring-2 ring-red-400" : ""
               }`}
             />
-            {errors.fullName && (
+            {errors.name && (
               <p className="text-[10px] text-red-500 mt-1 ml-1">
-                {errors.fullName.message}
+                {errors.name.message}
               </p>
             )}
           </div>
@@ -95,13 +86,7 @@ const Register = () => {
               Email Address
             </label>
             <input
-              {...register("email", {
-                required: "กรุณากรอกอีเมล",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "รูปแบบอีเมลไม่ถูกต้อง",
-                },
-              })}
+              {...register("email")}
               type="email"
               placeholder="name@wongnork.com"
               className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
@@ -122,13 +107,7 @@ const Register = () => {
             </label>
             <div className="relative">
               <input
-                {...register("password", {
-                  required: "กรุณากำหนดรหัสผ่าน",
-                  minLength: {
-                    value: 8,
-                    message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
-                  },
-                })}
+                {...register("password")}
                 type={showPassword ? "text" : "password"}
                 placeholder="............"
                 className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
@@ -192,11 +171,7 @@ const Register = () => {
             </label>
             <div className="relative">
               <input
-                {...register("confirmPassword", {
-                  required: "กรุณายืนยันรหัสผ่าน",
-                  validate: (value) =>
-                    value === password || "รหัสผ่านไม่ตรงกัน",
-                })}
+                {...register("confirmPassword")}
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="............"
                 className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
@@ -260,6 +235,7 @@ const Register = () => {
           >
             Create Account
           </button>
+          </fieldset>
         </form>
 
         {/* Divider */}
