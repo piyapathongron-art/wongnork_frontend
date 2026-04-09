@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router"; 
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import AppLayout from "../layouts/AppLayout";
 
 // Layouts
@@ -10,7 +10,7 @@ import AppLayout from "../layouts/AppLayout";
 
 // // Auth Pages
 // const Splash = lazy(() => import("./pages/Splash"));
-// const Login = lazy(() => import("./pages/Login"));
+const Login = lazy(() => import("../pages/Login"));
 // const Register = lazy(() => import("./pages/Register"));
 
 // // Main Tab Pages (Bottom Nav)
@@ -33,7 +33,6 @@ const HomeMap = lazy(() => import("../pages/HomeMap"));
 // // Admin Page
 // const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
-
 // ==========================================
 // 2. Router Configuration
 // ==========================================
@@ -45,11 +44,28 @@ const router = createBrowserRouter([
   //   path: "/welcome",
   //   element: <Splash />,
   // },
+  {
+    element: <AuthLayout />,
+    children: [
+      { path: "/login", element: <AuthLayout /> },
+      // { path: "/register", element: <Register /> },
+    ],
+  },
+  
+  // Layout ที่มี Bottom Nav ด้านล่าง
   // {
-  //   element: <AuthLayout />,
+  //   element: <AppLayout />, 
   //   children: [
-  //     { path: "/login", element: <AuthLayout /> },
-  //     // { path: "/register", element: <Register /> },
+  //     { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
+  //     // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
+  //     {
+  //       element: <ProtectedRoute />, 
+  //       children: [
+  //         { path: "/ai-recommend", element: <AiRecommend /> },
+  //         { path: "/my-parties", element: <MyParties /> },
+  //         { path: "/profile", element: <Profile /> },
+  //       ]
+  //     }
   //   ],
   // },
   
@@ -72,14 +88,14 @@ const router = createBrowserRouter([
 
   // // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
-  // { path: "/restaurant/:id", element: <RestaurantDetail /> }, 
+  // { path: "/restaurant/:id", element: <RestaurantDetail /> },
   // { path: "/party/:id", element: <PartyDetail /> }, // ✅ ดูรายละเอียดตี้ได้ แต่ถ้าจะกด Join ต้องเช็คสิทธิ์
 
   // // ----------------------------------------------------
   // // 🔒 กลุ่มที่ 2: Protected Routes (บังคับล็อกอิน 100%)
   // // ----------------------------------------------------
   // {
-  //   element: <ProtectedRoute />, 
+  //   element: <ProtectedRoute />,
   //   children: [
   //     // หน้าสร้างตี้ / หารบิล ต้องมี User ID
   //     { path: "/restaurant/:id/party/create", element: <CreateParty /> },
@@ -101,11 +117,13 @@ const router = createBrowserRouter([
 
 function AppRouter() {
   return (
-    <Suspense fallback={
+    <Suspense
+      fallback={
         <div className="text-2xl text-center h-screen flex items-center justify-center bg-white">
           Loading...
         </div>
-    }>
+      }
+    >
       <RouterProvider router={router} />
     </Suspense>
   );
