@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import useUserStore from "../stores/userStore";
 import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +18,8 @@ const Login = () => {
       password: "",
     },
   });
+
+  const navigate = useNavigate();
 
   const submitLogin = async (data) => {
     try {
@@ -179,6 +182,7 @@ const Login = () => {
           <button
             type="button"
             className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
+            onClick={() => navigate("/register")}
           >
             Sign Up
           </button>
