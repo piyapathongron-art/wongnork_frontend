@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
+  // const loginAction = userAuthStore((state) => state.login); // zustand อย่าลืม import จาก userAuthStore และแก้สิ่งที่รับมาด้วย
+
   const {
     register,
     handleSubmit,
@@ -24,7 +26,14 @@ const Login = () => {
 const onSubmit = async (data) => {
   try {
     const response = await loginApi(data);
-    // login สำเร็จ...
+    const { user, token } = response.data;
+    
+    const mockUser = { name: "Wongnork User", email: data.email };
+      const mockToken = "fake-jwt-token";
+
+      // เก็บข้อมูลเข้า Store ของ Zustand
+      loginAction(mockUser, mockToken);
+
   } catch (err) {
     // สมมติหลังบ้านตอบกลับมาว่า { field: "email", message: "อีเมลนี้ไม่มีในระบบ" }
     
@@ -181,6 +190,15 @@ const onSubmit = async (data) => {
           />
           <span className="text-gray-600 font-medium text-sm">Google</span>
         </button>
+        <span className="flex text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 mt-10 justify-center">
+          Don't have an account?{" "}
+          <button
+            type="button"
+            className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
+          >
+            Sign Up
+          </button>
+        </span>
       </div>
     </>
   );
