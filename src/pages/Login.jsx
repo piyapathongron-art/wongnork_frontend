@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import useUserStore from "../stores/userStore";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router";
+import { loginSchema } from "../validations/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +15,7 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
