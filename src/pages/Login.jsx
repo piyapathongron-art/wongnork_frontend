@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import useUserStore from "../stores/userStore";
+import { toast, ToastContainer } from "react-toastify";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const login = useUserStore((state) => state.login);
 
   const {
     register,
@@ -15,32 +18,26 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Email&Pw:", data);
-  };
+  
 
-  {
-    /* // เอาไว้ดึงตอน backend มาแล้ว
-const onSubmit = async (data) => {
+const submitLogin = async (data) => {
   try {
-    const response = await loginApi(data);
-    // login สำเร็จ...
+    const resp = await login(data)
+    toast.success("Login สำเร็จ",{containerId:"loginPage"})
   } catch (err) {
-    // สมมติหลังบ้านตอบกลับมาว่า { field: "email", message: "อีเมลนี้ไม่มีในระบบ" }
-    
-    setError("email", { 
-      type: "manual", 
-      message: err.response.data.message // เอา message จากหลังบ้านมาใส่
-    });
+    console.dir(err.response.data)
+    const errMessage = err.response?.data.error
+    toast.error(errMessage,{containerId:"loginPage"})
   }
 };
-*/
-  }
+
+  
 
   return (
     <>
       {/* Logo Section */}
       <div className="text-center mb-8">
+        <ToastContainer containerId="loginPage" />
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
           <span className="text-[#A65D2E] block">NORK</span>
@@ -51,7 +48,7 @@ const onSubmit = async (data) => {
 
       {/* Form Card เนื้อหาหลัก */}
       <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] p-8 shadow-sm">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(submitLogin)} className="space-y-6">
           {/* Email Input */}
           <div>
             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">

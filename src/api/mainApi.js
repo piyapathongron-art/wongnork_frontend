@@ -3,7 +3,7 @@ import axios from "axios";
 const PORT = 3000;
 
 export const mainApi = axios.create({
-  baseURL: `http://localhost:${PORT}`,
+  baseURL: `http://localhost:${PORT}/api`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,8 +28,4 @@ export async function apiLogin(body) {
 
 export async function apiRegister(body) {
   return await mainApi.post("/auth/register", body);
-}
-
-export async function apiGetProfile() {
-  return await mainApi.get("/auth/profile");
 }
