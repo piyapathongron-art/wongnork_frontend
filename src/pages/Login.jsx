@@ -18,20 +18,16 @@ const Login = () => {
     },
   });
 
-  
-
-const submitLogin = async (data) => {
-  try {
-    const resp = await login(data)
-    toast.success("Login สำเร็จ",{containerId:"loginPage"})
-  } catch (err) {
-    console.dir(err.response.data)
-    const errMessage = err.response?.data.error
-    toast.error(errMessage,{containerId:"loginPage"})
-  }
-};
-
-  
+  const submitLogin = async (data) => {
+    try {
+      const resp = await login(data);
+      toast.success("Login สำเร็จ", { containerId: "loginPage" });
+    } catch (err) {
+      console.dir(err.response.data);
+      const errMessage = err.response?.data.error;
+      toast.error(errMessage, { containerId: "loginPage" });
+    }
+  };
 
   return (
     <>
@@ -178,6 +174,15 @@ const submitLogin = async (data) => {
           />
           <span className="text-gray-600 font-medium text-sm">Google</span>
         </button>
+        <span className="flex text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 mt-10 justify-center">
+          Don't have an account?{" "}
+          <button
+            type="button"
+            className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
+          >
+            Sign Up
+          </button>
+        </span>
       </div>
     </>
   );
