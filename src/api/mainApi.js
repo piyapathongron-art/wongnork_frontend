@@ -33,3 +33,7 @@ export async function apiRegister(body) {
 export async function apiCloudinary() {
   return await mainApi.get("/get-signature");
 }
+
+export async function apiGetme() {
+  return await mainApi.get("/auth/me")
+}

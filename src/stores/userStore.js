@@ -16,12 +16,10 @@ const useUserStore = create(
         }
         return resp;
       },
-
       register: async (body) => {
         const resp = await apiRegister(body);
         return resp;
       },
-
       logout: async () => {
         set({ user: null, token: null, isLogin: false });
       },
