@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
+import AppLayout from "../layouts/AppLayout";
 
 // Layouts
 // const AppLayout = lazy(() => import("./layouts/AppLayout")); // Layout ที่มี Bottom Nav
-const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
+// const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
 // const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
 // const AdminRoute = lazy(() => import("./layouts/AdminRoute")); // Wrapper กันคนไม่ใช่ Admin
 
@@ -13,7 +14,7 @@ const Login = lazy(() => import("../pages/Login"));
 const Register = lazy(() => import("../pages/Register"));
 
 // // Main Tab Pages (Bottom Nav)
-// const HomeMap = lazy(() => import("./pages/HomeMap"));
+const HomeMap = lazy(() => import("../pages/HomeMap"));
 // const AiRecommend = lazy(() => import("./pages/AiRecommend"));
 // const MyParties = lazy(() => import("./pages/MyParties"));
 // const Profile = lazy(() => import("./pages/Profile"));
@@ -53,12 +54,12 @@ const router = createBrowserRouter([
 
   // Layout ที่มี Bottom Nav ด้านล่าง
   // {
-  //   element: <AppLayout />,
+  //   element: <AppLayout />, 
   //   children: [
   //     { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
   //     // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
   //     {
-  //       element: <ProtectedRoute />,
+  //       element: <ProtectedRoute />, 
   //       children: [
   //         { path: "/ai-recommend", element: <AiRecommend /> },
   //         { path: "/my-parties", element: <MyParties /> },
@@ -67,6 +68,23 @@ const router = createBrowserRouter([
   //     }
   //   ],
   // },
+  
+  // Layout ที่มี Bottom Nav ด้านล่าง
+  {
+    element: <AppLayout />, 
+    children: [
+      { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
+      // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
+      // {
+      //   element: <ProtectedRoute />, 
+      //   children: [
+      //     { path: "/ai-recommend", element: <AiRecommend /> },
+      //     { path: "/my-parties", element: <MyParties /> },
+      //     { path: "/profile", element: <Profile /> },
+      //   ]
+      // }
+    ],
+  },
 
   // // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
