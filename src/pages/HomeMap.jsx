@@ -1,43 +1,30 @@
-import React, { useState } from "react";
-import RestaurantDetailSheet from "../components/RestaurantDetail/RestaurantDetailSheet";
+import React, { Suspense, lazy } from 'react';
+
+// 1. Lazy import the sub-components
+const SearchBar = lazy(() => import('../components/SearchBar'));
+const MapBox = lazy(() => import('../components/MapBox'))
+// const NavBar = lazy(() => import('../components/NavBar'));
 
 const HomeMap = () => {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [selectedRes, setSelectedRes] = useState(null);
+    return (
+      <div className="w-full h-screen relative overflow-hidden bg-white touch-none">
+      
+      {/* 1. Map Component */}
+      <div className="absolute inset-0 z-0">
+        <Suspense fallback={<div className="w-full h-full bg-gray-100 animate-pulse" />}>
+          <MapBox />
+        </Suspense>
+      </div>
 
-  // ฟังก์ชันนี้แหละที่ในอนาคตจะส่งไปให้เพื่อนใช้ในหน้า Map
-  const handleMarkerClick = () => {
-    setSelectedRes({
-      name: "Cuisine Unplugged",
-      rating: "4.5",
-      address: "8/2 Rang Nam Alley, Phaya Thai, Bangkok",
-    });
-    setIsSheetOpen(true);
-  };
-
-  return (
-    <div className="relative w-full h-screen bg-gray-100 overflow-hidden">
-      {/* ส่วนของเพื่อน (Map) - ตอนนี้ทำเป็นกล่องเทาๆ รอไว้ก่อน */}
-      <div className="absolute inset-0 flex items-center justify-center bg-slate-300">
-        <div className="text-center">
-          <p className="text-gray-600 font-bold mb-4 italic">
-            [ พื้นที่แผนที่ของเพื่อนจะอยู่ตรงนี้ ]
-          </p>
-          <button
-            onClick={handleMarkerClick}
-            className="bg-[#A65D2E] text-white px-6 py-3 rounded-full shadow-xl hover:scale-105 transition-transform"
-          >
-            จำลองการกดหมุดบนแผนที่
-          </button>
+      {/* 2. UI Overlay (Search Bar) */}
+      <div className="fixed top-0 left-0 right-0 z-40 flex justify-center px-4 pt-8 pb-10 bg-gradient-to-b from-[#FFF8F5] via-[#FFF8F5]/80 to-transparent pointer-events-none">
+        <div className="w-full max-w-[402px] pointer-events-auto">
+          <Suspense fallback={null}>
+            <SearchBar />
+          </Suspense>
         </div>
       </div>
 
-      {/* ของเรา (Slide-up Panel) */}
-      <RestaurantDetailSheet
-        isOpen={isSheetOpen}
-        restaurant={selectedRes}
-        onClose={() => setIsSheetOpen(false)}
-      />
     </div>
   );
 };
