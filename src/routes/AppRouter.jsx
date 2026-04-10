@@ -4,7 +4,7 @@ import AppLayout from "../layouts/AppLayout";
 
 // Layouts
 // const AppLayout = lazy(() => import("./layouts/AppLayout")); // Layout ที่มี Bottom Nav
-// const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
+const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
 // const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
 // const AdminRoute = lazy(() => import("./layouts/AdminRoute")); // Wrapper กันคนไม่ใช่ Admin
 
