@@ -1,6 +1,7 @@
 import axios from "axios";
+import useUserStore from "../stores/userStore";
 
-const PORT = 3000;
+const PORT = 9000;
 
 export const mainApi = axios.create({
   baseURL: `http://localhost:${PORT}/api`,
@@ -11,7 +12,7 @@ export const mainApi = axios.create({
 
 mainApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = useUserStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -32,4 +33,8 @@ export async function apiRegister(body) {
 
 export async function apiCloudinary() {
   return await mainApi.get("/get-signature");
+}
+
+export async function apiGetme() {
+  return await mainApi.get("/auth/me")
 }

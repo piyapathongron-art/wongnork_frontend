@@ -54,12 +54,12 @@ const router = createBrowserRouter([
 
   // Layout ที่มี Bottom Nav ด้านล่าง
   // {
-  //   element: <AppLayout />, 
+  //   element: <AppLayout />,
   //   children: [
   //     { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
   //     // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
   //     {
-  //       element: <ProtectedRoute />, 
+  //       element: <ProtectedRoute />,
   //       children: [
   //         { path: "/ai-recommend", element: <AiRecommend /> },
   //         { path: "/my-parties", element: <MyParties /> },
@@ -68,15 +68,15 @@ const router = createBrowserRouter([
   //     }
   //   ],
   // },
-  
+
   // Layout ที่มี Bottom Nav ด้านล่าง
   {
-    element: <AppLayout />, 
+    element: <AppLayout />,
     children: [
       { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
       // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
       // {
-      //   element: <ProtectedRoute />, 
+      //   element: <ProtectedRoute />,
       //   children: [
       //     { path: "/ai-recommend", element: <AiRecommend /> },
       //     { path: "/my-parties", element: <MyParties /> },

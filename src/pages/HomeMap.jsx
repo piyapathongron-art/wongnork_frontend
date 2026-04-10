@@ -26,7 +26,7 @@ const HomeMap = () => {
       </div>
 
     </div>
-    );
+  );
 };
 
 export default HomeMap;
