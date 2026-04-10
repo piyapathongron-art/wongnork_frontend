@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { useForm } from "react-hook-form";
 import useUserStore from "../stores/userStore";
 import { toast, ToastContainer } from "react-toastify";
@@ -28,6 +28,7 @@ const Login = () => {
     try {
       new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
+  
       toast.success("Login สำเร็จ", { containerId: "loginPage" });
     } catch (err) {
       console.dir(err.response.data);
