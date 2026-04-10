@@ -29,6 +29,7 @@ const Login = () => {
       new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
       toast.success("Login สำเร็จ", { containerId: "loginPage" });
+      navigate("/")
     } catch (err) {
       console.dir(err.response.data);
       const errMessage = err.response?.data.error;

@@ -33,8 +33,8 @@ const Register = () => {
       console.log("Submit Data:", data);
       const resp = await registerUser(data);
       console.log("Response:", resp);
-      toast.success("สมัครสมาชิกสำเร็จ", { containerId: "loginPage" });
       navigate("/login");
+      toast.success("สมัครสมาชิกสำเร็จ", { containerId: "loginPage" });
     } catch (err) {
       const errorMsg =
         err.response?.data?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ";
