@@ -33,20 +33,20 @@ const Register = () => {
       console.log("Submit Data:", data);
       const resp = await registerUser(data);
       console.log("Response:", resp);
-      toast.success("สมัครสมาชิกสำเร็จ", { containerId: "loginPage" });
+      toast.success("สมัครสมาชิกสำเร็จ");
       navigate("/login");
     } catch (err) {
       const errorMsg =
         err.response?.data?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ";
       console.log(errorMsg);
-      toast.error(errorMsg, { containerId: "registerPage" });
+      toast.error(errorMsg);
     }
   };
 
   return (
     <>
       {/* Logo Section */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-4 animate-fade-up">
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
           <span className="text-[#A65D2E] block">NORK</span>
@@ -57,8 +57,7 @@ const Register = () => {
       </div>
 
       {/* Form Card */}
-      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-6 px-8 shadow-xl">
-        <ToastContainer containerId="registerPage" position="top-right" />
+      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-6 px-8 shadow-xl animate-fade-up">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <fieldset disabled={isSubmitting}>
             {/* Full Name Input */}

@@ -28,20 +28,19 @@ const Login = () => {
     try {
       new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
-  
-      toast.success("Login สำเร็จ", { containerId: "loginPage" });
+      toast.success("Login สำเร็จ");
+      navigate("/")
     } catch (err) {
       console.dir(err.response.data);
       const errMessage = err.response?.data.error;
-      toast.error(errMessage, { containerId: "loginPage" });
+      toast.error(errMessage);
     }
   };
 
   return (
     <>
       {/* Logo Section */}
-      <div className="text-center mb-4">
-        <ToastContainer containerId="loginPage" />
+      <div className="text-center mb-4 animate-fade-up">
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
           <span className="text-[#A65D2E] block">NORK</span>
@@ -52,7 +51,7 @@ const Login = () => {
       </div>
 
       {/* Form Card เนื้อหาหลัก */}
-      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-8 px-8 shadow-xl">
+      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-8 px-8 shadow-xl animate-fade-up">
         <form onSubmit={handleSubmit(submitLogin)} className="space-y-6">
           <fieldset disabled={isSubmitting}>
             {/* Email Input */}
