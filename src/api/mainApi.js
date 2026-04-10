@@ -1,4 +1,5 @@
 import axios from "axios";
+import useUserStore from "../stores/userStore";
 
 const PORT = 3000;
 
@@ -11,7 +12,7 @@ export const mainApi = axios.create({
 
 mainApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = useUserStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -11,9 +11,7 @@ const useUserStore = create(
       login: async (body) => {
         const resp = await apiLogin(body);
         console.log(resp);
-        if (resp.data.status === "success") {
-          set({ user: resp.data.user, token: resp.data.token, isLogin: true });
-        }
+        set({ user: resp.data.user, token: resp.data.token, isLogin: true });
         return resp;
       },
       register: async (body) => {
