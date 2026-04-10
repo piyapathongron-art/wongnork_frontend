@@ -6,22 +6,20 @@ const NavBar = lazy(() => import('../components/NavBar'));
 
 const AppLayout = () => {
     return (
-        <div className="flex flex-col min-h-screen bg-[#FFF8F5] font-sans text-[#2B361B]">
+        <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col">
+      
+      <main className="flex-grow relative h-full">
+        <Outlet />
+      </main>
 
-            {/* 1. Main Page Content Section */}
-            <main className="flex-grow pb-[120px]">
-                {/* Outlet renders the current child route (HomeMap, Auth, etc.) */}
-                <Outlet />
-            </main>
-
-            {/* 2. Persistent Navigation Bar */}
-            <div className="fixed bottom-0 left-0 right-0 z-50">
-                <Suspense fallback={null}>
-                    <NavBar />
-                </Suspense>
-            </div>
-
+      {/* FIXED NAVBAR (Bottom) */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+        <div className="w-full flex justify-center pb-6 pointer-events-auto">
+          <NavBar />
         </div>
+      </div>
+      
+    </div>
     );
 };
 

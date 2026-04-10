@@ -44,13 +44,13 @@ const router = createBrowserRouter([
   //   path: "/welcome",
   //   element: <Splash />,
   // },
-  {
-    element: <AuthLayout />,
-    children: [
-      { path: "/login", element: <AuthLayout /> },
-      // { path: "/register", element: <Register /> },
-    ],
-  },
+  // {
+  //   element: <AuthLayout />,
+  //   children: [
+  //     { path: "/login", element: <AuthLayout /> },
+  //     // { path: "/register", element: <Register /> },
+  //   ],
+  // },
   
   // Layout ที่มี Bottom Nav ด้านล่าง
   // {
