@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import RestaurantDetailSheet from "../components/RestaurantDetail/RestaurantDetailSheet";
+import RestaurantDetailSheet from "../components/restaurant/RestaurantDetailSheet";
 
 const HomeMap = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);

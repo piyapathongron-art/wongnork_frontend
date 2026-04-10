@@ -1,13 +1,12 @@
-import React, { Suspense, lazy } from 'react';
-import { Outlet } from 'react-router';
+import React, { Suspense, lazy } from "react";
+import { Outlet } from "react-router";
 
 // Lazy load the Nav for better performance
-const NavBar = lazy(() => import('../components/NavBar'));
+const NavBar = lazy(() => import("../components/NavBar"));
 
 const AppLayout = () => {
-    return (
-        <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col">
-      
+  return (
+    <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col">
       <main className="flex-grow relative h-full">
         <Outlet />
       </main>
@@ -18,9 +17,8 @@ const AppLayout = () => {
           <NavBar />
         </div>
       </div>
-      
     </div>
-    );
+  );
 };
 
 export default AppLayout;
