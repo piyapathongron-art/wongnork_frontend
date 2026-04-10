@@ -1,7 +1,7 @@
 import axios from "axios";
 import useUserStore from "../stores/userStore";
 
-const PORT = 3000;
+const PORT = 9000;
 
 export const mainApi = axios.create({
   baseURL: `http://localhost:${PORT}/api`,
