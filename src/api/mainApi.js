@@ -29,3 +29,7 @@ export async function apiLogin(body) {
 export async function apiRegister(body) {
   return await mainApi.post("/auth/register", body);
 }
+
+export async function apiCloudinary() {
+  return await mainApi.get("/get-signature");
+}
