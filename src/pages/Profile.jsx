@@ -22,19 +22,15 @@ const Profile = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     
+    // เรียกฟังก์ชัน logout จาก Store
     const logout = useUserStore((state) => state.logout);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                // Ensure your token is valid to avoid the 500 Invalid Signature error
                 const response = await apiGetme();
-                console.log(response);
-                
-                const data =  response.data;
-                setUserData(data);
-                console.log("datana",data);
-                
+                const userObj = response.data.data;
+                setUserData(userObj);
             } catch (err) {
                 console.error("Error fetching profile:", err);
                 setError('ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -62,27 +58,36 @@ const Profile = () => {
         );
     }
 
-    if (error) {
+    if (error || !userData) {
         return (
             <div className="w-full min-h-screen flex flex-col justify-center items-center bg-[#FFF8F5] px-6">
-                <span className="text-red-500 font-bold mb-4">{error}</span>
+                <span className="text-red-500 font-bold mb-4">{error || 'ไม่พบข้อมูลผู้ใช้'}</span>
                 <button onClick={handleLogout} className="bg-[#A65D2E] text-white px-6 py-2 rounded-full text-sm">
-                    กลับไปหน้า Login
+                    ออกจากระบบ
                 </button>
             </div>
         );
     }
 
-    if (!userData) return null;
-
-    // Based on your database schema and images, we safely access arrays
+    // ดึงข้อมูล Array มาเตรียมไว้
     const reviews = userData.reviews || [];
     const joinedParties = userData.joinedParties || [];
+    const savedRestaurants = userData.savedRestaurants || [];
+
+    // ลอจิกจัดการ Role: OWNER vs USER/ADMIN
+    const isOwner = userData.role === 'OWNER';
+    
+    // ดึงชื่อที่จะแสดงหลัก ถ้าเป็น OWNER ให้ดึงชื่อร้าน (ถ้าไม่มีร้านก็ fallback ไว้) ถ้าไม่ใช่ดึงชื่อ User
+    const mainTitle = isOwner 
+        ? (userData.ownedRestaurants?.[0]?.name || 'ยังไม่ได้ตั้งชื่อร้าน') 
+        : userData.name;
 
     return (
-        <div className="w-full min-h-screen bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans overflow-x-hidden">
-            {/* TopAppBar */}
-            <header className="fixed top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
+        // 🌟 แก้ตรงนี้: เปลี่ยนเป็น h-screen และเพิ่ม overflow-y-auto ให้เลื่อนได้
+        <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
+            
+            {/* TopAppBar 🌟 แก้ตรงนี้: เปลี่ยน fixed เป็น sticky จะได้ไม่บังเนื้อหา */}
+            <header className="sticky top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
                 <h1 className="text-xl font-extrabold text-[#A65D2E]">My Profile</h1>
                 
                 {/* Logout Icon */}
@@ -93,13 +98,14 @@ const Profile = () => {
                 </button>
             </header>
 
-            <main className="pt-20 px-6 space-y-8">
-                {/* Hero Profile Section */}
-                <section className="flex flex-col items-center text-center space-y-4">
-                    <div className="relative group mt-4">
+            {/* 🌟 เอา pt-20 ออก เพราะ Header เป็น sticky แล้วไม่ทับเนื้อหา */}
+            <main className="px-6 space-y-8 pt-4">
+                {/* 1. Hero Profile Section */}
+                <section className="flex flex-col items-center text-center space-y-3">
+                    <div className="relative group">
                         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md bg-[#2D3E25]">
                             <img 
-                                alt={userData.name} 
+                                alt="Profile Avatar"
                                 className="w-full h-full object-cover" 
                                 src={userData.avatarUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80'} 
                             />
@@ -111,9 +117,16 @@ const Profile = () => {
                         </div>
                     </div>
                     
-                    <h2 className="text-xl font-extrabold text-[#2B361B]">{data.data.name}</h2>
+                    {/* ส่วนแสดงชื่อ (มีลอจิกแบ่ง Role) */}
+                    <div className="text-center mt-2">
+                        <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>
+                        {/* ถ้าเป็น OWNER ให้เอาชื่อ User มาห้อยท้ายเป็น Owner */}
+                        {isOwner && (
+                            <p className="text-sm font-semibold text-[#8B837E] mt-1">Owner: {userData.name}</p>
+                        )}
+                    </div>
 
-                    {/* Stats Section moved right under name per image_1b0fe2.png */}
+                    {/* Stats Section */}
                     <div className="flex justify-center gap-12 w-full pt-2">
                         <div className="flex flex-col items-center">
                             <span className="text-lg font-extrabold text-[#A65D2E]">{reviews.length}</span>
@@ -130,7 +143,7 @@ const Profile = () => {
                     </button>
                 </section>
 
-                {/* My Parties Section */}
+                {/* 2. My Parties Section */}
                 <section className="space-y-4 pt-4">
                     <div className="flex justify-between items-end">
                         <h3 className="font-extrabold text-xl text-[#2B361B]">My Parties</h3>
@@ -174,7 +187,42 @@ const Profile = () => {
                     </div>
                 </section>
 
-                {/* My Reviews Section */}
+                {/* 3. Saved Restaurants Section */}
+                <section className="space-y-4">
+                    <h3 className="font-extrabold text-xl text-[#2B361B]">Saved Restaurants</h3>
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                        {savedRestaurants.length === 0 ? (
+                            <p className="text-sm text-gray-400 py-2">ยังไม่มีร้านที่บันทึกไว้</p>
+                        ) : (
+                            savedRestaurants.map((saved, index) => {
+                                const restaurant = saved.restaurant || {};
+                                const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80';
+                                
+                                return (
+                                    <div key={saved.id || index} className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30">
+                                        <div className="w-full h-32 bg-[#2D3E25]">
+                                            <img alt={restaurant.name} className="w-full h-full object-cover" src={imageUrl} />
+                                        </div>
+                                        <div className="p-4 flex justify-between items-start">
+                                            <div className="truncate pr-2">
+                                                <h4 className="font-bold text-sm text-[#2B361B] truncate">{restaurant.name || 'ไม่ทราบชื่อร้าน'}</h4>
+                                                <p className="text-[10px] text-[#A8A29F] mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
+                                            </div>
+                                            {/* Bookmark Icon */}
+                                            <span className="text-[#A65D2E]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                    <path fillRule="evenodd" d="M6.32 2.577a4.901 4.901 0 0 1 5.684 0l4.978 3.39c.673.458 1.018 1.25.962 2.062l-1.074 15.656a.75.75 0 0 1-1.341.348L12 18.337l-3.53 5.696a.75.75 0 0 1-1.342-.348L6.054 8.03A2.25 2.25 0 0 1 7.016 5.968l4.978-3.391ZM12 4.41l-4.978 3.391a.75.75 0 0 0-.322.688l.966 14.072 2.695-4.348a.75.75 0 0 1 1.278 0l2.695 4.348.966-14.072a.75.75 0 0 0-.322-.688L12 4.41Z" clipRule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </section>
+
+                {/* 4. My Reviews Section */}
                 <section className="space-y-4">
                     <h3 className="font-extrabold text-xl text-[#2B361B]">My Reviews</h3>
                     <div className="space-y-5">
