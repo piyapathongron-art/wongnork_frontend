@@ -31,8 +31,8 @@ export async function apiRegister(body) {
   return await mainApi.post("/auth/register", body);
 }
 
-export async function apiCloudinary() {
-  return await mainApi.get("/get-signature");
+export async function apiCloudinary(folder = "wongnork") {
+  return await mainApi.get(`/cloudinary/get-signature?folder=${folder}`);
 }
 
 export async function apiGetme() {
