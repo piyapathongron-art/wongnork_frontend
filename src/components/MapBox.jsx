@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { apiGetResturent } from '../api/resturent';
+import { apiGetRestaurants } from '../api/restaurant';
 import { createCustomMarkerElement } from '../utils/marker.util';
 import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
@@ -23,7 +23,7 @@ const MapBox = () => {
       add3DBuildingsLayer(map);
 
       try {
-        const res = await apiGetResturent();
+        const res = await apiGetRestaurants();
         const restaurants = res.data.restaurants;
 
         restaurants?.forEach((item) => {
@@ -32,7 +32,7 @@ const MapBox = () => {
           if (isNaN(lng) || isNaN(lat)) return;
 
           const el = createCustomMarkerElement(item.category);
-          
+
           el.addEventListener('click', (e) => {
             e.stopPropagation();
             map.flyTo({
