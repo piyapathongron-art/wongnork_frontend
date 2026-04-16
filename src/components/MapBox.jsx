@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { apiGetResturent } from '../api/resturent';
+import { apiGetRestaurants } from '../api/restaurant';
 import { createCustomMarkerElement } from '../utils/marker.util';
 import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
