@@ -39,3 +39,26 @@
   bottom: auto !important;
 }
 
+/* 1. Default for PC/Desktop */
+.mapboxgl-ctrl-bottom-right {
+    bottom: 10px !important;
+    right: 10px !important;
+    transition: bottom 0.3s ease; /* Smoothly moves if you resize the window */
+}
+
+/* 2. Mobile Override (Screens smaller than 768px) */
+@media (max-width: 767px) {
+    .mapboxgl-ctrl-bottom-right {
+        /* Lift it up to clear your mobile NavBar */
+        bottom: 130px !important; 
+        
+        /* Optional: Add safe area for iPhones with notches */
+        bottom: calc(130px + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* Move the Mapbox Logo/Attribution up too so it's not hidden */
+    .mapboxgl-ctrl-bottom-left {
+        bottom: 130px !important;
+    }
+}
+
