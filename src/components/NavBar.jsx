@@ -23,7 +23,7 @@ const NavBar = () => {
         <div
           onClick={() => {
             setActiveTab("ai-recommend");
-            navigate("/ai-recommned");
+            navigate("/");
           }}
           className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors("ai-recommend").opacity}`}
         >
@@ -89,7 +89,7 @@ const NavBar = () => {
         <div
           onClick={() => {
             setActiveTab("my-parties");
-            navigate("/my-parties");
+            navigate("/");
           }}
           className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors("my-parties").opacity}`}
         >
