@@ -1,7 +1,7 @@
 import axios from "axios";
 import useUserStore from "../stores/userStore";
 
-const PORT = 8000;
+const PORT = 8899;
 
 export const mainApi = axios.create({
   baseURL: `http://localhost:${PORT}/api`,
@@ -36,5 +36,5 @@ export async function apiCloudinary() {
 }
 
 export async function apiGetme() {
-  return await mainApi.get("/auth/me")
+  return await mainApi.get("/auth/me");
 }
