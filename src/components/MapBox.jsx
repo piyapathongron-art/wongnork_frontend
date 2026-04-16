@@ -1,24 +1,27 @@
 import React, { useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { apiGetRestaurants } from '../api/restaurant';
+import { apiGetResturent } from '../api/resturent';
 import { createCustomMarkerElement } from '../utils/marker.util';
 import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
 
-const MapBox = () => {
+const MapBox = ({ onMarkerClick }) => {
   const mapNodeRef = useRef(null);
   const markerRef = useRef(null); // Ref for the red placement marker
 
   const handleMapLoad = (map) => {
     // Add Controls
-    map.addControl(new mapboxgl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true,
-      showUserHeading: true
-    }), 'bottom-right');
+    map.addControl(
+      new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true,
+      }),
+      "bottom-right",
+    );
 
-    map.on('load', async () => {
+    map.on("load", async () => {
       map.resize();
       add3DBuildingsLayer(map);
 
@@ -41,18 +44,25 @@ const MapBox = () => {
               pitch: 60,
               speed: 1.5,
               curve: 1,
-              essential: true
+              essential: true,
             });
+
+            if (onMarkerClick) {
+              onMarkerClick(item);
+            }
           });
 
           const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
             <div style="color: black; padding: 5px; font-family: sans-serif;">
               <h4 style="margin:0; font-weight:bold;">${item.name}</h4>
-              <p style="margin:0; font-size:12px;">${item.category || 'Restaurant'}</p>
+              <p style="margin:0; font-size:12px;">${item.category || "Restaurant"}</p>
             </div>
           `);
 
-          new mapboxgl.Marker(el).setLngLat([lng, lat]).setPopup(popup).addTo(map);
+          new mapboxgl.Marker(el)
+            .setLngLat([lng, lat])
+            .setPopup(popup)
+            .addTo(map);
         });
       } catch (err) {
         console.error("Marker Loading Error:", err);
@@ -60,7 +70,7 @@ const MapBox = () => {
     });
 
     // Map Click Logic
-    map.on('click', (e) => {
+    map.on("click", (e) => {
       const { lng, lat } = e.lngLat;
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
@@ -76,8 +86,8 @@ const MapBox = () => {
   useMapInit(mapNodeRef, handleMapLoad);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <div ref={mapNodeRef} style={{ position: 'absolute', inset: 0 }} />
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+      <div ref={mapNodeRef} style={{ position: "absolute", inset: 0 }} />
     </div>
   );
 };
