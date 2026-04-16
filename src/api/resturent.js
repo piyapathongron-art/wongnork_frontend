@@ -5,7 +5,7 @@ const apiCreateResturent = async (body) => {
 }
 
 const apiGetResturent = async () => {
-    return await mainApi.get("/resturent");
+    return await mainApi.get("/restaurants");
 }
 
 const apiGetResturentById = async (id) => {
