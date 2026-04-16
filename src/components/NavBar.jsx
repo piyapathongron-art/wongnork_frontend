@@ -19,7 +19,7 @@ const NavBar = () => {
 
                 {/* 1. Ai Recommend */}
                 <div
-                onClick={() => {setActiveTab('ai-recommend'); navigate('/ai-recommned')}}
+                    onClick={() => { setActiveTab('ai-recommend'); navigate('/') }}
                     className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors('ai-recommend').opacity}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={getColors('ai-recommend').strokeWidth} stroke={getColors('ai-recommend').stroke} className="w-7 h-7">
@@ -33,7 +33,7 @@ const NavBar = () => {
 
                 {/* 2. Location */}
                 <div
-                onClick={() => {setActiveTab('location'); navigate('/')}}
+                    onClick={() => { setActiveTab('location'); navigate('/') }}
                     className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors('location').opacity}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={getColors('location').strokeWidth} stroke={getColors('location').stroke} className="w-7 h-7">
@@ -45,7 +45,7 @@ const NavBar = () => {
 
                 {/* 3. My Parties */}
                 <div
-                onClick={() => {setActiveTab('my-parties');navigate('/my-parties') }}
+                    onClick={() => { setActiveTab('my-parties'); navigate('/') }}
                     className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors('my-parties').opacity}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={getColors('my-parties').strokeWidth} stroke={getColors('my-parties').stroke} className="w-7 h-7">
@@ -57,7 +57,7 @@ const NavBar = () => {
 
                 {/* 4. Profile */}
                 <div
-                onClick={() => {setActiveTab('profile'); navigate('/profile')}}
+                    onClick={() => { setActiveTab('profile'); navigate('/profile') }}
                     className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors('profile').opacity}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={getColors('profile').strokeWidth} stroke={getColors('profile').stroke} className="w-7 h-7">

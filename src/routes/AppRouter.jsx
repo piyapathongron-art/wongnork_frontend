@@ -74,7 +74,7 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: "/", element: <HomeMap /> },
-      {path: "/profile",element: <Profile />} 
+      { path: "/profile", element: <Profile /> }
       // ✅ แผนที่ให้คนทั่วไปดูได้
       // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
       // {

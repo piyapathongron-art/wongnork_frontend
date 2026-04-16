@@ -20,9 +20,9 @@ const apiLeaveParty = async (id) => {
     return await mainApi.delete(`/parties/${id}/leave`);
 }
 
-const apiUpdatePartyStatus = async (id, status) => {
-    return await mainApi.patch(`/parties/${id}/status`, { status });
-}
+// const apiUpdatePartyStatus = async (id, status) => {
+//     return await mainApi.patch(`/parties/${id}/status`, { status });
+// }
 
 export {
     apiGetParties,
@@ -30,5 +30,4 @@ export {
     apiCreateParty,
     apiJoinParty,
     apiLeaveParty,
-    apiUpdatePartyStatus
 }
