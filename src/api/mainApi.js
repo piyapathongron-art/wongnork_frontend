@@ -36,5 +36,5 @@ export async function apiCloudinary(folder = "wongnork") {
 }
 
 export async function apiGetme() {
-  return await mainApi.get("/auth/me")
+  return await mainApi.get("/auth/me");
 }
