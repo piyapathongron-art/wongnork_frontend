@@ -1,10 +1,10 @@
-import React, { useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { apiGetRestaurants } from "../api/restaurant.js";
-import { createCustomMarkerElement } from "../utils/marker.util";
-import { add3DBuildingsLayer } from "../utils/mapLayers.util";
-import { useMapInit } from "../hooks/useMapInit";
+import React, { useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { apiGetRestaurants } from '../api/restaurant';
+import { createCustomMarkerElement } from '../utils/marker.util';
+import { add3DBuildingsLayer } from '../utils/mapLayers.util';
+import { useMapInit } from '../hooks/useMapInit';
 
 const MapBox = ({ onMarkerClick }) => {
   const mapNodeRef = useRef(null);
@@ -36,7 +36,7 @@ const MapBox = ({ onMarkerClick }) => {
 
           const el = createCustomMarkerElement(item.category);
 
-          el.addEventListener("click", (e) => {
+          el.addEventListener('click', (e) => {
             e.stopPropagation();
             map.flyTo({
               center: [lng, lat],
