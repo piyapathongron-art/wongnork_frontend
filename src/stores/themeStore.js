@@ -5,20 +5,22 @@ const getTheme = () => {
         return false
     }
     const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    return savedTheme === 'dark' || (!savedTheme && prefersDark)
 }
 
 export const useThemeStore = create((set, get) => ({
     isDark: getTheme(),
 
-    initThem: () => {
+    initTheme: () => {
         const dark = get().isDark
-        document.documentElement,classList.toggle('dark', dark)
+        document.documentElement.classList.toggle('dark', dark)
     },
     toggleTheme: () => {
-        const nextDark = !get().isDark
-        document.documentElement.classList.toggle('dark', nextDark)
+        const current = get().isDark
+        const nextDark = !current
         localStorage.setItem('theme', nextDark ? 'dark' : 'light')
+        document.documentElement.classList.toggle('dark', nextDark)
         set({isDark: nextDark})
     }
 }))
