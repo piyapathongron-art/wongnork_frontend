@@ -1,42 +1,42 @@
-import React, { useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { apiGetRestaurants } from "../api/restaurant.js";
-import { createCustomMarkerElement } from "../utils/marker.util";
-import { add3DBuildingsLayer } from "../utils/mapLayers.util";
-import { useMapInit } from "../hooks/useMapInit";
+import React, { useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { apiGetRestaurants } from '../api/restaurant';
+import { createCustomMarkerElement } from '../utils/marker.util';
+import { add3DBuildingsLayer } from '../utils/mapLayers.util';
+import { useMapInit } from '../hooks/useMapInit';
 
-const MapBox = ({ onMarkerClick }) => {
+
+const MapBox = ({ onMarkerClick, isDark }) => {
   const mapNodeRef = useRef(null);
   const markerRef = useRef(null); // Ref for the red placement marker
 
-  const handleMapLoad = (map) => {
-    // Add Controls
-    map.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showUserHeading: true,
-      }),
-      "bottom-right",
-    );
+  const allRestaurantsRef = useRef([])
+  const activeMarkersRef = useRef([])
 
-    map.on("load", async () => {
-      map.resize();
+  const handleMapLoad = (map) => {
+
+    map.on("style.load", async () => {
+    setTimeout( () => {map.resize();
       add3DBuildingsLayer(map);
+}, 0)
+      activeMarkersRef.current.forEach(marker => marker.remove());
+      activeMarkersRef.current = [];
 
       try {
-        const res = await apiGetRestaurants();
-        const restaurants = res.data.restaurants;
+        if(allRestaurantsRef.current.length === 0)
+        {const res = await apiGetRestaurants();
+        allRestaurantsRef.current = res.data.restaurants || []
+      }
 
-        restaurants?.forEach((item) => {
+        allRestaurantsRef.current.forEach((item) => {
           const lng = parseFloat(item.lng);
           const lat = parseFloat(item.lat);
           if (isNaN(lng) || isNaN(lat)) return;
 
           const el = createCustomMarkerElement(item.category);
 
-          el.addEventListener("click", (e) => {
+          el.addEventListener('click', (e) => {
             e.stopPropagation();
             map.flyTo({
               center: [lng, lat],
@@ -59,10 +59,10 @@ const MapBox = ({ onMarkerClick }) => {
             </div>
           `);
 
-          new mapboxgl.Marker(el)
-            .setLngLat([lng, lat])
-            .setPopup(popup)
-            .addTo(map);
+          const newMarker = new mapboxgl.Marker(el).setLngLat([lng, lat])
+          .setPopup(popup).addTo(map)
+
+          activeMarkersRef.current.push(newMarker)
         });
       } catch (err) {
         console.error("Marker Loading Error:", err);
@@ -83,7 +83,7 @@ const MapBox = ({ onMarkerClick }) => {
   };
 
   // Use the custom hook
-  useMapInit(mapNodeRef, handleMapLoad);
+  useMapInit(mapNodeRef, handleMapLoad, Boolean(isDark));
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
