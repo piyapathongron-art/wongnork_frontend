@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import AppLayout from "../layouts/AppLayout";
+import Party from "../pages/Party";
 
 // Layouts
 // const AppLayout = lazy(() => import("./layouts/AppLayout")); // Layout ที่มี Bottom Nav
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
       { path: "/", element: <HomeMap /> },
       { path: "/profile", element: <Profile /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
+      {path: "/party", element: <Party />}
       // ✅ แผนที่ให้คนทั่วไปดูได้
       // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
       // {
