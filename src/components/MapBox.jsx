@@ -1,72 +1,33 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { apiGetRestaurants } from '../api/restaurant';
 import { createCustomMarkerElement } from '../utils/marker.util';
 import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
+import useRestaurantStore from '../stores/restaurantStore';
 
-const MapBox = ({ onMarkerClick }) => {
+const MapBox = ({ onMarkerClick, isDark }) => {
   const mapNodeRef = useRef(null);
+  const mapRef = useRef(null);
   const markerRef = useRef(null); // Ref for the red placement marker
+  const activeMarkersRef = useRef([]);
+
+  const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
+  const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
+
+  // Initial Fetch
+  useEffect(() => {
+    fetchRestaurants();
+  }, [fetchRestaurants]);
 
   const handleMapLoad = (map) => {
-    // Add Controls
-    map.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showUserHeading: true,
-      }),
-      "bottom-right",
-    );
-
-    map.on("load", async () => {
-      map.resize();
-      add3DBuildingsLayer(map);
-
-      try {
-        const res = await apiGetRestaurants();
-        const restaurants = res.data.restaurants;
-
-        restaurants?.forEach((item) => {
-          const lng = parseFloat(item.lng);
-          const lat = parseFloat(item.lat);
-          if (isNaN(lng) || isNaN(lat)) return;
-
-          const el = createCustomMarkerElement(item.category);
-
-          el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            map.flyTo({
-              center: [lng, lat],
-              zoom: 17,
-              pitch: 60,
-              speed: 1.5,
-              curve: 1,
-              essential: true,
-            });
-
-            if (onMarkerClick) {
-              onMarkerClick(item);
-            }
-          });
-
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div style="color: black; padding: 5px; font-family: sans-serif;">
-              <h4 style="margin:0; font-weight:bold;">${item.name}</h4>
-              <p style="margin:0; font-size:12px;">${item.category || "Restaurant"}</p>
-            </div>
-          `);
-
-          new mapboxgl.Marker(el)
-            .setLngLat([lng, lat])
-            .setPopup(popup)
-            .addTo(map);
-        });
-      } catch (err) {
-        console.error("Marker Loading Error:", err);
-      }
+    mapRef.current = map;
+    map.on("style.load", () => {
+      setTimeout(() => {
+        map.resize();
+        add3DBuildingsLayer(map);
+        renderMarkers();
+      }, 0);
     });
 
     // Map Click Logic
@@ -82,8 +43,62 @@ const MapBox = ({ onMarkerClick }) => {
     });
   };
 
+  // Re-render markers when filteredRestaurants change
+  useEffect(() => {
+    if (mapRef.current) {
+      renderMarkers();
+    }
+  }, [filteredRestaurants]);
+
+  const renderMarkers = () => {
+    if (!mapRef.current) return;
+
+    // Clear existing markers
+    activeMarkersRef.current.forEach(marker => marker.remove());
+    activeMarkersRef.current = [];
+
+    // Add new markers
+    filteredRestaurants.forEach((item) => {
+      const lng = parseFloat(item.lng);
+      const lat = parseFloat(item.lat);
+      if (isNaN(lng) || isNaN(lat)) return;
+
+      const el = createCustomMarkerElement(item.category);
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mapRef.current.flyTo({
+          center: [lng, lat],
+          zoom: 17,
+          pitch: 60,
+          speed: 1.5,
+          curve: 1,
+          essential: true,
+        });
+
+        if (onMarkerClick) {
+          onMarkerClick(item);
+        }
+      });
+
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        <div style="color: black; padding: 5px; font-family: sans-serif;">
+          <h4 style="margin:0; font-weight:bold;">${item.name}</h4>
+          <p style="margin:0; font-size:12px;">${item.category || "Restaurant"}</p>
+        </div>
+      `);
+
+      const newMarker = new mapboxgl.Marker(el)
+        .setLngLat([lng, lat])
+        .setPopup(popup)
+        .addTo(mapRef.current);
+
+      activeMarkersRef.current.push(newMarker);
+    });
+  };
+
   // Use the custom hook
-  useMapInit(mapNodeRef, handleMapLoad);
+  useMapInit(mapNodeRef, handleMapLoad, Boolean(isDark));
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>

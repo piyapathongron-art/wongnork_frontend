@@ -1,11 +1,15 @@
 import React from 'react';
+import useRestaurantStore from '../stores/restaurantStore';
 
 const SearchBar = () => {
-    // Array for map() to render category buttons
-    const categories = ["อาหาร", "คาเฟ่", "บาร์", "ยอดนิยม"];
+    // Categories from our system
+    const categories = ["ทั้งหมด", "Shabu", "Cafe", "Japanese", "BBQ", "Thai", "Western", "Izakaya", "Dessert", "Street Food", "Fine Dining"];
+    
+    const selectedCategory = useRestaurantStore(state => state.selectedCategory);
+    const setSelectedCategory = useRestaurantStore(state => state.setSelectedCategory);
 
     return (
-        <div className="w-full max-w-[402px] flex flex-col items-center gap-3 p-4">
+        <div className="w-full max-w-[402px] flex flex-col items-center gap-3">
 
             {/* Search Bar Container */}
             <div className="w-full h-[64px] bg-[#F7EAD7] rounded-full flex items-center px-6 shadow-md border border-[#EEE2D1]/40">
@@ -32,7 +36,12 @@ const SearchBar = () => {
                 {categories.map((item, index) => (
                     <button
                         key={index}
-                        className="whitespace-nowrap bg-[#F7EAD7] text-[#2B361B] px-6 py-2 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-transform"
+                        onClick={() => setSelectedCategory(item)}
+                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${
+                            selectedCategory === item 
+                            ? 'bg-[#182806] text-[#FFF8EF]' 
+                            : 'bg-[#F7EAD7] text-[#2B361B]'
+                        }`}
                     >
                         {item}
                     </button>

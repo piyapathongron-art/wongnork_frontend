@@ -159,15 +159,38 @@ const AiRecommend = () => {
                                                 "{rec.reason}"
                                             </p>
 
-                                            <div className="space-y-3">
+                                            <div className="space-y-4">
                                                 <p className="text-xs font-bold uppercase tracking-widest text-[#B86B25] flex items-center gap-2">
-                                                    <Sparkles size={12} /> Signature Dishes
+                                                    <Sparkles size={12} /> Recommended Menus
                                                 </p>
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="grid grid-cols-1 gap-3">
+                                                    {rec.recommendedMenus && rec.recommendedMenus.map((menu, mIdx) => (
+                                                        <div 
+                                                            key={mIdx}
+                                                            className="flex items-center gap-3 p-2 rounded-xl bg-[#F2E8D9]/30 border border-[#F2E8D9]"
+                                                        >
+                                                            {menu.imageUrl && (
+                                                                <img 
+                                                                    src={menu.imageUrl} 
+                                                                    alt={menu.name}
+                                                                    className="w-16 h-16 rounded-lg object-cover shadow-sm"
+                                                                />
+                                                            )}
+                                                            <div className="flex-1">
+                                                                <p className="text-sm font-bold text-[#182806]">{menu.name}</p>
+                                                                <p className="text-xs text-[#B86B25] font-semibold">
+                                                                    ฿{menu.price.toLocaleString()}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                
+                                                <div className="flex flex-wrap gap-2 pt-2">
                                                     {rec.highlightMenu.map((menu, mIdx) => (
                                                         <span
                                                             key={mIdx}
-                                                            className="px-3 py-1 bg-[#182806] text-[#FFF8EF] rounded-full text-xs font-medium"
+                                                            className="px-3 py-1 bg-[#182806] text-[#FFF8EF] rounded-full text-[10px] font-medium"
                                                         >
                                                             {menu}
                                                         </span>
