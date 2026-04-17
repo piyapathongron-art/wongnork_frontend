@@ -22,7 +22,7 @@ const Profile = lazy(() => import("../pages/Profile"));
 // // Search & Restaurant Pages
 // const SearchFilter = lazy(() => import("./pages/SearchFilter"));
 // const AddRestaurant = lazy(() => import("./pages/AddRestaurant"));
-// const RestaurantDetail = lazy(() => import("./pages/RestaurantDetail"));
+const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
 
 // // Party & Split Bill Pages
 // const CreateParty = lazy(() => import("./pages/CreateParty"));
@@ -74,7 +74,7 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: "/", element: <HomeMap /> },
-      { path: "/profile", element: <Profile /> }
+      { path: "/profile", element: <Profile /> },
       // ✅ แผนที่ให้คนทั่วไปดูได้
       // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
       // {
@@ -90,7 +90,7 @@ const router = createBrowserRouter([
 
   // // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
-  // { path: "/restaurant/:id", element: <RestaurantDetail /> },
+  { path: "/restaurant/:id", element: <RestaurantDetail /> },
   // { path: "/party/:id", element: <PartyDetail /> }, // ✅ ดูรายละเอียดตี้ได้ แต่ถ้าจะกด Join ต้องเช็คสิทธิ์
 
   // // ----------------------------------------------------

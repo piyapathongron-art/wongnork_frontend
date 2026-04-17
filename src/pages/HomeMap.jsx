@@ -1,7 +1,8 @@
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import RestaurantDetailSheet from "../components/restaurant/RestaurantDetailSheet";
 import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetMenuByRestaurantId } from "../api/menuApi";
+import RestaurantDetail from "./RestaurantDetail";
 
 const SearchBar = lazy(() => import("../components/SearchBar"));
 const MapBox = lazy(() => import("../components/MapBox"));
@@ -9,6 +10,8 @@ const MapBox = lazy(() => import("../components/MapBox"));
 const HomeMap = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const [showFullDetail, setShowFullDetail] = useState(false);
 
   const handleMarkerClick = async (restaurantData) => {
     setSelectedRestaurant(restaurantData);
@@ -68,9 +71,23 @@ const HomeMap = () => {
       {/* Slide-up Detail Sheet */}
       <RestaurantDetailSheet
         isOpen={isSheetOpen}
-        onClose={handleCloseSheet}
         restaurant={selectedRestaurant}
+        onClose={() => setIsSheetOpen(false)}
+        onExpand={() => setShowFullDetail(true)} // 🌟 3. ส่งฟังก์ชันไปให้ Slide-up
       />
+
+      {/* 🌟 4. ถ้าสั่งเปิดหน้าเต็ม ให้โชว์ RestaurantDetail ทับแผนที่ไปเลย */}
+      {showFullDetail && selectedRestaurant && (
+        <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
+          <RestaurantDetail
+            restaurant={selectedRestaurant}
+            onBack={() => {
+              setShowFullDetail(false); // ปิดหน้าเต็ม
+              setIsSheetOpen(true); // เด้ง Slide-up กลับมาให้ด้วย
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
