@@ -14,7 +14,7 @@ const MapBox = ({ onMarkerClick, isDark }) => {
 
   const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
   const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
-
+  console.log(filteredRestaurants)
   // Initial Fetch
   useEffect(() => {
     fetchRestaurants();

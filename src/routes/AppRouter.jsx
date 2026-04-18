@@ -16,7 +16,8 @@ const Register = lazy(() => import("../pages/Register"));
 // // Main Tab Pages (Bottom Nav)
 const HomeMap = lazy(() => import("../pages/HomeMap"));
 const AiRecommend = lazy(() => import("../pages/AiRecommend"));
-// const MyParties = lazy(() => import("./pages/MyParties"));
+const MyParties = lazy(() => import("../pages/MyParties"));
+const Restaurants = lazy(() => import("../pages/Restaurants"));
 const Profile = lazy(() => import("../pages/Profile"));
 
 // // Search & Restaurant Pages
@@ -76,6 +77,8 @@ const router = createBrowserRouter([
       { path: "/", element: <HomeMap /> },
       { path: "/profile", element: <Profile /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
+      { path: "/restaurants", element: <Restaurants /> },
+      { path: "/my-parties", element: <MyParties /> },
       // ✅ แผนที่ให้คนทั่วไปดูได้
       // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
       // {

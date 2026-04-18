@@ -15,7 +15,7 @@ const HomeMap = () => {
 
   const [showFullDetail, setShowFullDetail] = useState(false);
   const isDark = useThemeStore((state) => state.isDark);
-  console.log("isDark", isDark);
+  // console.log("isDark", isDark);
   const initTheme = useThemeStore((state) => state.initTheme);
 
   useEffect(() => {
