@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { createCustomMarkerElement } from '../utils/marker.util';
@@ -11,6 +11,7 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null); // Ref for the red placement marker
   const activeMarkersRef = useRef([]);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
   const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
@@ -44,7 +45,7 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
       setTimeout(() => {
         map.resize();
         add3DBuildingsLayer(map);
-        renderMarkers();
+        setIsMapReady(true);
       }, 0);
     });
 
@@ -61,12 +62,12 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
     });
   };
 
-  // Re-render markers when filteredRestaurants change
+  // Re-render markers when filteredRestaurants change or map becomes ready
   useEffect(() => {
-    if (mapRef.current) {
+    if (isMapReady && mapRef.current) {
       renderMarkers();
     }
-  }, [filteredRestaurants]);
+  }, [filteredRestaurants, isMapReady]);
 
   const renderMarkers = () => {
     if (!mapRef.current) return;
