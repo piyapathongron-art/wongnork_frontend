@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Users, Clock, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import useUserStore from '../stores/userStore';
+import AuthModal from '../components/AuthModal';
 
 const MyParties = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const isLogin = useUserStore(state => state.isLogin);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     
     const mockParties = [
         {
@@ -47,13 +51,35 @@ const MyParties = () => {
         return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     };
 
+    const handleJoinClick = (e, party) => {
+        e.stopPropagation();
+        if (!isLogin) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+        // Logic for logged in users to join party
+        console.log("Join party", party.id);
+    };
+
+    const handleCreateClick = () => {
+        if (!isLogin) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+        // Logic to create party
+        console.log("Create party");
+    };
+
     return (
         <div className="w-full min-h-screen bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 z-40 bg-[#FFF8F5]/90 backdrop-blur-md px-6 pt-6 pb-4 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-extrabold text-[#A65D2E]">Open Parties</h1>
-                    <button className="bg-[#A65D2E] text-white px-4 py-2 rounded-full text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer">
+                    <button 
+                        onClick={handleCreateClick}
+                        className="bg-[#A65D2E] text-white px-4 py-2 rounded-full text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer"
+                    >
                         + Create
                     </button>
                 </div>
@@ -99,7 +125,7 @@ const MyParties = () => {
                                     <span className="truncate">{party.restaurantName} • {party.distance}</span>
                                 </div>
                                 
-                                <div className="flex justify-between items-end">
+                                <div className="flex justify-between items-end mb-4">
                                     <div className="flex items-center gap-2">
                                         <img src={party.leader.avatarUrl} alt={party.leader.name} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" />
                                         <div className="flex flex-col">
@@ -115,11 +141,31 @@ const MyParties = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                <button 
+                                    onClick={(e) => handleJoinClick(e, party)}
+                                    disabled={isFull}
+                                    className={`w-full py-3 rounded-xl font-bold text-[13px] flex justify-center items-center gap-2 shadow-sm transition-all ${
+                                        isFull 
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                            : 'bg-[#A65D2E] text-white hover:bg-[#8B4D24] active:scale-95 cursor-pointer'
+                                    }`}
+                                >
+                                    {isFull ? 'Party Full' : 'Join Party'}
+                                    {!isFull && <ArrowRight size={16} />}
+                                </button>
                             </div>
                         </div>
                     );
                 })}
             </div>
+
+            {/* Authentication Modal */}
+            <AuthModal 
+                isOpen={isAuthModalOpen} 
+                onClose={() => setIsAuthModalOpen(false)} 
+                message="กรุณาล็อกอินเพื่อเข้าร่วมปาร์ตี้ หรือสร้างปาร์ตี้ใหม่กับเพื่อนๆ"
+            />
         </div>
     );
 };

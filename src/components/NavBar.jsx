@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
+import useUserStore from "../stores/userStore";
 
 const NavBar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState("");
+    const isLogin = useUserStore(state => state.isLogin);
+
 
     // Sync activeTab with current URL path
     useEffect(() => {
@@ -121,22 +124,33 @@ const NavBar = () => {
                     </div>
                 </div>
 
-                {/* 5. Profile */}
+                {/* 5. Profile / Login */}
                 <div
-                    onClick={() => navigate("/profile")}
+                    onClick={() => navigate(isLogin ? "/profile" : "/login")}
                     className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("profile").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            strokeWidth={getColors("profile").strokeWidth}
-                            stroke={getColors("profile").stroke}
-                            className="w-6 h-6"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
+                        {isLogin ? (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                strokeWidth={getColors("profile").strokeWidth}
+                                stroke={getColors("profile").stroke}
+                                className="w-6 h-6"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                strokeWidth={getColors("profile").strokeWidth}
+                                stroke={getColors("profile").stroke}
+                                className="w-6 h-6"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
+                            </svg>
+                        )}
                         <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("profile").text}`}>
-                            Profile
+                            {isLogin ? "Profile" : "Login"}
                         </span>
                         {activeTab === "profile" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>

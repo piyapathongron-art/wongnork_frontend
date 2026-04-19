@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import useUserStore from '../stores/userStore.js';
 import useAiStore from '../stores/aiStore.js';
 import { useNavigate } from 'react-router';
+import AuthModal from '../components/AuthModal';
 
 const AiRecommend = () => {
     const { messages, addMessage, clearMessages } = useAiStore();
@@ -27,9 +28,11 @@ const AiRecommend = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [location, setLocation] = useState(null);
     const [showMenu, setShowMenu] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const scrollRef = useRef(null);
     const menuRef = useRef(null);
     const user = useUserStore((state) => state.user);
+    const isLogin = useUserStore((state) => state.isLogin);
     const navigate = useNavigate();
 
     // Get location on mount
@@ -67,7 +70,19 @@ const AiRecommend = () => {
         }
     }, [messages, isLoading]);
 
+    // Check login on mount
+    useEffect(() => {
+        if (!isLogin) {
+            setIsAuthModalOpen(true);
+        }
+    }, [isLogin]);
+
     const handleSend = async (customInput = null) => {
+        if (!isLogin) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+
         const textToSend = customInput || input;
         if (!textToSend.trim() || isLoading) return;
 
@@ -372,6 +387,13 @@ const AiRecommend = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Authentication Modal */}
+            <AuthModal 
+                isOpen={isAuthModalOpen} 
+                onClose={() => setIsAuthModalOpen(false)} 
+                message="กรุณาล็อกอินเพื่อใช้งานผู้ช่วย AI แนะนำร้านอาหาร"
+            />
         </div>
     );
 };
