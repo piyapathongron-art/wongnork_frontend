@@ -76,7 +76,7 @@ const HomeMap = () => {
       {/* UI Overlay (Search Bar) */}
       <div className="fixed top-0 left-0 right-0 z-40 flex justify-center px-4 pt-8 pb-10 bg-gradient-to-b from-[#FFF8F5] via-[#FFF8F5]/80 to-transparent dark:from-black dark:via-black/80 pointer-events-none">
         {/* Change dark color later */}
-        <div className="w-full max-w-[402px] pointer-events-auto flex flex-col items-end gap-3">
+        <div className="w-screen max-w-[402px] pointer-events-auto flex flex-col items-end gap-3">
           <Suspense
             fallback={
               <div className="h-12 w-full bg-white/50 rounded-full animate-pulse" />
