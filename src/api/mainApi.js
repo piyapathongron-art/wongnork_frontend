@@ -27,6 +27,10 @@ export async function apiLogin(body) {
   return await mainApi.post("/auth/login", body);
 }
 
+export async function apiGoogle(body) {
+  return await mainApi.post("/auth/google", body);
+}
+
 export async function apiRegister(body) {
   return await mainApi.post("/auth/register", body);
 }
