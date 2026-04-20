@@ -106,7 +106,6 @@ const NavBar = () => {
                 {/* 4. My Parties */}
                 <div
                     onClick={() => {
-                        setActiveTab("my-parties");
                         navigate("/party");
                     }}
                     className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors("my-parties").opacity}`}

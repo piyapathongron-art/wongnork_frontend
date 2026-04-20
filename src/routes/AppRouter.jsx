@@ -78,6 +78,7 @@ const router = createBrowserRouter([
       { path: "/", element: <HomeMap /> },
       { path: "/restaurants", element: <Restaurants /> },
       { path: "/my-parties", element: <MyParties /> },
+      { path: "/party", element: <Party /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
       {
         element: <ProtectedRoute />,
