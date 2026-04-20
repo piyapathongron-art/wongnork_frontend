@@ -5,7 +5,7 @@ import AppLayout from "../layouts/AppLayout";
 // Layouts
 // const AppLayout = lazy(() => import("./layouts/AppLayout")); // Layout ที่มี Bottom Nav
 const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
-// const ProtectedRoute = lazy(() => import("./layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
+const ProtectedRoute = lazy(() => import("../layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
 // const AdminRoute = lazy(() => import("./layouts/AdminRoute")); // Wrapper กันคนไม่ใช่ Admin
 
 // // Auth Pages
@@ -16,7 +16,8 @@ const Register = lazy(() => import("../pages/Register"));
 // // Main Tab Pages (Bottom Nav)
 const HomeMap = lazy(() => import("../pages/HomeMap"));
 const AiRecommend = lazy(() => import("../pages/AiRecommend"));
-// const MyParties = lazy(() => import("./pages/MyParties"));
+const MyParties = lazy(() => import("../pages/MyParties"));
+const Restaurants = lazy(() => import("../pages/Restaurants"));
 const Profile = lazy(() => import("../pages/Profile"));
 
 // // Search & Restaurant Pages
@@ -74,17 +75,15 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: "/", element: <HomeMap /> },
-      { path: "/profile", element: <Profile /> },
+      { path: "/restaurants", element: <Restaurants /> },
+      { path: "/my-parties", element: <MyParties /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
-      // ✅ แผนที่ให้คนทั่วไปดูได้
-      // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
-      // {
-      //   element: <ProtectedRoute />,
-      //   children: [
-      //     { path: "/my-parties", element: <MyParties /> },
-      //     { path: "/profile", element: <Profile /> },
-      //   ]
-      // }
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/profile", element: <Profile /> },
+        ]
+      }
     ],
   },
 
@@ -132,3 +131,4 @@ function AppRouter() {
 }
 
 export default AppRouter;
+

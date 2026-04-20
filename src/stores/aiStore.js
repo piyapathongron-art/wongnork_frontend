@@ -11,7 +11,7 @@ const useAiStore = create(
         {
           id: 'welcome',
           type: 'ai',
-          aiMessage: `สวัสดีครับ! คุณ ${useUserStore.getState().user.name.split(' ')[0]} ผมคือผู้ช่วย AI ของ Wongnork วันนี้อยากทานอะไรเป็นพิเศษไหมครับ? หรือให้ผมช่วยหาร้านอาหารใกล้คุณดี?`,
+          aiMessage: `สวัสดีครับ! คุณ ${useUserStore.getState().user?.name?.split(' ')[0] || 'Guest'} ผมคือผู้ช่วย AI ของ Wongnork วันนี้อยากทานอะไรเป็นพิเศษไหมครับ? หรือให้ผมช่วยหาร้านอาหารใกล้คุณดี?`,
           recommendations: []
         }
       ],
@@ -23,7 +23,7 @@ const useAiStore = create(
           {
             id: 'welcome',
             type: 'ai',
-            aiMessage: `สวัสดีครับ! คุณ ${useUserStore.getState().user.name.split(' ')[0]} ผมคือผู้ช่วย AI ของ Wongnork วันนี้อยากทานอะไรเป็นพิเศษไหมครับ? หรือให้ผมช่วยหาร้านอาหารใกล้คุณดี?`,
+            aiMessage: `สวัสดีครับ! คุณ ${useUserStore.getState().user?.name?.split(' ')[0] || 'Guest'} ผมคือผู้ช่วย AI ของ Wongnork วันนี้อยากทานอะไรเป็นพิเศษไหมครับ? หรือให้ผมช่วยหาร้านอาหารใกล้คุณดี?`,
             recommendations: []
           }
         ]
