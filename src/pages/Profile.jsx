@@ -42,6 +42,8 @@ const Profile = () => {
                 const response = await apiGetme();
                 const userObj = response.data.data;
                 setUserData(userObj);
+                console.log(userData);
+                
                 setEditForm({ name: userObj.name || '', avatarUrl: userObj.avatarUrl || '' });
             } catch (err) {
                 console.error("Error fetching profile:", err);
