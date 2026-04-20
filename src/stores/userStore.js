@@ -1,5 +1,5 @@
 import { createJSONStorage, persist } from "zustand/middleware";
-import { apiLogin, apiRegister } from "../api/mainApi";
+import { apiGoogle, apiLogin, apiRegister } from "../api/mainApi";
 import { create } from "zustand";
 
 const useUserStore = create(
@@ -13,6 +13,11 @@ const useUserStore = create(
         console.log(resp);
         set({ user: resp.data.user, token: resp.data.token, isLogin: true });
         return resp;
+      },
+      googleLogin: async (body) => {
+        const {user,token} = body
+        set({ user:user, token:token, isLogin: true });
+        
       },
       register: async (body) => {
         const resp = await apiRegister(body);
