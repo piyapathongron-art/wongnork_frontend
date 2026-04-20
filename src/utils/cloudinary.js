@@ -14,7 +14,10 @@ const uploadCloudinary = async (file, toastContainerId) => {
     // สเต็ปที่ 1: ไปขอ Signature, Timestamp และ API Key จาก Backend
     // ส่ง folder: 'wongnork' ไปเพื่อให้ Backend สร้าง Signature ให้ตรงกัน
     const authRes = await apiCloudinary("wongnork");
+
+
     const { signature, timestamp, api_key, cloud_name, folder } = authRes.data;
+    console.log(authRes.data)
 
     // สเต็ปที่ 2: เตรียมข้อมูล FormData
     const formData = new FormData();

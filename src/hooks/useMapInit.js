@@ -21,14 +21,18 @@ export const useMapInit = (mapNodeRef, onMapLoad, isDark) => {
                 antialias: true
             });
 
-            map.addControl(
-                new mapboxgl.GeolocateControl({
-                    positionOptions: { enableHighAccuracy: true },
-                    trackUserLocation: true,
-                    showUserHeading: true
-                }),
-                'bottom-right'
-            );
+            const geolocate = new mapboxgl.GeolocateControl({
+                positionOptions: { enableHighAccuracy: true },
+                trackUserLocation: true,
+                showUserHeading: true
+            });
+
+            map.addControl(geolocate, 'bottom-right');
+
+            // Trigger geolocation automatically once the map is loaded
+            map.on('load', () => {
+                geolocate.trigger();
+            });
 
             mapRef.current = map;
 

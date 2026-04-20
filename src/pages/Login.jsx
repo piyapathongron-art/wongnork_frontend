@@ -5,10 +5,14 @@ import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router";
 import { loginSchema } from "../validations/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const login = useUserStore((state) => state.login);
+  const googleLogin = useUserStore((state) => state.googleLogin)
 
   const {
     register,
@@ -34,6 +38,31 @@ const Login = () => {
       console.dir(err.response.data);
       const errMessage = err.response?.data.error;
       toast.error(errMessage);
+    }
+  };
+
+ const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const idToken = credentialResponse.credential;
+
+      // 1. 🟢 ต้องยิง API ไปหา Backend ก่อนเพื่อเอาข้อมูล User และ Token ของระบบเรา
+      const response = await axios.post("http://localhost:8899/api/auth/google", {
+        token: idToken,
+      });
+
+      // 2. 🟢 เมื่อได้ response มาแล้ว ค่อยดึงค่าออกมาพักไว้ในตัวแปร
+      // จุดนี้ห้ามสลับขึ้นไปไว้ก่อนบรรทัด axios.post เด็ดขาด
+      const { token, user } = response.data;
+
+      // 3. 🟢 นำตัวแปร token และ user ที่ได้จากข้อ 2 ส่งเข้า Store
+      // Error เกิดเพราะบรรทัดนี้อาจจะอยู่สูงกว่าบรรทัดที่ 2 ในโค้ดของคุณ
+      await googleLogin({ user: user, token: token });
+
+      toast.success("เข้าสู่ระบบด้วย Google สำเร็จ!");
+      navigate("/");
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      toast.error("เข้าสู่ระบบด้วย Google ล้มเหลว กรุณาลองใหม่");
     }
   };
 
@@ -176,14 +205,18 @@ const Login = () => {
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
 
-        <button className="w-full bg-[#FEF1E9] border border-orange-100 flex items-center justify-center gap-3 py-3 rounded-xl hover:bg-white transition-colors cursor-pointer">
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          <span className="text-gray-600 font-medium text-sm">Google</span>
-        </button>
+       
+<div className="flex justify-center w-full">
+  <GoogleLogin
+    onSuccess={handleGoogleSuccess}
+    onError={() => toast.error("ยกเลิกการเชื่อมต่อ Google")}
+    useOneTap
+    theme="outline"
+    size="large"
+    width="100%" 
+    shape="rectangular"
+  />
+</div>
         <span className="flex text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 mt-10 justify-center">
           Don't have an account?{" "}
           <button
