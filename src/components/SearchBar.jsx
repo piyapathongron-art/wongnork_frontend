@@ -97,7 +97,7 @@ const SearchBar = ({ onSearchResultClick }) => {
         <div className="w-full max-w-[402px] flex flex-col items-center gap-3 relative" ref={dropdownRef}>
 
             {/* Search Bar Container */}
-            <div className="w-[90%] h-[64px] bg-[#F7EAD7]/90 backdrop-blur-md rounded-full flex items-center px-6 shadow-md border border-[#EEE2D1]/40 relative z-50">
+            <div className="w-[90%] h-[52px] bg-[#F7EAD7]/90 backdrop-blur-md rounded-full flex items-center px-6 shadow-md border border-[#EEE2D1]/40 relative z-50">
 
                 {/* Raw SVG Menu Icon */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-[#2B361B] cursor-pointer">
@@ -159,7 +159,7 @@ const SearchBar = ({ onSearchResultClick }) => {
                     <button
                         key={index}
                         onClick={() => setSelectedCategory(item)}
-                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${selectedCategory === item
+                        className={`whitespace-nowrap px-6 py-2 h-10 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${selectedCategory === item
                             ? 'bg-[#182806] text-[#FFF8EF]'
                             : 'bg-[#F7EAD7]/90 backdrop-blur-sm text-[#2B361B]'
                             }`}
