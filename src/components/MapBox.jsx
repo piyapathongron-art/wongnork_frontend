@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { createCustomMarkerElement } from '../utils/marker.util';
@@ -6,14 +6,33 @@ import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
 import useRestaurantStore from '../stores/restaurantStore';
 
-const MapBox = ({ onMarkerClick, isDark }) => {
+const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
   const mapNodeRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null); // Ref for the red placement marker
   const activeMarkersRef = useRef([]);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
   const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
+
+  useImperativeHandle(ref, () => ({
+    flyToRestaurant: (restaurant) => {
+      if (!mapRef.current) return;
+      const lng = parseFloat(restaurant.lng);
+      const lat = parseFloat(restaurant.lat);
+      if (isNaN(lng) || isNaN(lat)) return;
+
+      mapRef.current.flyTo({
+        center: [lng, lat],
+        zoom: 17,
+        pitch: 60,
+        speed: 1.5,
+        curve: 1,
+        essential: true,
+      });
+    }
+  }));
 
   // Initial Fetch
   useEffect(() => {
@@ -26,7 +45,7 @@ const MapBox = ({ onMarkerClick, isDark }) => {
       setTimeout(() => {
         map.resize();
         add3DBuildingsLayer(map);
-        renderMarkers();
+        setIsMapReady(true);
       }, 0);
     });
 
@@ -43,12 +62,12 @@ const MapBox = ({ onMarkerClick, isDark }) => {
     });
   };
 
-  // Re-render markers when filteredRestaurants change
+  // Re-render markers when filteredRestaurants change or map becomes ready
   useEffect(() => {
-    if (mapRef.current) {
+    if (isMapReady && mapRef.current) {
       renderMarkers();
     }
-  }, [filteredRestaurants]);
+  }, [filteredRestaurants, isMapReady]);
 
   const renderMarkers = () => {
     if (!mapRef.current) return;
@@ -105,6 +124,6 @@ const MapBox = ({ onMarkerClick, isDark }) => {
       <div ref={mapNodeRef} style={{ position: "absolute", inset: 0 }} />
     </div>
   );
-};
+});
 
 export default MapBox;
