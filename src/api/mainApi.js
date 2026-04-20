@@ -42,3 +42,10 @@ export async function apiCloudinary(folder = "wongnork") {
 export async function apiGetme() {
   return await mainApi.get("/auth/me");
 }
+
+export async function apiUpdateProfile(body) {
+  return await mainApi.put("/auth/profile", body); // ใช้ PATCH หรือ PUT ตามที่หลังบ้านกำหนด
+}
+
+// apisave
+
