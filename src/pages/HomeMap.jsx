@@ -4,6 +4,8 @@ import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetMenuByRestaurantId } from "../api/menuApi";
 import RestaurantDetail from "./RestaurantDetail";
 import { useThemeStore } from "../stores/themeStore";
+import useRestaurantStore from "../stores/restaurantStore";
+
 
 const SearchBar = lazy(() => import("../components/SearchBar"));
 const MapBox = lazy(() => import("../components/MapBox"));
@@ -19,9 +21,13 @@ const HomeMap = () => {
   // console.log("isDark", isDark);
   const initTheme = useThemeStore((state) => state.initTheme);
 
+  const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
+
   useEffect(() => {
-    initTheme();
-  }, [initTheme]);
+    if (mapBoxRef.current && filteredRestaurants.length > 0) {
+      mapBoxRef.current.fitBoundsToCategory(filteredRestaurants);
+    }
+  }, [filteredRestaurants]);
 
   const handleMarkerClick = async (restaurantData) => {
     setSelectedRestaurant(restaurantData);
@@ -88,9 +94,9 @@ const HomeMap = () => {
               <div className="h-12 w-full bg-white/50 rounded-full animate-pulse" />
             }
           >
-            <SearchBar 
-              onSearchResultClick={handleSearchResultClick} 
-              onCategoryFilter={handleCategoryChange} 
+            <SearchBar
+              onSearchResultClick={handleSearchResultClick}
+              onCategoryFilter={handleCategoryChange}
             />
             <ThemeToggleButton />
           </Suspense>
