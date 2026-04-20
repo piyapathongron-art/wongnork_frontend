@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useState, useRef } from "react";
 import RestaurantDetailSheet from "../components/restaurant/RestaurantDetailSheet";
 import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetMenuByRestaurantId } from "../api/menuApi";
@@ -12,10 +12,11 @@ const ThemeToggleButton = lazy(() => import("../components/ThemeToggleButton"));
 const HomeMap = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const mapBoxRef = useRef(null);
 
   const [showFullDetail, setShowFullDetail] = useState(false);
   const isDark = useThemeStore((state) => state.isDark);
-  console.log("isDark", isDark);
+  // console.log("isDark", isDark);
   const initTheme = useThemeStore((state) => state.initTheme);
 
   useEffect(() => {
@@ -47,6 +48,13 @@ const HomeMap = () => {
     }
   };
 
+  const handleSearchResultClick = (restaurantData) => {
+    if (mapBoxRef.current) {
+        mapBoxRef.current.flyToRestaurant(restaurantData);
+    }
+    handleMarkerClick(restaurantData);
+  };
+
   const handleCloseSheet = () => {
     setIsSheetOpen(false);
   };
@@ -62,7 +70,7 @@ const HomeMap = () => {
             <div className="absolute inset-0 bg-gray-100 dark:bg-zinc-900 animate-pulse" /> //Change dark color later//
           }
         >
-          <MapBox onMarkerClick={handleMarkerClick} isDark={isDark} />
+          <MapBox ref={mapBoxRef} onMarkerClick={handleMarkerClick} isDark={isDark} />
         </Suspense>
       </div>
       {/* UI Overlay (Search Bar) */}
@@ -74,7 +82,7 @@ const HomeMap = () => {
               <div className="h-12 w-full bg-white/50 rounded-full animate-pulse" />
             }
           >
-            <SearchBar />
+            <SearchBar onSearchResultClick={handleSearchResultClick} />
             <ThemeToggleButton />
           </Suspense>
         </div>
