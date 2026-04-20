@@ -240,7 +240,6 @@ const Profile = () => {
                 <section className="space-y-4 pt-4">
                     <div className="flex justify-between items-end">
                         <h3 className="font-extrabold text-xl text-[#2B361B]">My Parties</h3>
-                        <span className="text-[#A65D2E] text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:underline pb-1">View Map</span>
                     </div>
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                         {joinedParties.map((jp, index) => {
