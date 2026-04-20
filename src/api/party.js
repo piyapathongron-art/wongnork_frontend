@@ -1,7 +1,9 @@
 import { mainApi } from "./mainApi";
 
 const apiGetParties = async () => {
-    return await mainApi.get("/parties");
+    const res = await mainApi.get("/parties");
+    console.log("API resp", res.data.data)
+    return res
 }
 
 const apiGetPartyById = async (id) => {
