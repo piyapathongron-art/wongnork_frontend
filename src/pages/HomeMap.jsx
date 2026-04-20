@@ -55,6 +55,12 @@ const HomeMap = () => {
     handleMarkerClick(restaurantData);
   };
 
+  const handleCategoryChange = (filteredData) => {
+    if (mapBoxRef.current && filteredData && filteredData.length > 0) {
+      mapBoxRef.current.fitBoundsToCategory(filteredData);
+    }
+  };
+
   const handleCloseSheet = () => {
     setIsSheetOpen(false);
   };
@@ -82,7 +88,10 @@ const HomeMap = () => {
               <div className="h-12 w-full bg-white/50 rounded-full animate-pulse" />
             }
           >
-            <SearchBar onSearchResultClick={handleSearchResultClick} />
+            <SearchBar 
+              onSearchResultClick={handleSearchResultClick} 
+              onCategoryFilter={handleCategoryChange} 
+            />
             <ThemeToggleButton />
           </Suspense>
         </div>
