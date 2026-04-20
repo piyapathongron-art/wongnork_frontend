@@ -22,7 +22,7 @@ const Profile = lazy(() => import("../pages/Profile"));
 // // Search & Restaurant Pages
 // const SearchFilter = lazy(() => import("./pages/SearchFilter"));
 // const AddRestaurant = lazy(() => import("./pages/AddRestaurant"));
-const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
+// const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
 
 // // Party & Split Bill Pages
 // const CreateParty = lazy(() => import("./pages/CreateParty"));
