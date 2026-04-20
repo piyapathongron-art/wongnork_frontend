@@ -55,10 +55,9 @@ export const useMapInit = (mapNodeRef, onMapLoad, isDark) => {
                 mapRef.current = null;
             }
         };
-        // Adding isDark here is the "Auto-Refresh" secret.
-        // It ensures that if the theme changes BEFORE geolocation finishes,
-        // the map still initializes with the correct style.
-    }, [mapNodeRef, isDark]); 
+        // Removed isDark from here to prevent destroying the map on theme toggle.
+        // The second useEffect handles the theme change via setStyle.
+    }, [mapNodeRef]); 
 
     useEffect(() => {
         const map = mapRef.current;
