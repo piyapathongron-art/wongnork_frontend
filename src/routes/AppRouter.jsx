@@ -29,7 +29,7 @@ const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
 // // Party & Split Bill Pages
 // const CreateParty = lazy(() => import("./pages/CreateParty"));
 // const PartyDetail = lazy(() => import("./pages/PartyDetail"));
-// const SplitBillMenu = lazy(() => import("./pages/SplitBillMenu"));
+const SplitBillMenu = lazy(() => import("../pages/SplitBillMenu"));
 // const SplitBillSummary = lazy(() => import("./pages/SplitBillSummary"));
 
 // // Admin Page
@@ -55,23 +55,6 @@ const router = createBrowserRouter([
   },
 
   // Layout ที่มี Bottom Nav ด้านล่าง
-  // {
-  //   element: <AppLayout />,
-  //   children: [
-  //     { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
-  //     // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
-  //     {
-  //       element: <ProtectedRoute />,
-  //       children: [
-  //         { path: "/ai-recommend", element: <AiRecommend /> },
-  //         { path: "/my-parties", element: <MyParties /> },
-  //         { path: "/profile", element: <Profile /> },
-  //       ]
-  //     }
-  //   ],
-  // },
-
-  // Layout ที่มี Bottom Nav ด้านล่าง
   {
     element: <AppLayout />,
     children: [
@@ -84,6 +67,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "/profile", element: <Profile /> },
+          { path: "/party/:id/split-bill", element: <SplitBillMenu /> },
         ]
       }
     ],

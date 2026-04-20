@@ -262,7 +262,7 @@ const Profile = () => {
                             const memberCount = party.members?.length || 1;
 
                             return (
-                                <div key={party.relationId || index} className="flex-none w-[160px] bg-white rounded-3xl p-3 shadow-sm border border-[#EEE2D1]/30 space-y-3 relative overflow-hidden">
+                                <div key={party.relationId || index} onClick={() => navigate(`/party/${party.id}/split-bill`)} className="flex-none w-[160px] bg-white rounded-3xl p-3 shadow-sm border border-[#EEE2D1]/30 space-y-3 relative overflow-hidden cursor-pointer active:scale-95 transition-transform">
                                     {party.isLeader && (
                                         <div className="absolute top-2 right-2 z-10 bg-[#FFF8F5]/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-[#F7EAD7]">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[#A65D2E]">
