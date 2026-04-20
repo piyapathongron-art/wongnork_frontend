@@ -14,13 +14,14 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     return R * c; // Distance in km
 };
 
-const SearchBar = ({ onSearchResultClick }) => {
+const SearchBar = ({ onSearchResultClick, onCategoryFilter }) => {
     // Categories from our system
     const categories = ["ทั้งหมด", "Shabu", "Cafe", "Japanese", "BBQ", "Thai", "Western", "Izakaya", "Dessert", "Street Food", "Fine Dining"];
 
     const selectedCategory = useRestaurantStore(state => state.selectedCategory);
     const setSelectedCategory = useRestaurantStore(state => state.setSelectedCategory);
     const restaurants = useRestaurantStore(state => state.restaurants);
+    const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants); // Added to get the filtered list
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -44,6 +45,23 @@ const SearchBar = ({ onSearchResultClick }) => {
             );
         }
     }, []);
+
+    // Effect to trigger map bounds adjustment when category changes
+    // We listen to selectedCategory and filteredRestaurants.
+    // We only trigger if the user explicitly clicked a category button (handled below)
+    const handleCategoryClick = (category) => {
+        setSelectedCategory(category);
+    };
+
+    // Use an effect to wait for the store to update filteredRestaurants after setSelectedCategory
+    useEffect(() => {
+        if (onCategoryFilter && filteredRestaurants.length > 0) {
+            // Optional: If category is "ทั้งหมด", we might not want to fit bounds to the whole country,
+            // or we might. Let's do it anyway.
+            onCategoryFilter(filteredRestaurants);
+        }
+    }, [selectedCategory, filteredRestaurants, onCategoryFilter]);
+
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -158,7 +176,7 @@ const SearchBar = ({ onSearchResultClick }) => {
                 {categories.map((item, index) => (
                     <button
                         key={index}
-                        onClick={() => setSelectedCategory(item)}
+                        onClick={() => handleCategoryClick(item)}
                         className={`whitespace-nowrap px-6 py-2 h-10 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${selectedCategory === item
                             ? 'bg-[#182806] text-[#FFF8EF]'
                             : 'bg-[#F7EAD7]/90 backdrop-blur-sm text-[#2B361B]'
