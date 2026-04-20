@@ -50,7 +50,7 @@ const HomeMap = () => {
 
   const handleSearchResultClick = (restaurantData) => {
     if (mapBoxRef.current) {
-        mapBoxRef.current.flyToRestaurant(restaurantData);
+      mapBoxRef.current.flyToRestaurant(restaurantData);
     }
     handleMarkerClick(restaurantData);
   };
