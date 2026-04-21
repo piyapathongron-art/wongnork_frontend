@@ -1,10 +1,11 @@
-import { create } from 'zustand';
-import { apiGetRestaurants } from '../api/restaurant';
+import { create } from "zustand";
+import { apiGetRestaurants } from "../api/restaurant";
 
 const useRestaurantStore = create((set, get) => ({
   restaurants: [],
   filteredRestaurants: [],
-  selectedCategory: 'ทั้งหมด',
+  selectedCategory: "ทั้งหมด",
+  searchQuery: "",
   isLoading: false,
 
   setRestaurants: (data) => {
@@ -14,6 +15,11 @@ const useRestaurantStore = create((set, get) => ({
 
   setSelectedCategory: (category) => {
     set({ selectedCategory: category });
+    get().applyFilter();
+  },
+
+  setSearchQuery: (query) => {
+    set({ searchQuery: query });
     get().applyFilter();
   },
 
@@ -32,14 +38,22 @@ const useRestaurantStore = create((set, get) => ({
   },
 
   applyFilter: () => {
-    const { restaurants, selectedCategory } = get();
-    if (selectedCategory === 'ทั้งหมด') {
-      set({ filteredRestaurants: restaurants });
-    } else {
-      const filtered = restaurants.filter(r => r.category === selectedCategory);
-      set({ filteredRestaurants: filtered });
-    }
-  }
+    const { restaurants, selectedCategory, searchQuery } = get();
+
+    const filtered = restaurants.filter((rest) => {
+      // 1. เช็คคำค้นหา
+      const matchesSearch = rest.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      // 2. เช็คหมวดหมู่
+      const matchesCategory =
+        selectedCategory === "ทั้งหมด" || rest.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    set({ filteredRestaurants: filtered });
+  },
 }));
 
 export default useRestaurantStore;

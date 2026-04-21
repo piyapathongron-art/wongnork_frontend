@@ -255,6 +255,7 @@ const Profile = () => {
                         </div>
                     </div>
 
+
                     {isEditing ? (
                         <div className="flex gap-3 mt-4">
                             <button onClick={handleCancelEdit} disabled={isSaving} className="bg-[#EBE5E0] text-[#8B837E] px-6 py-2 rounded-full font-semibold text-sm shadow-sm transition-transform active:scale-95 cursor-pointer disabled:opacity-50">
@@ -271,6 +272,8 @@ const Profile = () => {
                     )}
                 </section>
 
+
+                {/* 2. My Parties Section */}
                 <section className="space-y-4 pt-4">
                     <div className="flex justify-between items-end">
                         <h3 className="font-extrabold text-xl text-[#2B361B]">My Parties</h3>
