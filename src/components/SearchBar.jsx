@@ -1,27 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useRestaurantStore from '../stores/restaurantStore';
+import calculateDistance from '../utils/distance.ustils';
 
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-    const R = 6371; // Radius of the earth in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    return R * c; // Distance in km
-};
+// const calculateDistance = (lat1, lon1, lat2, lon2) => {
+//     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+//     const R = 6371; // Radius of the earth in km
+//     const dLat = (lat2 - lat1) * Math.PI / 180;
+//     const dLon = (lon2 - lon1) * Math.PI / 180;
+//     const a = 
+//         Math.sin(dLat/2) * Math.sin(dLat/2) +
+//         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+//         Math.sin(dLon/2) * Math.sin(dLon/2); 
+//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+//     return R * c; // Distance in km
+// };
 
-const SearchBar = ({ onSearchResultClick }) => {
+const SearchBar = ({ onSearchResultClick, onCategoryFilter }) => {
     // Categories from our system
     const categories = ["ทั้งหมด", "Shabu", "Cafe", "Japanese", "BBQ", "Thai", "Western", "Izakaya", "Dessert", "Street Food", "Fine Dining"];
-    
+
     const selectedCategory = useRestaurantStore(state => state.selectedCategory);
     const setSelectedCategory = useRestaurantStore(state => state.setSelectedCategory);
     const restaurants = useRestaurantStore(state => state.restaurants);
-    
+    const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants); // Added to get the filtered list
+
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -45,6 +47,23 @@ const SearchBar = ({ onSearchResultClick }) => {
         }
     }, []);
 
+    // Effect to trigger map bounds adjustment when category changes
+    // We listen to selectedCategory and filteredRestaurants.
+    // We only trigger if the user explicitly clicked a category button (handled below)
+    const handleCategoryClick = (category) => {
+        setSelectedCategory(category);
+    };
+
+    // Use an effect to wait for the store to update filteredRestaurants after setSelectedCategory
+    useEffect(() => {
+        if (onCategoryFilter && filteredRestaurants.length > 0) {
+            // Optional: If category is "ทั้งหมด", we might not want to fit bounds to the whole country,
+            // or we might. Let's do it anyway.
+            onCategoryFilter(filteredRestaurants);
+        }
+    }, [selectedCategory, filteredRestaurants, onCategoryFilter]);
+
+
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -63,10 +82,10 @@ const SearchBar = ({ onSearchResultClick }) => {
             setIsDropdownOpen(false);
         } else {
             const lowerQuery = searchQuery.toLowerCase();
-            let results = restaurants.filter(r => 
+            let results = restaurants.filter(r =>
                 r.name.toLowerCase().includes(lowerQuery)
             );
-            
+
             // Calculate distance and sort if user location is available
             results = results.map(r => {
                 const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, r.lat, r.lng) : null;
@@ -97,7 +116,7 @@ const SearchBar = ({ onSearchResultClick }) => {
         <div className="w-full max-w-[402px] flex flex-col items-center gap-3 relative" ref={dropdownRef}>
 
             {/* Search Bar Container */}
-            <div className="w-full h-[64px] bg-[#F7EAD7]/90 backdrop-blur-md rounded-full flex items-center px-6 shadow-md border border-[#EEE2D1]/40 relative z-50">
+            <div className="w-[90%] h-[52px] bg-[#F7EAD7]/90 backdrop-blur-md rounded-full flex items-center px-6 shadow-md border border-[#EEE2D1]/40 relative z-50">
 
                 {/* Raw SVG Menu Icon */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-[#2B361B] cursor-pointer">
@@ -110,7 +129,7 @@ const SearchBar = ({ onSearchResultClick }) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => { if (searchQuery.trim() !== '') setIsDropdownOpen(true); }}
-                    className="flex-1 bg-transparent px-4 text-[#2B361B] placeholder:text-[#A8A29F] outline-none text-lg font-medium"
+                    className="flex-1  bg-transparent px-2 text-[#2B361B] placeholder:text-[#A8A29F] outline-none text-lg font-medium"
                 />
 
                 {/* Raw SVG Search Icon */}
@@ -123,7 +142,7 @@ const SearchBar = ({ onSearchResultClick }) => {
             {isDropdownOpen && searchResults.length > 0 && (
                 <div className="absolute top-[72px] left-0 right-0 bg-[#FFF8F5]/60 backdrop-blur-2xl rounded-2xl shadow-lg border border-[#EEE2D1]/30 overflow-hidden z-40 max-h-[300px] overflow-y-auto">
                     {searchResults.map((result) => (
-                        <div 
+                        <div
                             key={result.id}
                             onClick={() => handleResultClick(result)}
                             className="px-6 py-4 hover:bg-[#F7EAD7]/70 cursor-pointer border-b border-[#EEE2D1]/30 last:border-0 transition-colors flex items-center justify-between"
@@ -146,7 +165,7 @@ const SearchBar = ({ onSearchResultClick }) => {
                     ))}
                 </div>
             )}
-            
+
             {isDropdownOpen && searchResults.length === 0 && searchQuery.trim() !== '' && (
                 <div className="absolute top-[72px] left-0 right-0 bg-[#FFF8F5]/60 backdrop-blur-2xl rounded-2xl shadow-lg border border-[#EEE2D1]/30 p-6 text-center z-40">
                     <p className="text-[#8B837E] font-medium text-sm">ไม่พบร้านอาหารที่ค้นหา</p>
@@ -158,12 +177,11 @@ const SearchBar = ({ onSearchResultClick }) => {
                 {categories.map((item, index) => (
                     <button
                         key={index}
-                        onClick={() => setSelectedCategory(item)}
-                        className={`whitespace-nowrap px-6 py-2 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${
-                            selectedCategory === item 
-                            ? 'bg-[#182806] text-[#FFF8EF]' 
+                        onClick={() => handleCategoryClick(item)}
+                        className={`whitespace-nowrap px-6 py-2 h-10 rounded-full text-[14px] font-bold shadow-sm border border-[#EEE2D1]/30 active:scale-95 transition-all ${selectedCategory === item
+                            ? 'bg-[#182806] text-[#FFF8EF]'
                             : 'bg-[#F7EAD7]/90 backdrop-blur-sm text-[#2B361B]'
-                        }`}
+                            }`}
                     >
                         {item}
                     </button>

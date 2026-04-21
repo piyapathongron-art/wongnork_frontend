@@ -18,8 +18,8 @@ const NavBar = () => {
             setActiveTab("restaurants");
         } else if (path === "/profile") {
             setActiveTab("profile");
-        } else if (path === "/my-parties") {
-            setActiveTab("my-parties");
+        } else if (path === "/party") {
+            setActiveTab("party");
         } else if (path === "/") {
             setActiveTab("location");
         }
@@ -38,12 +38,12 @@ const NavBar = () => {
 
     return (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none">
-            <nav className="w-full max-w-[420px] bg-[#F7EAD7] h-[90px] rounded-[45px] flex items-center justify-between px-2 shadow-xl border border-[#EEE2D1]/30 pointer-events-auto">
+            <nav className="w-full max-w-[420px] bg-[#F7EAD7] h-[65px] rounded-[45px] flex items-center justify-between px-5 shadow-xl border border-[#EEE2D1]/30 pointer-events-auto">
 
                 {/* 1. Ai Recommend */}
                 <div
                     onClick={() => navigate("/ai-recommend")}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("ai-recommend").opacity}`}
+                    className={` w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("ai-recommend").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
                         <svg
@@ -57,14 +57,13 @@ const NavBar = () => {
                         <span className={`text-[9px] font-bold uppercase tracking-tighter text-center leading-tight mt-1 ${getColors("ai-recommend").text}`}>
                             AI Chat
                         </span>
-                        {activeTab === "ai-recommend" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>
                 </div>
 
                 {/* 2. Restaurants */}
                 <div
                     onClick={() => navigate("/restaurants")}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("restaurants").opacity}`}
+                    className={`w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("restaurants").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
                         <svg
@@ -78,14 +77,13 @@ const NavBar = () => {
                         <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("restaurants").text}`}>
                             Restaurants
                         </span>
-                        {activeTab === "restaurants" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>
                 </div>
 
                 {/* 3. Location (Home) */}
                 <div
                     onClick={() => navigate("/")}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("location").opacity}`}
+                    className={`w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("location").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
                         <svg
@@ -99,35 +97,35 @@ const NavBar = () => {
                         <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("location").text}`}>
                             Map
                         </span>
-                        {activeTab === "location" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>
                 </div>
 
                 {/* 4. My Parties */}
                 <div
-                    onClick={() => navigate("/my-parties")}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("my-parties").opacity}`}
+                    onClick={() => {
+                        navigate("/party");
+                    }}
+                    className={`w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors("party").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            strokeWidth={getColors("my-parties").strokeWidth}
-                            stroke={getColors("my-parties").stroke}
+                            strokeWidth={getColors("party").strokeWidth}
+                            stroke={getColors("party").stroke}
                             className="w-6 h-6"
                         >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a5.97 5.97 0 0 0-.942 3.197M12 10.5a3.375 3.375 0 1 0 0-6.75 3.375 3.375 0 0 0 0 6.75ZM21 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z" />
                         </svg>
-                        <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("my-parties").text}`}>
+                        <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("party").text}`}>
                             Party
                         </span>
-                        {activeTab === "my-parties" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>
                 </div>
 
                 {/* 5. Profile / Login */}
                 <div
                     onClick={() => navigate(isLogin ? "/profile" : "/login")}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("profile").opacity}`}
+                    className={`w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full ${getColors("profile").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
                         {isLogin ? (
@@ -152,7 +150,6 @@ const NavBar = () => {
                         <span className={`text-[9px] font-bold uppercase tracking-tighter mt-1 ${getColors("profile").text}`}>
                             {isLogin ? "Profile" : "Login"}
                         </span>
-                        {activeTab === "profile" && <div className="absolute -bottom-2 w-1 h-1 bg-[#BC6C25] rounded-full" />}
                     </div>
                 </div>
             </nav>

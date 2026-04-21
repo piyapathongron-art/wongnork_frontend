@@ -5,6 +5,7 @@ import { apiGetMenuByRestaurantId } from "../api/menuApi";
 import { useThemeStore } from "../stores/themeStore";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useSheetStore } from "../stores/sheetStore";
+import useRestaurantStore from "../stores/restaurantStore";
 
 const SearchBar = lazy(() => import("../components/SearchBar"));
 const MapBox = lazy(() => import("../components/MapBox"));
@@ -28,9 +29,15 @@ const HomeMap = () => {
   // console.log("isDark", isDark);
   const initTheme = useThemeStore((state) => state.initTheme);
 
+  const filteredRestaurants = useRestaurantStore(
+    (state) => state.filteredRestaurants,
+  );
+
   useEffect(() => {
-    initTheme();
-  }, [initTheme]);
+    if (mapBoxRef.current && filteredRestaurants.length > 0) {
+      mapBoxRef.current.fitBoundsToCategory(filteredRestaurants);
+    }
+  }, [filteredRestaurants]);
 
   useEffect(() => {
     if (location.pathname === "/" && selectedRestaurant && !isSheetOpen) {
@@ -61,6 +68,16 @@ const HomeMap = () => {
     handleMarkerClick(restaurantData);
   };
 
+  const handleCategoryChange = (filteredData) => {
+    if (mapBoxRef.current && filteredData && filteredData.length > 0) {
+      mapBoxRef.current.fitBoundsToCategory(filteredData);
+    }
+  };
+
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
+  };
+
   return (
     <div className="w-full h-screen relative overflow-hidden bg-white dark:bg-black touch-none">
       {/* Change dark color later */}
@@ -81,13 +98,16 @@ const HomeMap = () => {
       {/* UI Overlay (Search Bar) */}
       <div className="fixed top-0 left-0 right-0 z-40 flex justify-center px-4 pt-8 pb-10 bg-gradient-to-b from-[#FFF8F5] via-[#FFF8F5]/80 to-transparent dark:from-black dark:via-black/80 pointer-events-none">
         {/* Change dark color later */}
-        <div className="w-full max-w-[402px] pointer-events-auto flex flex-col items-end gap-3">
+        <div className="w-screen max-w-[402px] pointer-events-auto flex flex-col items-end gap-3">
           <Suspense
             fallback={
               <div className="h-12 w-full bg-white/50 rounded-full animate-pulse" />
             }
           >
-            <SearchBar onSearchResultClick={handleSearchResultClick} />
+            <SearchBar
+              onSearchResultClick={handleSearchResultClick}
+              onCategoryFilter={handleCategoryChange}
+            />
             <ThemeToggleButton />
           </Suspense>
         </div>
