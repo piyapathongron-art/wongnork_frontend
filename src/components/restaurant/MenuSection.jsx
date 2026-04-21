@@ -11,9 +11,9 @@ const MenuSection = ({ menuItems }) => {
   return (
     <section className="mb-8">
       <div className="flex justify-between items-end mb-4 px-6">
-        <h3 className="text-xl font-bold text-[#2C241E]">เมนูไฮไลท์</h3>
+        <h3 className="text-xl font-bold text-[#2C241E]">เมนู</h3>
         {sortedMenu.length > 0 && (
-          <button className="text-[13px] font-bold text-[#A67045] hover:underline">
+          <button className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer">
             ดูเมนูทั้งหมด
           </button>
         )}

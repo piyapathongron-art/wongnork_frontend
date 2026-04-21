@@ -1,27 +1,37 @@
-import React, { Suspense, lazy, useEffect, useState, useRef } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 import RestaurantDetailSheet from "../components/restaurant/RestaurantDetailSheet";
 import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetMenuByRestaurantId } from "../api/menuApi";
-import RestaurantDetail from "./RestaurantDetail";
 import { useThemeStore } from "../stores/themeStore";
+import { Outlet, useLocation, useNavigate } from "react-router";
+import { useSheetStore } from "../stores/sheetStore";
 import useRestaurantStore from "../stores/restaurantStore";
-
 
 const SearchBar = lazy(() => import("../components/SearchBar"));
 const MapBox = lazy(() => import("../components/MapBox"));
 const ThemeToggleButton = lazy(() => import("../components/ThemeToggleButton"));
 
 const HomeMap = () => {
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const {
+    selectedRestaurant,
+    isSheetOpen,
+    openSheet,
+    closeSheet,
+    clearRestaurant,
+    updateRestaurantDetails,
+  } = useSheetStore();
+
+  const navigate = useNavigate();
+  const location = useLocation();
   const mapBoxRef = useRef(null);
 
-  const [showFullDetail, setShowFullDetail] = useState(false);
   const isDark = useThemeStore((state) => state.isDark);
   // console.log("isDark", isDark);
   const initTheme = useThemeStore((state) => state.initTheme);
 
-  const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
+  const filteredRestaurants = useRestaurantStore(
+    (state) => state.filteredRestaurants,
+  );
 
   useEffect(() => {
     if (mapBoxRef.current && filteredRestaurants.length > 0) {
@@ -29,28 +39,25 @@ const HomeMap = () => {
     }
   }, [filteredRestaurants]);
 
-  const handleMarkerClick = async (restaurantData) => {
-    setSelectedRestaurant(restaurantData);
-    setIsSheetOpen(true);
+  useEffect(() => {
+    if (location.pathname === "/" && selectedRestaurant && !isSheetOpen) {
+      openSheet(selectedRestaurant);
+    }
+  }, [location.pathname, selectedRestaurant, isSheetOpen, openSheet]);
 
+  const handleMarkerClick = async (restaurantData) => {
+    openSheet(restaurantData);
     try {
       const [reviewsRes, menusRes] = await Promise.all([
         apiGetAllReview(restaurantData.id),
         apiGetMenuByRestaurantId(restaurantData.id),
       ]);
-      const fullReviews = reviewsRes.data.data;
-      const fullMenus = menusRes.data.data;
+      const fullReviews = reviewsRes.data?.data || [];
+      const fullMenus = menusRes.data?.data || [];
 
-      setSelectedRestaurant((prevData) => {
-        if (!prevData || prevData.id !== restaurantData.id) return prevData;
-        return {
-          ...prevData,
-          reviews: fullReviews,
-          menu: fullMenus,
-        };
-      });
+      updateRestaurantDetails(restaurantData.id, fullReviews, fullMenus);
     } catch (error) {
-      console.error("ดึงข้อมูลรีวิวไม่สำเร็จ:", error);
+      console.error("ดึงข้อมูลไม่สำเร็จ:", error);
     }
   };
 
@@ -73,7 +80,6 @@ const HomeMap = () => {
 
   return (
     <div className="w-full h-screen relative overflow-hidden bg-white dark:bg-black touch-none">
-      {" "}
       {/* Change dark color later */}
       {/* Map Component */}
       <div className="absolute inset-0 z-0 w-full h-full">
@@ -82,7 +88,11 @@ const HomeMap = () => {
             <div className="absolute inset-0 bg-gray-100 dark:bg-zinc-900 animate-pulse" /> //Change dark color later//
           }
         >
-          <MapBox ref={mapBoxRef} onMarkerClick={handleMarkerClick} isDark={isDark} />
+          <MapBox
+            ref={mapBoxRef}
+            onMarkerClick={handleMarkerClick}
+            isDark={isDark}
+          />
         </Suspense>
       </div>
       {/* UI Overlay (Search Bar) */}
@@ -106,21 +116,15 @@ const HomeMap = () => {
       <RestaurantDetailSheet
         isOpen={isSheetOpen}
         restaurant={selectedRestaurant}
-        onClose={() => setIsSheetOpen(false)}
-        onExpand={() => setShowFullDetail(true)} // 🌟 3. ส่งฟังก์ชันไปให้ Slide-up
+        onClose={() => {
+          closeSheet();
+          setTimeout(() => clearRestaurant(), 300);
+        }}
+        onExpand={() => {
+          navigate(`/restaurant/${selectedRestaurant.id}`);
+        }}
       />
-      {/* 🌟 4. ถ้าสั่งเปิดหน้าเต็ม ให้โชว์ RestaurantDetail ทับแผนที่ไปเลย */}
-      {showFullDetail && selectedRestaurant && (
-        <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
-          <RestaurantDetail
-            restaurant={selectedRestaurant}
-            onBack={() => {
-              setShowFullDetail(false); // ปิดหน้าเต็ม
-              setIsSheetOpen(true); // เด้ง Slide-up กลับมาให้ด้วย
-            }}
-          />
-        </div>
-      )}
+      <Outlet context={{ restaurant: selectedRestaurant }} />
     </div>
   );
 };
