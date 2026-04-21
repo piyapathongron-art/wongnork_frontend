@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { apiGetme, apiUpdateProfile } from '../api/mainApi'; 
+import { apiGetme, apiUpdateProfile } from '../api/mainApi';
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
@@ -23,14 +23,14 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    
+
     const logout = useUserStore((state) => state.logout);
 
     // 🌟 State สำหรับโหมดแก้ไข
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', avatarUrl: '' });
-    
+
     // 🌟 สำหรับจัดการอัปโหลดรูปภาพ
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -43,7 +43,7 @@ const Profile = () => {
                 const userObj = response.data.data;
                 setUserData(userObj);
                 console.log(userData);
-                
+
                 setEditForm({ name: userObj.name || '', avatarUrl: userObj.avatarUrl || '' });
             } catch (err) {
                 console.error("Error fetching profile:", err);
@@ -69,7 +69,7 @@ const Profile = () => {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); 
+            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
@@ -91,7 +91,7 @@ const Profile = () => {
 
             // ส่งข้อมูลไป Backend
             await apiUpdateProfile(updateData);
-            
+
             // อัปเดตข้อมูลบนหน้าจอ
             setUserData(prev => ({ ...prev, name: updateData.name, avatarUrl: updateData.avatarUrl }));
             setIsEditing(false);
@@ -109,7 +109,7 @@ const Profile = () => {
     // 🌟 ฟังก์ชันกดยกเลิก
     const handleCancelEdit = () => {
         // คืนค่าเดิม
-        setEditForm({ name: userData.name, avatarUrl: userData.avatarUrl || '' }); 
+        setEditForm({ name: userData.name, avatarUrl: userData.avatarUrl || '' });
         setPreviewUrl('');
         setSelectedFile(null);
         setIsEditing(false);
@@ -136,16 +136,39 @@ const Profile = () => {
 
     const reviews = userData.reviews || [];
     const joinedParties = userData.joinedParties || [];
+    const partiesLed = userData.partiesLed || [];
     const savedRestaurants = userData.savedRestaurants || [];
     const isOwner = userData.role === 'OWNER';
-    
-    const mainTitle = isOwner 
-        ? (userData.ownedRestaurants?.[0]?.name || 'ยังไม่ได้ตั้งชื่อร้าน') 
+
+    // รวมปาร์ตี้ที่ join และปาร์ตี้ที่ตัวเองเป็น leader เข้าด้วยกัน พร้อมกรองตัวซ้ำ
+    // (ใช้ Map กรองด้วย party.id โดยให้สิทธิ์ IsLeader: true ทับ IsLeader: false)
+    const combinedParties = [
+        ...joinedParties.map(jp => ({ ...jp.party, isLeader: false, relationId: jp.id })),
+        ...partiesLed.map(party => ({ ...party, isLeader: true, relationId: party.id }))
+    ];
+
+    const uniquePartiesMap = new Map();
+    combinedParties.forEach(p => {
+        // ถ้ายังไม่มีใน Map หรือตัวใหม่เป็น Leader ให้บันทึกลง Map (ทับตัวเก่าที่เป็นแค่ Member)
+        if (!uniquePartiesMap.has(p.id) || p.isLeader) {
+            uniquePartiesMap.set(p.id, p);
+        }
+    });
+
+    const allMyParties = Array.from(uniquePartiesMap.values());
+
+    // เรียงตามเวลาล่าสุด
+    allMyParties.sort((a, b) => new Date(b.meetupTime) - new Date(a.meetupTime));
+
+    const mainTitle = isOwner
+        ? (userData.ownedRestaurants?.[0]?.name || 'ยังไม่ได้ตั้งชื่อร้าน')
         : userData.name;
+
+    console.log(allMyParties)
 
     return (
         <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
-            
+
             <header className="sticky top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
                 <h1 className="text-xl font-extrabold text-[#A65D2E]">My Profile</h1>
                 <button onClick={handleLogout} className="text-[#A65D2E] hover:bg-[#F7EAD7] p-2 rounded-full transition-colors cursor-pointer" title="Logout">
@@ -157,43 +180,43 @@ const Profile = () => {
 
             <main className="px-6 space-y-8 pt-4">
                 <section className="flex flex-col items-center text-center space-y-3">
-                    
+
                     {/* 🌟 แสดงรููปภาพ และเปิดให้คลิกอัปโหลดถ้าอยู่ในโหมด Edit */}
                     <div className={`relative group ${isEditing ? 'cursor-pointer' : ''}`} onClick={() => isEditing && fileInputRef.current.click()}>
                         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md bg-[#2D3E25]">
-                            <img 
+                            <img
                                 alt="Profile Avatar"
-                                className="w-full h-full object-cover" 
-                                src={previewUrl || editForm.avatarUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80'} 
+                                className="w-full h-full object-cover"
+                                src={previewUrl || editForm.avatarUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80'}
                             />
                         </div>
-                        
+
                         {/* ไอคอนกล้องจะโชว์เฉพาะตอนกด Edit */}
                         {isEditing && (
                             <div className="absolute bottom-0 right-0 bg-[#A65D2E] p-1.5 rounded-full text-white shadow-sm border border-white hover:bg-[#8e4f27]">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
                                 </svg>
                             </div>
                         )}
 
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
                             ref={fileInputRef}
                             onChange={handleFileChange}
                         />
                     </div>
-                    
+
                     <div className="text-center mt-2 w-full">
                         {/* 🌟 สลับระหว่าง Text ธรรมดา กับ Input Field */}
                         {isEditing ? (
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 value={editForm.name}
-                                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                 placeholder="ใส่ชื่อของคุณ"
                                 className="text-xl font-extrabold text-[#2B361B] bg-white border-b-2 border-[#A65D2E] focus:outline-none text-center px-2 py-1 w-full max-w-[250px] rounded-lg shadow-sm"
                             />
@@ -213,7 +236,7 @@ const Profile = () => {
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Reviews</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-extrabold text-[#A65D2E]">{joinedParties.length}</span>
+                            <span className="text-lg font-extrabold text-[#A65D2E]">{allMyParties.length}</span>
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Parties</span>
                         </div>
                     </div>
@@ -242,15 +265,21 @@ const Profile = () => {
                         <h3 className="font-extrabold text-xl text-[#2B361B]">My Parties</h3>
                     </div>
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                        {joinedParties.map((jp, index) => {
-                            const party = jp.party || {};
+                        {allMyParties.map((party, index) => {
                             const restaurant = party.restaurant || {};
                             const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80';
                             const memberCount = party.members?.length || 1;
 
                             return (
-                                <div key={jp.id || index} className="flex-none w-[160px] bg-white rounded-3xl p-3 shadow-sm border border-[#EEE2D1]/30 space-y-3 relative overflow-hidden">
-                                    <div className="w-full h-24 rounded-2xl overflow-hidden bg-[#2D3E25]">
+                                <div key={party.relationId || index} onClick={() => navigate(`/party/${party.id}/split-bill`)} className="flex-none w-[160px] bg-white rounded-3xl p-3 shadow-sm border border-[#EEE2D1]/30 space-y-3 relative overflow-hidden cursor-pointer active:scale-95 transition-transform">
+                                    {party.isLeader && (
+                                        <div className="absolute top-2 right-2 z-10 bg-[#FFF8F5]/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-[#F7EAD7]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[#A65D2E]">
+                                                <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <div className="w-full h-24 rounded-2xl overflow-hidden bg-[#2D3E25] relative">
                                         <img alt={party.name} className="w-full h-full object-cover" src={imageUrl} />
                                     </div>
                                     <div className="space-y-0.5">
@@ -259,9 +288,22 @@ const Profile = () => {
                                         </p>
                                         <h4 className="font-bold text-sm truncate text-[#2B361B]">{party.name || 'Party'}</h4>
                                     </div>
-                                    <div className="flex -space-x-2 pt-1">
-                                        <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-200"></div>
-                                        <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F7EAD7] flex items-center justify-center text-[10px] font-bold text-[#A65D2E]">+{memberCount}</div>
+                                    <div className="flex items-center gap-2 pt-1">
+                                        <div className="flex -space-x-2">
+                                            {/* โชว์รูปโปรไฟล์คนในตี้ (สูงสุด 3 คน) */}
+                                            {party.members?.slice(0, 3).map((member, mIdx) => (
+                                                <div key={mIdx} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative z-10 shadow-sm">
+                                                    <img
+                                                        src={member.user?.avatarUrl || `https://i.pravatar.cc/150?u=${member.user?.id || mIdx}`}
+                                                        alt={member.user?.name || "Member"}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            ))}
+                                            <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F7EAD7] flex items-center justify-center text-[10px] font-bold text-[#A65D2E] shadow-sm z-20">
+                                                +{Math.max(memberCount - 3, 0)}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -271,7 +313,7 @@ const Profile = () => {
                         <div className="flex-none w-[160px] bg-[#FAF5F0] rounded-3xl p-3 border border-[#EEE2D1]/50 flex flex-col justify-center items-center text-center space-y-2 cursor-pointer hover:bg-[#F2E8DF] transition-colors">
                             <div className="w-10 h-10 rounded-full border border-[#8B837E] flex items-center justify-center text-[#8B837E]">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
                             </div>
                             <p className="text-xs font-medium text-[#8B837E]">Host a new party</p>
@@ -289,7 +331,7 @@ const Profile = () => {
                             savedRestaurants.map((saved, index) => {
                                 const restaurant = saved.restaurant || {};
                                 const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80';
-                                
+
                                 return (
                                     <div key={saved.id || index} className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30">
                                         <div className="w-full h-32 bg-[#2D3E25]">
@@ -338,7 +380,7 @@ const Profile = () => {
                                             <div className="flex text-[#A65D2E]">
                                                 {[...Array(5)].map((_, starIndex) => (
                                                     <svg key={starIndex} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={starIndex < review.rating ? "currentColor" : "none"} stroke={starIndex < review.rating ? "none" : "currentColor"} strokeWidth={2} className="w-3 h-3">
-                                                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                                                     </svg>
                                                 ))}
                                             </div>

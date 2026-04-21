@@ -29,7 +29,7 @@ const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
 // // Party & Split Bill Pages
 // const CreateParty = lazy(() => import("./pages/CreateParty"));
 // const PartyDetail = lazy(() => import("./pages/PartyDetail"));
-// const SplitBillMenu = lazy(() => import("./pages/SplitBillMenu"));
+const SplitBillMenu = lazy(() => import("../pages/SplitBillMenu"));
 // const SplitBillSummary = lazy(() => import("./pages/SplitBillSummary"));
 
 // // Admin Page
@@ -55,23 +55,6 @@ const router = createBrowserRouter([
   },
 
   // Layout ที่มี Bottom Nav ด้านล่าง
-  // {
-  //   element: <AppLayout />,
-  //   children: [
-  //     { path: "/", element: <HomeMap /> }, // ✅ แผนที่ให้คนทั่วไปดูได้
-  //     // 🔒 สอดไส้ ProtectedRoute เฉพาะหน้า Tab ที่ต้องล็อกอิน
-  //     {
-  //       element: <ProtectedRoute />,
-  //       children: [
-  //         { path: "/ai-recommend", element: <AiRecommend /> },
-  //         { path: "/my-parties", element: <MyParties /> },
-  //         { path: "/profile", element: <Profile /> },
-  //       ]
-  //     }
-  //   ],
-  // },
-
-  // Layout ที่มี Bottom Nav ด้านล่าง
   {
     element: <AppLayout />,
     children: [
@@ -89,13 +72,23 @@ const router = createBrowserRouter([
     ],
   },
 
-  // // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
+  // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
   { path: "/restaurant/:id", element: <RestaurantDetail /> },
   // { path: "/party/:id", element: <PartyDetail /> }, // ✅ ดูรายละเอียดตี้ได้ แต่ถ้าจะกด Join ต้องเช็คสิทธิ์
 
+  // ----------------------------------------------------
+  // 🔒 กลุ่มที่ 2: Protected Routes (Standalone ไม่มี NavBar)
+  // ----------------------------------------------------
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: "/party/:id/split-bill", element: <SplitBillMenu /> },
+    ]
+  },
+
   // // ----------------------------------------------------
-  // // 🔒 กลุ่มที่ 2: Protected Routes (บังคับล็อกอิน 100%)
+  // // 🔒 กลุ่มที่ 3: Admin Routes
   // // ----------------------------------------------------
   // {
   //   element: <ProtectedRoute />,
