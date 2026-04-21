@@ -35,7 +35,7 @@ const Login = () => {
       toast.success("Login สำเร็จ");
       navigate("/")
     } catch (err) {
-      console.dir(err.response.data);
+      console.dir(err.response?.data);
       const errMessage = err.response?.data.error;
       toast.error(errMessage);
     }
