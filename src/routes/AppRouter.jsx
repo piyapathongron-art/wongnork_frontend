@@ -65,7 +65,11 @@ const router = createBrowserRouter([
         element: <HomeMap />,
         children: [{ path: "restaurant/:id", element: <RestaurantDetail /> }],
       },
-      { path: "/restaurants", element: <Restaurants /> },
+      { 
+        path: "/restaurants", 
+        element: <Restaurants />,
+        children: [{ path: ":id", element: <RestaurantDetail /> }],
+      },
       { path: "/my-parties", element: <MyParties /> },
       { path: "/party", element: <Party /> },
       { path: "/ai-recommend", element: <AiRecommend /> },

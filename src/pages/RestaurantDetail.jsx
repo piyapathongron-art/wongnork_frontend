@@ -198,8 +198,8 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop";
 
   return (
-    <div className="fixed inset-0 bg-[#FFF8F2] overflow-y-auto z-[100] pb-32">
-      <header className="fixed top-0 inset-x-0 z-50 flex justify-between items-center px-6 py-5 bg-[#FFF8F2]/90 backdrop-blur-md border-b border-[#EEDCcc]/50">
+    <div className="fixed inset-0 bg-[#FFF8F2] overflow-y-auto z-[200] pb-32">
+      <header className="fixed top-0 inset-x-0 z-[210] flex justify-between items-center px-6 py-5 bg-[#FFF8F2]/90 backdrop-blur-md border-b border-[#EEDCcc]/50">
         <button onClick={handleBack} className="p-2 active:scale-90 transition">
           <ArrowLeft size={22} className="text-[#594A3D] cursor-pointer" />
         </button>
