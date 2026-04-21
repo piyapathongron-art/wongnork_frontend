@@ -26,11 +26,10 @@ const HomeMap = () => {
 
   // Role Debugging
   useEffect(() => {
-    if (mapBoxRef.current && filteredRestaurants.length > 0) {
-      mapBoxRef.current.fitBoundsToCategory(filteredRestaurants);
-      console.log("Current Auth Role:", user?.role); // Will now show 'OWNER' after your store fix
+    if (filteredRestaurants.length > 0) {
+      console.log("Current Auth Role:", user?.role); 
     }
-  }, [filteredRestaurants, user]); // Added user dependency
+  }, [filteredRestaurants, user]); 
 
   const handleMarkerClick = async (res) => {
     setSelectedRestaurant(res);
@@ -54,7 +53,7 @@ const HomeMap = () => {
           <Suspense fallback={<div className="h-12 w-full bg-white/20 rounded-full" />}>
             <SearchBar 
               onSearchResultClick={(res) => { mapBoxRef.current?.flyToRestaurant(res); handleMarkerClick(res); }}
-              onCategoryFilter={(data) => mapBoxRef.current?.fitBoundsToCategory(data)} 
+              onCategoryClick={() => { mapBoxRef.current?.zoomOutToOverview(); }}
             />
             <ThemeToggleButton />
           </Suspense>

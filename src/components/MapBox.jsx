@@ -32,6 +32,15 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
         essential: true,
       });
     },
+    zoomOutToOverview: () => {
+      if (!mapRef.current) return;
+      mapRef.current.flyTo({
+        zoom: 13,
+        pitch: 0,
+        speed: 1.2,
+        essential: true,
+      });
+    },
     fitBoundsToCategory: (restaurants) => {
       if (!mapRef.current || !restaurants || restaurants.length === 0) return;
       const bounds = new mapboxgl.LngLatBounds(
@@ -139,6 +148,7 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
         .setPopup(popup)
         .addTo(mapRef.current);
 
+      newMarker.restaurantId = item.id;
       activeMarkersRef.current.push(newMarker);
     });
   };
