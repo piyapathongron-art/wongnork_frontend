@@ -24,13 +24,16 @@ import ShareModal from "../components/restaurant/ShareModal";
 import AllReviews from "../components/restaurant/AllReviews";
 import AllMenus from "../components/restaurant/AllMenus";
 
-const RestaurantDetail = () => {
+const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const context = useOutletContext();
 
-  const [restaurant, setRestaurant] = useState(context?.restaurant || null);
-  const [isLoadingRest, setIsLoadingRest] = useState(!context?.restaurant);
+  // ถ้าได้ restaurant มาจาก prop โดยตรง (render inline จาก HomeMap) ให้ใช้เลย
+  // ถ้าไม่ได้ ค่อยไปเช็คจาก context (render ผ่าน router)
+  const initialRestaurant = propRestaurant || context?.restaurant || null;
+  const [restaurant, setRestaurant] = useState(initialRestaurant);
+  const [isLoadingRest, setIsLoadingRest] = useState(!initialRestaurant);
   const [reviewItems, setReviewItems] = useState([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -46,31 +49,49 @@ const RestaurantDetail = () => {
   const handleBack = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(-1);
+    if (onBack) {
+      onBack(); // ใช้ callback จาก HomeMap ถ้ามี
+    } else {
+      navigate(-1);
+    }
   };
 
   useEffect(() => {
     const fetchSelfData = async () => {
-      if (!context?.restaurant?.menus && id) {
+      // ถ้ามี propRestaurant มาแล้ว (inline render) ไม่ต้องโหลด API
+      if (propRestaurant) {
+        setRestaurant(propRestaurant);
+        setIsLoadingRest(false);
+        return;
+      }
+
+      // ถ้ามีข้อมูลครบจาก context แล้ว ใช้เลย
+      if (context?.restaurant?.menus) {
+        setRestaurant(context.restaurant);
+        setIsLoadingRest(false);
+        return;
+      }
+
+      // ถ้ามี id จาก route params ค่อยยิง API
+      if (id) {
         try {
           setIsLoadingRest(true);
           const res = await apiGetRestaurantById(id);
-
           const data = res.data?.restaurant || res.data;
-
           setRestaurant(data);
         } catch (error) {
           console.error("ดึงข้อมูลร้านไม่สำเร็จ:", error);
         } finally {
           setIsLoadingRest(false);
         }
-      } else if (context?.restaurant) {
-        setRestaurant(context.restaurant);
-        setIsLoadingRest(false);
+        return;
       }
+
+      // ไม่มีทั้ง prop, context และ id → ไม่ต้องโหลด
+      setIsLoadingRest(false);
     };
     fetchSelfData();
-  }, [id, context?.restaurant]);
+  }, [id, context?.restaurant, propRestaurant]);
 
 
 // 🌟 จุดที่ต้องแก้: เช็คสถานะจากข้อมูลโปรไฟล์จริง เพื่อให้สีกดแล้วไม่หายตอนกดย้อนกลับ
