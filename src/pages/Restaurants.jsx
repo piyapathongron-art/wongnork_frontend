@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, Loader2, X } from "lucide-react";
-import { apiGetRestaurants } from "../api/restaurant";
 import RestaurantCard from "../components/restaurant/RestaurantCard";
+import useRestaurantStore from "../stores/restaurantStore"; // 🌟 ดึง Store มาใช้
 
 const Restaurants = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("ทั้งหมด");
-  const [restaurants, setRestaurants] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    restaurants,
+    filteredRestaurants,
+    selectedCategory,
+    searchQuery,
+    isLoading,
+    setSelectedCategory,
+    setSearchQuery,
+  } = useRestaurantStore();
+
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const categories = [
@@ -22,36 +28,6 @@ const Restaurants = () => {
     "Street Food",
   ];
 
-  useEffect(() => {
-    fetchRestaurants();
-  }, []);
-
-  const fetchRestaurants = async () => {
-    try {
-      setIsLoading(true);
-      const res = await apiGetRestaurants();
-      setRestaurants(res.data?.restaurants || []);
-    } catch (error) {
-      console.error("Failed to fetch:", error);
-      setRestaurants([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ลอจิกกรองข้อมูล
-  const filteredRestaurants = Array.isArray(restaurants)
-    ? restaurants.filter((rest) => {
-        const matchesSearch = rest.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-        const matchesCategory =
-          activeCategory === "ทั้งหมด" || rest.category === activeCategory;
-        return matchesSearch && matchesCategory;
-      })
-    : [];
-
-  // ลอจิก Dropdown Hint
   const searchHints = searchQuery
     ? restaurants
         .filter((r) => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -69,7 +45,9 @@ const Restaurants = () => {
         {/* Search Bar with Dropdown */}
         <div className="relative z-[100]">
           <div
-            className={`flex items-center bg-white rounded-full px-4 py-3 shadow-sm border transition-colors relative z-20 ${isSearchFocused ? "border-[#A65D2E]" : "border-[#EEE2D1]"}`}
+            className={`flex items-center bg-white rounded-full px-4 py-3 shadow-sm border transition-colors relative z-20 ${
+              isSearchFocused ? "border-[#A65D2E]" : "border-[#EEE2D1]"
+            }`}
           >
             <Search
               size={18}
@@ -79,15 +57,15 @@ const Restaurants = () => {
               type="text"
               placeholder="ค้นหาร้านอาหาร..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)} // 🌟 อัปเดตผ่าน Zustand
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               className="flex-1 bg-transparent border-none outline-none px-3 text-sm text-[#2B361B] placeholder:text-[#A8A29F]"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
-                className="p-1 rounded-full text-[#A8A29F] hover:text-[#A65D2E] active:scale-95 transition-all"
+                onClick={() => setSearchQuery("")} // 🌟 เคลียร์ค่าผ่าน Zustand
+                className="p-1 rounded-full text-[#A8A29F] hover:text-[#A65D2E] active:scale-95 transition-all cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -106,7 +84,7 @@ const Restaurants = () => {
                 <div
                   key={hint.id}
                   onClick={() => {
-                    setSearchQuery(hint.name);
+                    setSearchQuery(hint.name); // 🌟 ตั้งค่าคำค้นหาผ่าน Zustand
                     setIsSearchFocused(false);
                   }}
                   className="px-5 py-3 hover:bg-[#FFF8F5] cursor-pointer flex items-center gap-3 transition-colors"
@@ -138,8 +116,12 @@ const Restaurants = () => {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${activeCategory === cat ? "bg-[#A65D2E] text-white" : "bg-white text-[#8B837E] border border-[#EEE2D1]"} cursor-pointer`}
+              onClick={() => setSelectedCategory(cat)} // 🌟 เปลี่ยนหมวดหมู่ผ่าน Zustand
+              className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                selectedCategory === cat
+                  ? "bg-[#A65D2E] text-white"
+                  : "bg-white text-[#8B837E] border border-[#EEE2D1]"
+              }`}
             >
               {cat}
             </button>
