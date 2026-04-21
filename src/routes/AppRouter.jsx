@@ -67,19 +67,28 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "/profile", element: <Profile /> },
-          { path: "/party/:id/split-bill", element: <SplitBillMenu /> },
         ]
       }
     ],
   },
 
-  // // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
+  // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
   { path: "/restaurant/:id", element: <RestaurantDetail /> },
   // { path: "/party/:id", element: <PartyDetail /> }, // ✅ ดูรายละเอียดตี้ได้ แต่ถ้าจะกด Join ต้องเช็คสิทธิ์
 
+  // ----------------------------------------------------
+  // 🔒 กลุ่มที่ 2: Protected Routes (Standalone ไม่มี NavBar)
+  // ----------------------------------------------------
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: "/party/:id/split-bill", element: <SplitBillMenu /> },
+    ]
+  },
+
   // // ----------------------------------------------------
-  // // 🔒 กลุ่มที่ 2: Protected Routes (บังคับล็อกอิน 100%)
+  // // 🔒 กลุ่มที่ 3: Admin Routes
   // // ----------------------------------------------------
   // {
   //   element: <ProtectedRoute />,

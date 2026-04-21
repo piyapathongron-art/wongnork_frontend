@@ -140,13 +140,22 @@ const Profile = () => {
     const savedRestaurants = userData.savedRestaurants || [];
     const isOwner = userData.role === 'OWNER';
 
-    // รวมปาร์ตี้ที่ join และปาร์ตี้ที่ตัวเองเป็น leader เข้าด้วยกัน
-    // (โดยเช็คว่า party ที่ได้จาก joinedParties จะอยู่ในรูปแบบ jp.party 
-    // ส่วน partiesLed จะเป็น object ของ party เลย เราจึงต้อง normalize ข้อมูลให้หน้าตาเหมือนกัน)
-    const allMyParties = [
+    // รวมปาร์ตี้ที่ join และปาร์ตี้ที่ตัวเองเป็น leader เข้าด้วยกัน พร้อมกรองตัวซ้ำ
+    // (ใช้ Map กรองด้วย party.id โดยให้สิทธิ์ IsLeader: true ทับ IsLeader: false)
+    const combinedParties = [
         ...joinedParties.map(jp => ({ ...jp.party, isLeader: false, relationId: jp.id })),
         ...partiesLed.map(party => ({ ...party, isLeader: true, relationId: party.id }))
     ];
+
+    const uniquePartiesMap = new Map();
+    combinedParties.forEach(p => {
+        // ถ้ายังไม่มีใน Map หรือตัวใหม่เป็น Leader ให้บันทึกลง Map (ทับตัวเก่าที่เป็นแค่ Member)
+        if (!uniquePartiesMap.has(p.id) || p.isLeader) {
+            uniquePartiesMap.set(p.id, p);
+        }
+    });
+
+    const allMyParties = Array.from(uniquePartiesMap.values());
 
     // เรียงตามเวลาล่าสุด
     allMyParties.sort((a, b) => new Date(b.meetupTime) - new Date(a.meetupTime));
@@ -291,10 +300,10 @@ const Profile = () => {
                                                     />
                                                 </div>
                                             ))}
+                                            <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F7EAD7] flex items-center justify-center text-[10px] font-bold text-[#A65D2E] shadow-sm z-20">
+                                                +{Math.max(memberCount - 3, 0)}
+                                            </div>
                                         </div>
-                                        {/* <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F7EAD7] flex items-center justify-center text-[10px] font-bold text-[#A65D2E] shadow-sm">
-                                            +{Math.max(memberCount - 3, 0)}
-                                        </div> */}
                                     </div>
                                 </div>
                             );
