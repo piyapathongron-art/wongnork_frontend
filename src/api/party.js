@@ -22,6 +22,10 @@ const apiLeaveParty = async (id) => {
     return await mainApi.delete(`/parties/${id}/leave`);
 }
 
+const apiKickMember = async (partyId, userId) => {
+    return await mainApi.delete(`/parties/${partyId}/members/${userId}`);
+}
+
 // const apiUpdatePartyStatus = async (id, status) => {
 //     return await mainApi.patch(`/parties/${id}/status`, { status });
 // }
@@ -49,6 +53,7 @@ export {
     apiCreateParty,
     apiJoinParty,
     apiLeaveParty,
+    apiKickMember,
     apiAddOrderItem,
     apiRemoveOrderItem,
     apiGetSplitBill,

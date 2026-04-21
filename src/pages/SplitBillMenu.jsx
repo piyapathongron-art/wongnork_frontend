@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Receipt, Check, Utensils, AlertCircle, X, Users, Plus } from 'lucide-react';
-import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiRemoveOrderItem, apiAddCustomItem } from '../api/party';
+import { ArrowLeft, Receipt, Check, Utensils, AlertCircle, X, Users, Plus, Crown, User as UserIcon } from 'lucide-react';
+import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiRemoveOrderItem, apiAddCustomItem, apiKickMember } from '../api/party';
 import { apiGetMenuByRestaurantId } from '../api/menuApi';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
@@ -22,6 +22,8 @@ const SplitBillMenu = () => {
     const [selectedMenuForSheet, setSelectedMenuForSheet] = useState(null);
     const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
     const [customItemForm, setCustomItemForm] = useState({ name: '', price: '' });
+
+    const isLeader = party?.leaderId === user?.id;
 
     const loadData = useCallback(async () => {
         try {
@@ -105,6 +107,21 @@ const SplitBillMenu = () => {
         }
     };
 
+    const handleKickMember = async (userId, userName) => {
+        if (!window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะ ${userName} ออกจากปาร์ตี้?`)) return;
+
+        try {
+            setActionLoading(true);
+            await apiKickMember(id, userId);
+            toast.success(`เตะ ${userName} ออกเรียบร้อย`);
+            await loadData();
+        } catch (error) {
+            toast.error(error.response?.data?.message || "ไม่สามารถเตะสมาชิกได้");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     if (loading && !party) {
         return (
             <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
@@ -119,6 +136,21 @@ const SplitBillMenu = () => {
         items: [],
         summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 }
     };
+
+    const sortedMembers = [...(party.members || [])].sort((a, b) => {
+        const isAMe = a.user.id === user?.id;
+        const isBMe = b.user.id === user?.id;
+        const isALeader = a.user.id === party.leaderId;
+        const isBLeader = b.user.id === party.leaderId;
+
+        const getWeight = (isMe, isLeader) => {
+            if (isMe) return 2;
+            if (isLeader) return 1;
+            return 0;
+        };
+
+        return getWeight(isBMe, isBLeader) - getWeight(isAMe, isALeader);
+    });
 
     const getMenuSharers = (itemId, type) => {
         const sharers = [];
@@ -192,7 +224,7 @@ const SplitBillMenu = () => {
 
     return (
         <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] font-sans overflow-hidden">
-            {/*  Glass Header with Gradient Fade */}
+            {/* 🌟 Glass Header with Gradient Fade */}
             <header className="absolute top-0 left-0 right-0 z-40 bg-[#FFF8F5]/70 backdrop-blur-xl px-6 py-4 flex items-center gap-4 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }}>
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto">
                     <ArrowLeft size={24} className="text-[#2B361B]" />
@@ -203,8 +235,64 @@ const SplitBillMenu = () => {
                 </div>
             </header>
 
-            {/* Scrollable Main Content */}
+            {/* 🌟 Scrollable Main Content */}
             <main className="h-full overflow-y-auto no-scrollbar pt-24 pb-72 px-6">
+
+                {/* 🌟 Party Members Section */}
+                <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4">สมาชิกในปาร์ตี้ ({party.members?.length || 0} คน)</h3>
+                <div className="mb-8 "
+                    style={{
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)'
+                    }}
+                >
+
+                    <div className="pl-5 flex gap-4 overflow-x-auto no-scrollbar pt-2 ">
+                        {sortedMembers?.map((member) => {
+                            const isMemberLeader = party.leaderId === member.user.id;
+                            const isMemberMe = member.user.id === user?.id;
+                            const canKick = isLeader && !isMemberLeader;
+
+                            return (
+                                <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
+                                    <div className="relative">
+                                        <div className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200">
+                                            <img
+                                                src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`}
+                                                alt={member.user.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+
+                                        {isMemberMe && (
+                                            <div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white">
+                                                <UserIcon size={10} className="text-white fill-current" />
+                                            </div>
+                                        )}
+
+                                        {isMemberLeader && (
+                                            <div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white">
+                                                <Crown size={10} className="text-white fill-current" />
+                                            </div>
+                                        )}
+                                        {canKick && (
+                                            <button
+                                                onClick={() => handleKickMember(member.user.id, member.user.name)}
+                                                className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors"
+                                            >
+                                                <X size={10} strokeWidth={3} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-[#2B361B]'}`}>
+                                        {member.user.id === user?.id ? 'คุณ' : member.user.name}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="bg-[#EAD9CF]/40 rounded-[2rem] p-5 mb-8 border border-[#EAD9CF] flex gap-4 items-center">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
                         <Utensils size={20} className="text-[#A65D2E]" />
@@ -403,12 +491,12 @@ const SplitBillMenu = () => {
                                     onClick={handleConfirmToggle}
                                     disabled={actionLoading}
                                     className={`w-full py-4 rounded-2xl font-bold shadow-sm transition-all flex justify-center items-center gap-2 cursor-pointer ${(() => {
-                                            const isCustom = !!selectedMenuForSheet.partyId;
-                                            const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
-                                            return mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === type);
-                                        })()
-                                            ? 'bg-[#EAD9CF] text-[#2B361B] hover:bg-[#D9C5B2]'
-                                            : 'bg-[#2B361B] text-white hover:bg-[#1A2210]'
+                                        const isCustom = !!selectedMenuForSheet.partyId;
+                                        const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
+                                        return mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === type);
+                                    })()
+                                        ? 'bg-[#EAD9CF] text-[#2B361B] hover:bg-[#D9C5B2]'
+                                        : 'bg-[#2B361B] text-white hover:bg-[#1A2210]'
                                         }`}
                                 >
                                     {actionLoading ? 'กำลังประมวลผล...' : (
