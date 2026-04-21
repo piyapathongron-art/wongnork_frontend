@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Receipt, Check, Utensils, AlertCircle, X, Users, Plus, Crown, User as UserIcon } from 'lucide-react';
-import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiRemoveOrderItem, apiAddCustomItem, apiKickMember } from '../api/party';
+import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiKickMember } from '../api/party';
 import { apiGetMenuByRestaurantId } from '../api/menuApi';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
@@ -17,11 +17,6 @@ const SplitBillMenu = () => {
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-
-    // 🌟 State สำหรับ Bottom Sheet และ Modal
-    const [selectedMenuForSheet, setSelectedMenuForSheet] = useState(null);
-    const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
-    const [customItemForm, setCustomItemForm] = useState({ name: '', price: '' });
 
     const isLeader = party?.leaderId === user?.id;
 
@@ -56,52 +51,18 @@ const SplitBillMenu = () => {
         loadData();
     }, [loadData]);
 
-    const handleConfirmToggle = async () => {
-        if (!selectedMenuForSheet || actionLoading) return;
-
-        const isCustom = !!selectedMenuForSheet.partyId;
-        const itemId = selectedMenuForSheet.id;
-
-        // เช็คว่าเลือกไปแล้วหรือยัง
-        const isSelected = isCustom
-            ? mySummary.items.some(i => i.itemId === itemId && i.type === 'CUSTOM')
-            : mySummary.items.some(i => i.itemId === itemId && i.type === 'OFFICIAL');
-
+    const handleAddMenuToBill = async (menu) => {
+        if (actionLoading) return;
         setActionLoading(true);
         try {
-            if (isSelected) {
-                await apiRemoveOrderItem(id, itemId);
-                toast.info("ยกเลิกรายการนี้แล้ว", { autoClose: 1000 });
-            } else {
-                const body = isCustom ? { customItemId: itemId } : { menuId: itemId };
-                await apiAddOrderItem(id, body);
-                toast.success("เลือกรายการนี้แล้ว", { autoClose: 1000 });
-            }
-            setSelectedMenuForSheet(null);
-            await loadData();
+            await apiAddOrderItem(id, { menuId: menu.id, quantity: 1, isCustom: false });
+            toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`, { autoClose: 1000, position: "top-center", theme: "dark" });
+            
+            // Re-fetch bill silently
+            const billRes = await apiGetSplitBill(id);
+            setBillSummary(billRes.data.data);
         } catch (error) {
             toast.error(error.response?.data?.message || "เกิดข้อผิดพลาด");
-        } finally {
-            setActionLoading(false);
-        }
-    };
-
-    const handleAddCustomItem = async () => {
-        if (!customItemForm.name || !customItemForm.price) {
-            return toast.warn("กรุณากรอกชื่อและราคา");
-        }
-        setActionLoading(true);
-        try {
-            await apiAddCustomItem(id, {
-                name: customItemForm.name,
-                price: parseFloat(customItemForm.price)
-            });
-            toast.success("เพิ่มเมนูพิเศษเรียบร้อย!");
-            setIsAddCustomModalOpen(false);
-            setCustomItemForm({ name: '', price: '' });
-            await loadData();
-        } catch (error) {
-            toast.error("เพิ่มเมนูไม่สำเร็จ");
         } finally {
             setActionLoading(false);
         }
@@ -152,69 +113,38 @@ const SplitBillMenu = () => {
         return getWeight(isBMe, isBLeader) - getWeight(isAMe, isALeader);
     });
 
-    const getMenuSharers = (itemId, type) => {
-        const sharers = [];
-        billSummary?.members?.forEach(m => {
-            if (m.items.some(i => i.itemId === itemId && i.type === type)) {
-                sharers.push(m.user);
-            }
-        });
-        return sharers;
-    };
-
-    const MenuItemCard = ({ item, isCustom = false }) => {
-        const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
-        const isSelected = mySummary.items.some(i => i.itemId === item.id && i.type === type);
-        const currentSharers = getMenuSharers(item.id, type);
+    const MenuItemCard = ({ item }) => {
+        // หาว่าในบิลมีเมนูนี้กี่อันแล้ว (รวม Quantity)
+        const tableItem = billSummary?.tableItems?.find(ti => ti.name === item.name && !ti.isCustom);
+        const totalOrdered = tableItem ? tableItem.quantity : 0;
 
         return (
             <div
-                onClick={() => setSelectedMenuForSheet(item)}
-                className={`p-4 rounded-[1.5rem] flex items-center gap-4 border transition-all cursor-pointer active:scale-[0.98] ${isSelected
-                    ? 'bg-white border-[#A65D2E] shadow-md ring-1 ring-[#A65D2E]/20'
-                    : 'bg-white border-[#EEE2D1] opacity-80 hover:opacity-100'
-                    }`}
+                onClick={() => handleAddMenuToBill(item)}
+                className="p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50 group"
             >
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'bg-[#A65D2E] border-[#A65D2E]' : 'border-[#D9C5B2]'
-                    }`}>
-                    {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
-                </div>
-
-                {item.imageUrl && !isCustom && (
-                    <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
-                )}
-
-                {isCustom && (
-                    <div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0">
+                {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />
+                ) : (
+                    <div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]">
                         <Utensils size={24} className="text-[#A65D2E]" />
                     </div>
                 )}
 
                 <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
-                    <div className="flex items-end justify-between mt-2">
+                    <div className="flex items-center justify-between mt-2">
                         <p className="text-[13px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()}</p>
-                        <div className='flex flex-col items-end space-y-2'>
-                            {currentSharers.length > 0 && (
-                                <div className="flex items-center gap-1 bg-[#F7EAD7] px-2 py-0.5 rounded-md">
-                                    <Users size={10} className="text-[#A65D2E]" />
-                                    <span className="text-[9px] font-bold flex uppercase tracking-wider text-[#A65D2E]">
-                                        หาร {currentSharers.length} คน
-                                    </span>
-                                </div>
+                        
+                        <div className="flex items-center gap-2">
+                            {totalOrdered > 0 && (
+                                <span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-0.5 rounded-md">
+                                    โต๊ะสั่งไปแล้ว {totalOrdered} จาน
+                                </span>
                             )}
-                            <div className='flex -space-x-2'>
-                                {currentSharers.slice(0, 3).map((u, i) => (
-                                    <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative z-10 shadow-sm">
-                                        <img src={u.avatarUrl || `https://i.pravatar.cc/150?u=${u.id}`} alt="Member" className="w-full h-full object-cover" />
-                                    </div>
-                                ))}
-                                {currentSharers.length > 3 && (
-                                    <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F7EAD7] flex items-center justify-center text-[8px] font-bold text-[#A65D2E] z-20 shadow-sm">
-                                        +{currentSharers.length - 3}
-                                    </div>
-                                )}
-                            </div>
+                            <button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm group-active:scale-95 transition-transform">
+                                <Plus size={16} />
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -230,24 +160,23 @@ const SplitBillMenu = () => {
                     <ArrowLeft size={24} className="text-[#2B361B]" />
                 </button>
                 <div className="flex-1 overflow-hidden">
-                    <h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none truncate">รายการอาหาร</h1>
+                    <h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none truncate">เลือกเมนูเข้าบิลโต๊ะ</h1>
                     <p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party.name}</p>
                 </div>
             </header>
 
             {/* 🌟 Scrollable Main Content */}
-            <main className="h-full overflow-y-auto no-scrollbar pt-24 pb-72 px-6">
+            <main className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6">
 
                 {/* 🌟 Party Members Section */}
                 <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4">สมาชิกในปาร์ตี้ ({party.members?.length || 0} คน)</h3>
-                <div className="mb-8 "
+                <div className="mb-6"
                     style={{
                         maskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)'
                     }}
                 >
-
-                    <div className="pl-5 flex gap-4 overflow-x-auto no-scrollbar pt-2 ">
+                    <div className="pl-5 flex gap-4 overflow-x-auto no-scrollbar pt-2 pb-2">
                         {sortedMembers?.map((member) => {
                             const isMemberLeader = party.leaderId === member.user.id;
                             const isMemberMe = member.user.id === user?.id;
@@ -263,13 +192,11 @@ const SplitBillMenu = () => {
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
-
                                         {isMemberMe && (
                                             <div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white">
                                                 <UserIcon size={10} className="text-white fill-current" />
                                             </div>
                                         )}
-
                                         {isMemberLeader && (
                                             <div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white">
                                                 <Crown size={10} className="text-white fill-current" />
@@ -298,42 +225,24 @@ const SplitBillMenu = () => {
                         <Utensils size={20} className="text-[#A65D2E]" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-[14px] leading-tight">ร่วมหารเมนูที่คุณทาน</h3>
-                        <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">กดเพื่อดูรายละเอียด และเริ่มหารบิลกับเพื่อนๆ</p>
+                        <h3 className="font-bold text-[14px] leading-tight">กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ</h3>
+                        <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ</p>
                     </div>
                 </div>
 
-                {/* 1. Official Menu Section */}
-                <div className="space-y-4 mb-10">
+                {/* Official Menu Section */}
+                <div className="space-y-3 mb-10">
                     <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                         <div className="h-px flex-1 bg-[#EAD9CF]" />
-                        เมนูจากร้านอาหาร
+                        เมนูทั้งหมดจากร้าน
                         <div className="h-px flex-1 bg-[#EAD9CF]" />
                     </h3>
-                    {menuItems.map(menu => <MenuItemCard key={menu.id} item={menu} isCustom={false} />)}
+                    {menuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)}
                     {menuItems.length === 0 && (
                         <div className="text-center py-6 opacity-40">
                             <p className="text-xs font-bold italic">ไม่พบเมนูจากร้านอาหาร</p>
                         </div>
                     )}
-                </div>
-
-                {/* 2. Custom Items Section */}
-                <div className="space-y-4 mb-10">
-                    <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <div className="h-px flex-1 bg-[#EAD9CF]" />
-                        เมนูพิเศษประจำตี้
-                        <div className="h-px flex-1 bg-[#EAD9CF]" />
-                    </h3>
-                    {party.customItems?.map(item => <MenuItemCard key={item.id} item={item} isCustom={true} />)}
-
-                    <button
-                        onClick={() => setIsAddCustomModalOpen(true)}
-                        className="w-full py-4 rounded-[1.5rem] border-2 border-dashed border-[#EAD9CF] text-[#A65D2E] font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-[#F7EAD7]/30 transition-colors"
-                    >
-                        <Plus size={18} />
-                        เพิ่มเมนูอื่นที่ไม่มีในรายการ
-                    </button>
                 </div>
             </main>
 
@@ -343,175 +252,44 @@ const SplitBillMenu = () => {
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                             <Receipt size={18} className="text-[#A8A29F]" />
-                            <span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider">สรุปยอดของคุณ</span>
+                            <span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider">ยอดรวมของคุณ (คนเดียว)</span>
                         </div>
                         <span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-1 rounded-md uppercase">
-                            SC {party.serviceCharge}% • VAT {party.vat}%
+                            คุณหารอยู่ {mySummary.items.length} รายการ
                         </span>
                     </div>
 
                     <div className="flex justify-between items-end mb-6">
-                        <div className="text-4xl font-black text-[#2B361B] tracking-tight">
-                            ฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}
+                        <div className="text-4xl font-black text-[#2B361B] tracking-tight flex items-center gap-2">
+                            <motion.span
+                                key={mySummary.summary.netTotal}
+                                initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            >
+                                ฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}
+                            </motion.span>
                         </div>
                         {mySummary.items.length > 0 && (
                             <div className="text-right">
-                                <p className="text-[11px] text-[#A8A29F] font-bold">ค่าอาหาร: ฿{mySummary.summary.subtotal.toFixed(2)}</p>
-                                <p className="text-[11px] text-[#A8A29F] font-medium">+ SC & VAT: ฿{(mySummary.summary.serviceCharge + mySummary.summary.vat).toFixed(2)}</p>
+                                <p className="text-[11px] text-[#A8A29F] font-bold">ค่าอาหารสุทธิ: ฿{mySummary.summary.subtotal.toFixed(2)}</p>
                             </div>
                         )}
                     </div>
 
                     <button
                         onClick={() => navigate(`/party/${id}/split-bill/summary`)}
-                        className="w-full bg-[#182806] hover:bg-[#2D3E1A] text-white py-4 rounded-2xl font-bold shadow-lg shadow-black/20 active:scale-[0.98] transition-all flex justify-center items-center gap-2 cursor-pointer"
+                        className="w-full bg-[#182806] hover:bg-[#2D3E1A] text-white py-4 rounded-2xl font-bold shadow-lg shadow-black/20 active:scale-[0.98] transition-all flex justify-center items-center gap-2 cursor-pointer relative overflow-hidden"
                     >
-                        ดูสรุปบิลทั้งโต๊ะ
+                        จัดการบิลทั้งโต๊ะ
+                        {billSummary?.tableItems?.length > 0 && (
+                            <span className="absolute right-4 bg-[#A65D2E] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                                โต๊ะสั่งแล้ว {billSummary.tableItems.reduce((acc, curr) => acc + curr.quantity, 0)} จาน
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
-
-            {/* 🌟 Add Custom Item Modal (Glassmorphism) */}
-            <AnimatePresence>
-                {isAddCustomModalOpen && (
-                    <>
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAddCustomModalOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100]" />
-                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="fixed inset-0 flex items-center justify-center z-[101] px-6">
-                            <div className="bg-[#FFF8F5] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-[#EEE2D1]">
-                                <h3 className="text-xl font-bold text-[#2B361B] mb-6">เพิ่มเมนูพิเศษ 🍳</h3>
-                                <div className="space-y-4 mb-8">
-                                    <div>
-                                        <label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest block mb-2 ml-1">ชื่อเมนู</label>
-                                        <input
-                                            type="text"
-                                            value={customItemForm.name}
-                                            onChange={(e) => setCustomItemForm({ ...customItemForm, name: e.target.value })}
-                                            placeholder="เช่น เบียร์ขวด, ติ่มซำแถม"
-                                            className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest block mb-2 ml-1">ราคา (฿)</label>
-                                        <input
-                                            type="number"
-                                            value={customItemForm.price}
-                                            onChange={(e) => setCustomItemForm({ ...customItemForm, price: e.target.value })}
-                                            placeholder="0.00"
-                                            className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    <button onClick={() => setIsAddCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-[#8B837E]">ยกเลิก</button>
-                                    <button onClick={handleAddCustomItem} disabled={actionLoading} className="flex-1 bg-[#A65D2E] text-white py-3 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">
-                                        {actionLoading ? '...' : 'เพิ่มเมนู'}
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-
-            {/* 🌟 Bottom Sheet สำหรับกดเลือกเมนู (Glassmorphism) */}
-            <AnimatePresence>
-                {selectedMenuForSheet && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedMenuForSheet(null)}
-                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-                        />
-                        <motion.div
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 right-0 bg-[#FFF8F5] rounded-t-[2.5rem] z-50 p-6 shadow-2xl border-t border-[#EEE2D1]"
-                        >
-                            <div className="max-w-md mx-auto relative">
-                                <button
-                                    onClick={() => setSelectedMenuForSheet(null)}
-                                    className="absolute -top-2 -right-2 p-2 bg-[#EAD9CF]/50 rounded-full text-[#8B837E] hover:bg-[#EAD9CF] transition-colors"
-                                >
-                                    <X size={20} />
-                                </button>
-
-                                {selectedMenuForSheet.imageUrl && (
-                                    <div className="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden shadow-sm border border-[#EAD9CF]">
-                                        <img src={selectedMenuForSheet.imageUrl} alt={selectedMenuForSheet.name} className="w-full h-full object-cover" />
-                                    </div>
-                                )}
-
-                                <h3 className="text-xl font-bold text-center text-[#2B361B] mb-1">{selectedMenuForSheet.name}</h3>
-                                <p className="text-center text-[#A65D2E] font-black text-lg mb-6">ราคาเต็ม: ฿{selectedMenuForSheet.price.toLocaleString()}</p>
-
-                                {/* ข้อมูลผู้ที่แชร์อยู่ */}
-                                {(() => {
-                                    const isCustom = !!selectedMenuForSheet.partyId;
-                                    const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
-                                    const sharers = getMenuSharers(selectedMenuForSheet.id, type);
-                                    const isCurrentlySelected = isCustom
-                                        ? mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === 'CUSTOM')
-                                        : mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === 'OFFICIAL');
-
-                                    const futureSharerCount = isCurrentlySelected ? Math.max(sharers.length - 1, 1) : sharers.length + 1;
-                                    const estimatedCost = selectedMenuForSheet.price / futureSharerCount;
-
-                                    return (
-                                        <div className="bg-white rounded-[1.5rem] p-4 mb-6 border border-[#EAD9CF]/50 shadow-sm">
-                                            <h4 className="text-[11px] font-bold text-[#8B837E] uppercase tracking-wider mb-3">
-                                                สมาชิกที่หารเมนูนี้อยู่ ({sharers.length} คน)
-                                            </h4>
-
-                                            {sharers.length > 0 ? (
-                                                <div className="flex flex-wrap gap-2 mb-4">
-                                                    {sharers.map(s => (
-                                                        <div key={s.id} className="flex items-center gap-1.5 bg-[#FFF8F5] px-2 py-1 rounded-lg border border-[#EEE2D1]">
-                                                            <img src={s.avatarUrl || `https://i.pravatar.cc/150?u=${s.id}`} alt={s.name} className="w-5 h-5 rounded-full object-cover" />
-                                                            <span className="text-[10px] font-bold text-[#2B361B]">{s.name}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p className="text-[12px] text-[#A8A29F] mb-4 italic">ยังไม่มีใครเลือกเมนูนี้ (คุณจะเป็นคนแรก)</p>
-                                            )}
-
-                                            <div className="flex justify-between items-center pt-3 border-t border-[#EAD9CF]/50">
-                                                <span className="text-[12px] font-bold text-[#2B361B]">ยอดแชร์ (โดยประมาณ)</span>
-                                                <span className="text-[15px] font-black text-[#A65D2E]">฿{Math.ceil(estimatedCost).toLocaleString()} <span className="text-[10px] font-medium text-[#8B837E]">/ คน</span></span>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-
-                                <button
-                                    onClick={handleConfirmToggle}
-                                    disabled={actionLoading}
-                                    className={`w-full py-4 rounded-2xl font-bold shadow-sm transition-all flex justify-center items-center gap-2 cursor-pointer ${(() => {
-                                        const isCustom = !!selectedMenuForSheet.partyId;
-                                        const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
-                                        return mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === type);
-                                    })()
-                                        ? 'bg-[#EAD9CF] text-[#2B361B] hover:bg-[#D9C5B2]'
-                                        : 'bg-[#2B361B] text-white hover:bg-[#1A2210]'
-                                        }`}
-                                >
-                                    {actionLoading ? 'กำลังประมวลผล...' : (
-                                        (() => {
-                                            const isCustom = !!selectedMenuForSheet.partyId;
-                                            const type = isCustom ? 'CUSTOM' : 'OFFICIAL';
-                                            return mySummary.items.some(i => i.itemId === selectedMenuForSheet.id && i.type === type);
-                                        })() ? 'ยกเลิกการหารเมนูนี้' : 'ยืนยันเข้าร่วมหาร'
-                                    )}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

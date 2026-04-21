@@ -26,21 +26,26 @@ const apiKickMember = async (partyId, userId) => {
     return await mainApi.delete(`/parties/${partyId}/members/${userId}`);
 }
 
-// const apiUpdatePartyStatus = async (id, status) => {
-//     return await mainApi.patch(`/parties/${id}/status`, { status });
-// }
+// --- Split Bill API (Hybrid Opt-in Flow) ---
 
 const apiAddOrderItem = async (partyId, body) => {
-    // body can be { menuId } or { customItemId }
+    // body: { menuId, isCustom, name, price, quantity }
     return await mainApi.post(`/parties/${partyId}/items`, body);
 }
 
-const apiRemoveOrderItem = async (partyId, itemId) => {
-    return await mainApi.delete(`/parties/${partyId}/items/${itemId}`);
+const apiUpdateOrderItemQuantity = async (partyId, itemId, action) => {
+    // action: "increment" | "decrement"
+    return await mainApi.put(`/parties/${partyId}/items/${itemId}/quantity`, { action });
 }
 
-const apiAddCustomItem = async (partyId, body) => {
-    return await mainApi.post(`/parties/${partyId}/custom-items`, body);
+const apiToggleOrderItemSharer = async (partyId, itemId, action) => {
+    // action: "join" | "leave"
+    return await mainApi.put(`/parties/${partyId}/items/${itemId}/sharers`, { action });
+}
+
+const apiRemoveOrderItem = async (partyId, itemId) => {
+    // Delete item entirely from the bill
+    return await mainApi.delete(`/parties/${partyId}/items/${itemId}`);
 }
 
 const apiGetSplitBill = async (partyId) => {
@@ -55,7 +60,8 @@ export {
     apiLeaveParty,
     apiKickMember,
     apiAddOrderItem,
+    apiUpdateOrderItemQuantity,
+    apiToggleOrderItemSharer,
     apiRemoveOrderItem,
-    apiGetSplitBill,
-    apiAddCustomItem
+    apiGetSplitBill
 }
