@@ -1,8 +1,8 @@
-import React, { use, useState } from "react";
+import React, { use, useState,useEffect } from "react";
 import { useForm } from "react-hook-form";
 import useUserStore from "../stores/userStore";
 import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router";
+import { useNavigate,useLocation } from "react-router";
 import { loginSchema } from "../validations/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GoogleLogin } from "@react-oauth/google";
@@ -13,6 +13,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const login = useUserStore((state) => state.login);
   const googleLogin = useUserStore((state) => state.googleLogin)
+
+  const navigate = useNavigate();
 
   const {
     register,
@@ -26,16 +28,18 @@ const Login = () => {
     },
   });
 
-  const navigate = useNavigate();
+
 
   const submitLogin = async (data) => {
+    console.log("data", data)
     try {
-      new Promise((resolve) => setTimeout(resolve, 5000));
+      // new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
+      console.log("Resr =",resp)
       toast.success("Login สำเร็จ");
       navigate("/")
     } catch (err) {
-      console.dir(err.response.data);
+      console.dir(err);
       const errMessage = err.response?.data.error;
       toast.error(errMessage);
     }

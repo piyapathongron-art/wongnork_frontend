@@ -8,16 +8,26 @@ import useUserStore from '../stores/userStore';
 import calculateDistance from '../utils/distance.ustils';
 import CreatePartyModal from '../components/Modals/CreatePartyModal';
 
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 const Party = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, isLogin } = useUserStore();
     const [parties, setParties] = useState([]);
     const [myParties, setMyParties] = useState([]);
     const [userLoc, setUserLoc] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false)
+
+    // 🌟 Auto open modal if navigated from Profile with state
+    useEffect(() => {
+        if (location.state?.openCreateModal) {
+            setIsModalOpen(true);
+            // Clear state so it doesn't reopen on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(

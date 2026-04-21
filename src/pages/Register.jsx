@@ -29,11 +29,11 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     try {
-      new Promise((resolve) => setTimeout(resolve, 5000));
+      // new Promise((resolve) => setTimeout(resolve, 5000));
       console.log("Submit Data:", data);
       const resp = await registerUser(data);
       console.log("Response:", resp);
-      toast.success("สมัครสมาชิกสำเร็จ");
+      toast.success("ลงทะเบียนสำเร็จ โปรดตรวจสอบ Email เพื่อยืนยันตัวตน");
       navigate("/login");
     } catch (err) {
       const errorMsg =
@@ -230,11 +230,33 @@ const Register = () => {
             </div>
 
             <button
-              type="submit"
-              className="w-full bg-[#A65D2E] hover:bg-[#8e4f27] text-white font-semibold py-2 rounded-xl shadow-lg shadow-orange-900/20 transform active:scale-[0.98] transition-all mt-4 cursor-pointer"
-            >
-              Create Account
-            </button>
+  type="submit"
+  disabled={isSubmitting} 
+  className={`w-full flex justify-center items-center font-semibold py-2 rounded-xl shadow-lg transition-all mt-4 
+    ${isSubmitting 
+      ? "bg-gray-400 cursor-not-allowed text-white" 
+      : "bg-[#A65D2E] hover:bg-[#8e4f27] text-white shadow-orange-900/20 transform active:scale-[0.98] cursor-pointer" // สีปุ่มปกติ
+    }`}
+>
+ 
+  {isSubmitting ? (
+    <>
+      
+      <svg 
+        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24"
+      >
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      กำลังส่งอีเมล...
+    </>
+  ) : (
+    "Create Account"
+  )}
+</button>
           </fieldset>
         </form>
 

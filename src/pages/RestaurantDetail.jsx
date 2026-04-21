@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetRestaurantById } from "../api/restaurant";
 
+import { apiToggleSaveRestaurant, apiGetme } from "../api/mainApi"; //  เติม apiGetme 
+
+
+import { toast } from "react-toastify";
+
 import {
   ArrowLeft,
   Share2,
@@ -31,6 +36,8 @@ const RestaurantDetail = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllMenus, setShowAllMenus] = useState(false);
+
+  const [isSaved, setIsSaved] = useState(false); // สถานะว่าเซฟร้านนี้หรือยัง
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -65,6 +72,34 @@ const RestaurantDetail = () => {
     fetchSelfData();
   }, [id, context?.restaurant]);
 
+
+// 🌟 จุดที่ต้องแก้: เช็คสถานะจากข้อมูลโปรไฟล์จริง เพื่อให้สีกดแล้วไม่หายตอนกดย้อนกลับ
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      try {
+        const res = await apiGetme();
+        // ดึงรายการที่เซฟไว้ทั้งหมดมาเช็ค
+        const savedList = res.data?.data?.savedRestaurants || [];
+        
+        // ตรวจสอบว่า ID ร้านในหน้านี้ (id) มีอยู่ในรายการที่เซฟไว้ไหม
+        const isAlreadySaved = savedList.some(item => item.restaurantId === id);
+        
+        setIsSaved(isAlreadySaved);
+      } catch (error) {
+        console.error("Error checking saved status:", error);
+      }
+    };
+
+    if (id) {
+      checkSavedStatus();
+    }
+  }, [id]);
+
+
+
+
+
+
   // 3. ดึงรีวิว
   useEffect(() => {
     if (restaurant?.id) {
@@ -78,12 +113,42 @@ const RestaurantDetail = () => {
       const res = await apiGetAllReview(restaurantId);
       const reviewsData = res.data?.data || res.data || [];
       setReviewItems(reviewsData);
+
+      // console.log("ข้อมูลร้านที่ Backend ส่งมา:", data)
     } catch (error) {
       setReviewItems([]);
     } finally {
       setIsLoadingReviews(false);
     }
   };
+
+
+// 🌟 4. ฟังก์ชันจัดการปุ่ม Save (Optimistic UI)
+  const handleToggleSave = async () => {
+    if (!restaurant?.id) return;
+
+    // สลับสีไอคอนบนหน้าจอทันที (ไม่ต้องรอ API) เพื่อความลื่นไหล
+    setIsSaved(!isSaved);
+
+    try {
+      // ยิง API ไปจัดการหลังบ้าน
+      await apiToggleSaveRestaurant(restaurant.id);
+      
+      if (!isSaved) {
+        toast.success("บันทึกร้านอาหารลงโปรไฟล์แล้ว");
+      }
+    } catch (error) {
+      // ถ้า API พัง (เช่น เน็ตหลุด) ให้สลับสีไอคอนกลับมาเป็นค่าเดิม
+      setIsSaved(isSaved);
+      toast.error("เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
+      console.error(error);
+    }
+  };
+
+
+
+
+
 
   if (isLoadingRest) {
     return (
@@ -120,16 +185,27 @@ const RestaurantDetail = () => {
         <h1 className="text-sm font-bold text-[#332B25] tracking-wide truncate px-4">
           {restaurant?.name}
         </h1>
-        <div className="flex gap-2">
+
+<div className="flex gap-2">
           <button
             onClick={() => setIsShareModalOpen(true)}
             className="p-2 cursor-pointer"
           >
             <Share2 size={20} className="text-[#594A3D]" />
           </button>
-          <button className="p-2">
-            <Bookmark size={20} className="text-[#594A3D] cursor-pointer" />
+
+          {/* 🌟 5. วางทับปุ่ม Bookmark เดิมตรงนี้เลยครับ! */}
+          <button 
+            onClick={handleToggleSave} 
+            className="p-2 active:scale-75 transition-transform duration-200 cursor-pointer"
+          >
+            <Bookmark 
+              size={22} 
+              className={isSaved ? "text-[#A67045]" : "text-[#594A3D]"} 
+              fill={isSaved ? "currentColor" : "none"} 
+            />
           </button>
+          
         </div>
       </header>
 
