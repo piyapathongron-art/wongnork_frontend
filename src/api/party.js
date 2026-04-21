@@ -26,10 +26,25 @@ const apiLeaveParty = async (id) => {
 //     return await mainApi.patch(`/parties/${id}/status`, { status });
 // }
 
+const apiAddOrderItem = async (partyId, menuId) => {
+    return await mainApi.post(`/parties/${partyId}/items`, { menuId });
+}
+
+const apiRemoveOrderItem = async (partyId, menuId) => {
+    return await mainApi.delete(`/parties/${partyId}/items/${menuId}`);
+}
+
+const apiGetSplitBill = async (partyId) => {
+    return await mainApi.get(`/parties/${partyId}/split-bill`);
+}
+
 export {
     apiGetParties,
     apiGetPartyById,
     apiCreateParty,
     apiJoinParty,
     apiLeaveParty,
+    apiAddOrderItem,
+    apiRemoveOrderItem,
+    apiGetSplitBill
 }

@@ -7,7 +7,10 @@ import { apiGetParties, apiJoinParty, apiLeaveParty } from '../api/party';
 import useUserStore from '../stores/userStore';
 import calculateDistance from '../utils/distance.ustils';
 
+import { useNavigate } from 'react-router';
+
 const Party = () => {
+    const navigate = useNavigate();
     const { user, isLogin } = useUserStore();
     const [parties, setParties] = useState([]);
     const [myParties, setMyParties] = useState([]);
@@ -104,12 +107,13 @@ const Party = () => {
                                     — Your Current Groups —
                                 </h2>
                                 {myParties.map(party => (
-                                    <PartyCard 
-                                        key={`joined-${party.id}`} 
-                                        party={party} 
-                                        isJoined={true} 
-                                        onLeave={() => handleLeave(party.id)}
-                                    />
+                                    <div key={`joined-${party.id}`} onClick={() => navigate(`/party/${party.id}/split-bill`)} className="cursor-pointer">
+                                        <PartyCard 
+                                            party={party} 
+                                            isJoined={true} 
+                                            onLeave={(e) => { e?.stopPropagation(); handleLeave(party.id); }}
+                                        />
+                                    </div>
                                 ))}
                                 <div className="h-px bg-[#BC6C25]/20 w-full mt-4 mb-2" />
                             </>
