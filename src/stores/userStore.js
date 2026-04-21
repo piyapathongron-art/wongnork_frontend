@@ -13,8 +13,10 @@ const useUserStore = create(
         // console.log(resp);
         set({ token: resp.data.token, isLogin: true });
         const getInfo = await apiGetme()
-        // console.log(getInfo)
-        set({ user: getInfo.data.user })
+        const userData = getInfo.data.data
+        // console.log(userData)
+        set({ user: userData })
+        // console.log("user =", user)
         return resp;
       },
       googleLogin: async (body) => {
