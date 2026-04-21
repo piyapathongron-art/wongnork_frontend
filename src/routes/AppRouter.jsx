@@ -8,6 +8,8 @@ import Party from "../pages/Party";
 const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
 const ProtectedRoute = lazy(() => import("../layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
 // const AdminRoute = lazy(() => import("./layouts/AdminRoute")); // Wrapper กันคนไม่ใช่ Admin
+import RestaurantDetail from "../pages/RestaurantDetail"; // หน้า Slide-up ข้อมูลร้านอาหารที่ปักหมุด
+// import Restaurants from "../pages/Restaurants";
 
 // // Auth Pages
 // const Splash = lazy(() => import("./pages/Splash"));
@@ -24,7 +26,7 @@ const Profile = lazy(() => import("../pages/Profile"));
 // // Search & Restaurant Pages
 // const SearchFilter = lazy(() => import("./pages/SearchFilter"));
 // const AddRestaurant = lazy(() => import("./pages/AddRestaurant"));
-const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
+// const RestaurantDetail = lazy(() => import("../pages/RestaurantDetail"));
 
 // // Party & Split Bill Pages
 // const CreateParty = lazy(() => import("./pages/CreateParty"));
@@ -58,23 +60,25 @@ const router = createBrowserRouter([
   {
     element: <AppLayout />,
     children: [
-      { path: "/", element: <HomeMap /> },
+      {
+        path: "/",
+        element: <HomeMap />,
+        children: [{ path: "restaurant/:id", element: <RestaurantDetail /> }],
+      },
       { path: "/restaurants", element: <Restaurants /> },
       { path: "/my-parties", element: <MyParties /> },
       { path: "/party", element: <Party /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
       {
         element: <ProtectedRoute />,
-        children: [
-          { path: "/profile", element: <Profile /> },
-        ]
-      }
+        children: [{ path: "/profile", element: <Profile /> }],
+      },
     ],
   },
 
   // หน้า Standalone ที่คนทั่วไปเปิดดูได้ (เช่น แชร์ลิงก์ให้เพื่อนดูร้าน)
   // { path: "/search", element: <SearchFilter /> },
-  { path: "/restaurant/:id", element: <RestaurantDetail /> },
+  // { path: "/restaurant/:id", element: <Restaurants /> },
   // { path: "/party/:id", element: <PartyDetail /> }, // ✅ ดูรายละเอียดตี้ได้ แต่ถ้าจะกด Join ต้องเช็คสิทธิ์
 
   // ----------------------------------------------------
@@ -126,4 +130,3 @@ function AppRouter() {
 }
 
 export default AppRouter;
-
