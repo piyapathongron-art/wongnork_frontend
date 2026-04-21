@@ -26,12 +26,17 @@ const apiLeaveParty = async (id) => {
 //     return await mainApi.patch(`/parties/${id}/status`, { status });
 // }
 
-const apiAddOrderItem = async (partyId, menuId) => {
-    return await mainApi.post(`/parties/${partyId}/items`, { menuId });
+const apiAddOrderItem = async (partyId, body) => {
+    // body can be { menuId } or { customItemId }
+    return await mainApi.post(`/parties/${partyId}/items`, body);
 }
 
-const apiRemoveOrderItem = async (partyId, menuId) => {
-    return await mainApi.delete(`/parties/${partyId}/items/${menuId}`);
+const apiRemoveOrderItem = async (partyId, itemId) => {
+    return await mainApi.delete(`/parties/${partyId}/items/${itemId}`);
+}
+
+const apiAddCustomItem = async (partyId, body) => {
+    return await mainApi.post(`/parties/${partyId}/custom-items`, body);
 }
 
 const apiGetSplitBill = async (partyId) => {
@@ -46,5 +51,6 @@ export {
     apiLeaveParty,
     apiAddOrderItem,
     apiRemoveOrderItem,
-    apiGetSplitBill
+    apiGetSplitBill,
+    apiAddCustomItem
 }
