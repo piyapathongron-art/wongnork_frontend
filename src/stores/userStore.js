@@ -16,7 +16,7 @@ const useUserStore = create(
         const userData = getInfo.data.data
         // console.log(userData)
         set({ user: userData })
-        console.log("user =", user)
+        // console.log("user =", user)
         return resp;
       },
       googleLogin: async (body) => {

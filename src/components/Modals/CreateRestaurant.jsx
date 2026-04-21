@@ -12,16 +12,18 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
     const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
         defaultValues: { 
             name: "",
-            category: "", // Initialized as empty string for text input
+            category: "", 
+            address: "",
             lat: 13.7563, 
             lng: 100.5018 
         }
     });
 
-    // Watch coordinates for the UI display
+    // Watch values to display coordinates in the UI
     const [lat, lng] = [watch("lat"), watch("lng")];
 
     const handleMapClick = (e) => {
+        // Update the form state with coordinates from the MapBox click
         setValue("lat", e.lngLat.lat);
         setValue("lng", e.lngLat.lng);
     };
@@ -49,19 +51,18 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
 
                 {/* INTERACTIVE MAP HEADER */}
                 <div className="h-52 w-full relative flex-shrink-0">
-                    <MapBox isDark={true} onClick={handleMapClick} />
+                    <MapBox onClick={handleMapClick} />
                     <button 
                         onClick={onClose} 
                         className="absolute top-4 right-4 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-all"
                     >
                         <X className="w-5 h-5" />
                     </button>
-                    <div className="absolute bottom-4 left-4 z-10 px-3 py-1 bg-[#BC6C25] text-[#F7EAD7] text-[9px] font-black uppercase rounded-full flex items-center gap-1 shadow-lg">
-                        <MapPin className="w-3 h-3" /> Tap Map to Pin Location
+                    <div className="absolute bottom-4 left-4 z-10 px-3 py-1 bg-[#BC6C25] text-[#F7EAD7] text-[9px] font-black uppercase rounded-full flex items-center gap-1 shadow-lg pointer-events-none">
+                        <MapPin className="w-3 h-3" /> Click map to place marker
                     </div>
                 </div>
 
-                {/* FORM CONTENT */}
                 <div className="p-8 overflow-y-auto no-scrollbar pb-32">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-3 bg-[#BC6C25] rounded-2xl shadow-xl">
@@ -74,7 +75,6 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
                     </div>
 
                     <form onSubmit={handleSubmit(processSubmit)} className="space-y-5">
-                        {/* RESTAURANT NAME */}
                         <InputField
                             label="Restaurant Name"
                             register={register("name", { required: "Name is required" })}
@@ -83,34 +83,31 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
                         />
 
                         <div className="grid grid-cols-2 gap-4">
-                            {/* CATEGORY - TEXT INPUT ONLY */}
+                            {/* CATEGORY (STRING INPUT) */}
                             <InputField
                                 label="Category"
                                 register={register("category", { required: "Category is required" })}
                                 error={errors.category}
-                                placeholder="e.g. Jazz Bar, Cafe, Bistro"
+                                placeholder="e.g. Jazz Bar"
                             />
 
                             {/* COORDINATES DISPLAY */}
                             <div className="text-left">
-                                <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2 tracking-widest">
-                                    Pin Coordinates
-                                </label>
+                                <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2 tracking-widest">Pin Coordinates</label>
                                 <div className="w-full bg-zinc-100 dark:bg-black/40 border-2 border-dashed border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-[10px] font-mono flex items-center justify-center text-zinc-500">
                                     {lat.toFixed(4)}, {lng.toFixed(4)}
                                 </div>
                             </div>
                         </div>
 
-                        {/* ADDRESS */}
                         <InputField
                             label="Full Address"
-                            register={register("address")}
+                            register={register("address", { required: "Address is required" })}
+                            error={errors.address}
                             placeholder="Building, Street, District..."
                             isTextArea
                         />
 
-                        {/* SUBMIT BUTTON */}
                         <button
                             disabled={isSubmitting}
                             type="submit"

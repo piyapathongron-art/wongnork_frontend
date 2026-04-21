@@ -6,10 +6,10 @@ import { add3DBuildingsLayer } from '../utils/mapLayers.util';
 import { useMapInit } from '../hooks/useMapInit';
 import useRestaurantStore from '../stores/restaurantStore';
 
-const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
+const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Added onClick prop
   const mapNodeRef = useRef(null);
   const mapRef = useRef(null);
-  const markerRef = useRef(null); // Ref for the red placement marker
+  const markerRef = useRef(null); 
   const activeMarkersRef = useRef([]);
   const [isMapReady, setIsMapReady] = useState(false);
 
@@ -34,32 +34,24 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
     },
     fitBoundsToCategory: (restaurants) => {
       if (!mapRef.current || !restaurants || restaurants.length === 0) return;
-
-      // Create a 'LngLatBounds' with both corners at the first coordinate.
       const bounds = new mapboxgl.LngLatBounds(
         [parseFloat(restaurants[0].lng), parseFloat(restaurants[0].lat)],
         [parseFloat(restaurants[0].lng), parseFloat(restaurants[0].lat)]
       );
-
-      // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
       for (const res of restaurants) {
         const lng = parseFloat(res.lng);
         const lat = parseFloat(res.lat);
-        if (!isNaN(lng) && !isNaN(lat)) {
-          bounds.extend([lng, lat]);
-        }
+        if (!isNaN(lng) && !isNaN(lat)) bounds.extend([lng, lat]);
       }
-
       mapRef.current.fitBounds(bounds, {
         padding: { top: 150, bottom: 300, left: 50, right: 50 },
-        pitch: 0, // Reset pitch for a better overview
+        pitch: 0,
         speed: 1.2,
-        maxZoom: 16 // Prevent zooming in too close if there's only 1 restaurant
+        maxZoom: 16 
       });
     }
   }));
 
-  // Initial Fetch
   useEffect(() => {
     fetchRestaurants();
   }, [fetchRestaurants]);
@@ -74,20 +66,35 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
       }, 0);
     });
 
-    // Map Click Logic
+    // --- UPDATED CLICK LOGIC ---
     map.on("click", (e) => {
-      const { lng, lat } = e.lngLat;
-      if (markerRef.current) {
-        markerRef.current.setLngLat([lng, lat]);
-      } else {
-        markerRef.current = new mapboxgl.Marker({ color: "#FF0000" })
-          .setLngLat([lng, lat])
-          .addTo(map);
+      // Only run placement logic if the parent (Modal) provided an onClick prop
+      if (onClick) {
+        const { lng, lat } = e.lngLat;
+        
+        if (markerRef.current) {
+          markerRef.current.setLngLat([lng, lat]);
+        } else {
+          // Use your signature brown color or keep the red
+          markerRef.current = new mapboxgl.Marker({ 
+            color: "#BC6C25", 
+            draggable: true 
+          })
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+          // If the user drags the marker, tell the form
+          markerRef.current.on('dragend', () => {
+            const newPos = markerRef.current.getLngLat();
+            onClick({ lngLat: newPos });
+          });
+        }
+        // Send initial click coordinates back to form
+        onClick(e);
       }
     });
   };
 
-  // Re-render markers when filteredRestaurants change or map becomes ready
   useEffect(() => {
     if (isMapReady && mapRef.current) {
       renderMarkers();
@@ -96,12 +103,9 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
 
   const renderMarkers = () => {
     if (!mapRef.current) return;
-
-    // Clear existing markers
     activeMarkersRef.current.forEach(marker => marker.remove());
     activeMarkersRef.current = [];
 
-    // Add new markers
     filteredRestaurants.forEach((item) => {
       const lng = parseFloat(item.lng);
       const lat = parseFloat(item.lat);
@@ -120,9 +124,7 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
           essential: true,
         });
 
-        if (onMarkerClick) {
-          onMarkerClick(item);
-        }
+        if (onMarkerClick) onMarkerClick(item);
       });
 
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
@@ -141,7 +143,6 @@ const MapBox = forwardRef(({ onMarkerClick, isDark }, ref) => {
     });
   };
 
-  // Use the custom hook
   useMapInit(mapNodeRef, handleMapLoad, Boolean(isDark));
 
   return (

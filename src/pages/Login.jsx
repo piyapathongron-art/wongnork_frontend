@@ -31,13 +31,15 @@ const Login = () => {
 
 
   const submitLogin = async (data) => {
+    console.log("data", data)
     try {
-      new Promise((resolve) => setTimeout(resolve, 5000));
+      // new Promise((resolve) => setTimeout(resolve, 5000));
       const resp = await login(data);
+      console.log("Resr =",resp)
       toast.success("Login สำเร็จ");
       navigate("/")
     } catch (err) {
-      console.dir(err.response?.data);
+      console.dir(err);
       const errMessage = err.response?.data.error;
       toast.error(errMessage);
     }
