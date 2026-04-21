@@ -5,7 +5,7 @@ import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant } from '../api/main
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
-import { LucideChefHat } from 'lucide-react';
+import { Bookmark, LucideChefHat } from 'lucide-react';
 
 // Helper functions for dates
 const formatDate = (isoString) => {
@@ -38,6 +38,7 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
+    
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -110,13 +111,13 @@ const Profile = () => {
         try {
             // ยิง API ไปเอาออกหลังบ้าน
             await apiToggleSaveRestaurant(restaurantId);
-            
+
             // อัปเดตหน้าจอทันทีโดยกรองร้านนี้ออกไปจาก Array
             setUserData(prev => ({
                 ...prev,
                 savedRestaurants: prev.savedRestaurants.filter(item => item.restaurantId !== restaurantId)
             }));
-            
+
             toast.success("นำออกจากรายการที่บันทึกแล้ว");
         } catch (err) {
             console.error("Error toggling save:", err);
@@ -229,8 +230,8 @@ const Profile = () => {
                             <>
                                 {isOwner && (
                                     <div className='flex justify-center'>
-                                    <h2 className="text-xl font-extrabold text-[#2B361B]">{userData.name}</h2>
-                                    <LucideChefHat />
+                                        <h2 className="text-xl font-extrabold text-[#2B361B]">{userData.name}</h2>
+                                        <LucideChefHat />
                                     </div>
                                 )}
                                 <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>
@@ -350,13 +351,12 @@ const Profile = () => {
                                                 <p className="text-[10px] text-[#A8A29F] mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
                                             </div>
                                             {/* 🌟 2. เปลี่ยน Span เป็น Button และเรียกฟังก์ชันเมื่อกด */}
-                                            <button 
+                                            <button
                                                 onClick={() => handleToggleSave(restaurant.id)}
-                                                className="text-[#A65D2E] p-1.5 rounded-full hover:bg-[#F7EAD7] transition-all active:scale-90"
+                                                className="text-[#594A3D] p-1.5 rounded-full hover:bg-[#F7EAD7] transition-all active:scale-90"
+                                                title="ถอนการบันทึก"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                                                    <path fillRule="evenodd" d="M6.32 2.577a4.901 4.901 0 0 1 5.684 0l4.978 3.39c.673.458 1.018 1.25.962 2.062l-1.074 15.656a.75.75 0 0 1-1.341.348L12 18.337l-3.53 5.696a.75.75 0 0 1-1.342-.348L6.054 8.03A2.25 2.25 0 0 1 7.016 5.968l4.978-3.391ZM12 4.41l-4.978 3.391a.75.75 0 0 0-.322.688l.966 14.072 2.695-4.348a.75.75 0 0 1 1.278 0l2.695 4.348.966-14.072a.75.75 0 0 0-.322-.688L12 4.41Z" clipRule="evenodd" />
-                                                </svg>
+                                                <Bookmark size={20} fill="currentColor" />
                                             </button>
                                         </div>
                                     </div>
