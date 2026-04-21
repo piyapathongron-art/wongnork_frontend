@@ -5,12 +5,13 @@ import useRestaurantStore from "../stores/restaurantStore";
 // Lazy load the Nav for better performance
 const NavBar = lazy(() => import("../components/NavBar"));
 
-
 const AppLayout = () => {
-  const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
+  const fetchRestaurants = useRestaurantStore(
+    (state) => state.fetchRestaurants,
+  );
   useEffect(() => {
     fetchRestaurants();
-  }, [])
+  }, []);
   return (
     <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col">
       <main className="flex-grow relative h-full">
