@@ -6,11 +6,15 @@ import { useLocation } from "react-router";
 import MenuSection from "./MenuSection";
 import ReviewSection from "./ReviewSection";
 import ShareModal from "./ShareModal";
+import AllReviews from "./AllReviews";
+import AllMenus from "./AllMenus";
 
 const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const location = useLocation();
   const [step, setStep] = useState("half");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showAllMenus, setShowAllMenus] = useState(false);
 
   useEffect(() => {
     if (location.pathname === "/") {
@@ -50,7 +54,11 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={handleSafeClose}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  handleSafeClose();
+                }
+              }}
               className="absolute inset-0 bg-black/20 pointer-events-auto"
             />
 
@@ -140,10 +148,14 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                 </div>
 
                 <div className="space-y-10">
-                  <MenuSection menuItems={menuItems} />
+                  <MenuSection
+                    menuItems={menuItems}
+                    onViewAllClick={() => setShowAllMenus(true)}
+                  />
                   <ReviewSection
                     reviewItems={reviewItems}
                     isLoading={isLoadingReviews}
+                    onViewAllClick={() => setShowAllReviews(true)}
                   />
                 </div>
               </div>
@@ -151,6 +163,17 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AllReviews
+        isOpen={showAllReviews}
+        onClose={() => setShowAllReviews(false)}
+        reviews={reviewItems}
+      />
+      <AllMenus
+        isOpen={showAllMenus}
+        onClose={() => setShowAllMenus(false)}
+        menus={menuItems}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}

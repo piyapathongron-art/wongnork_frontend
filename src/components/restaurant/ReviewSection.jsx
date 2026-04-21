@@ -1,13 +1,16 @@
 import React from "react";
 import { Star } from "lucide-react";
 
-const ReviewSection = ({ reviewItems, isLoading }) => {
+const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
   return (
     <section className="mb-8 px-6">
       <div className="flex justify-between items-end mb-4">
         <h3 className="text-xl font-bold text-[#2C241E]">รีวิว</h3>
         {reviewItems.length > 0 && (
-          <button className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer">
+          <button
+            onClick={onViewAllClick}
+            className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer"
+          >
             ดูทั้งหมด ({reviewItems.length})
           </button>
         )}
