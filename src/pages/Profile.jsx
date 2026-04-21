@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { apiGetme, apiUpdateProfile } from '../api/mainApi';
+// 🌟 เพิ่ม apiToggleSaveRestaurant เข้ามาใน Import
+import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant } from '../api/mainApi';
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
+import { Bookmark, LucideChefHat } from 'lucide-react';
 
 // Helper functions for dates
 const formatDate = (isoString) => {
@@ -36,6 +38,7 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
+    
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -73,13 +76,12 @@ const Profile = () => {
         }
     };
 
-    // 🌟 ฟังก์ชันกด Save
+    // 🌟 ฟังก์ชันกด Save Profile
     const handleSaveProfile = async () => {
         setIsSaving(true);
         try {
             let finalAvatarUrl = editForm.avatarUrl;
 
-            // ถ้ามีการเลือกรูปใหม่ ให้โยนขึ้น Cloudinary
             if (selectedFile) {
                 finalAvatarUrl = await uploadCloudinary(selectedFile, "toast-container");
             }
@@ -89,10 +91,8 @@ const Profile = () => {
                 avatarUrl: finalAvatarUrl
             };
 
-            // ส่งข้อมูลไป Backend
             await apiUpdateProfile(updateData);
 
-            // อัปเดตข้อมูลบนหน้าจอ
             setUserData(prev => ({ ...prev, name: updateData.name, avatarUrl: updateData.avatarUrl }));
             setIsEditing(false);
             setSelectedFile(null);
@@ -106,9 +106,26 @@ const Profile = () => {
         }
     };
 
-    // 🌟 ฟังก์ชันกดยกเลิก
+    // 🌟 ฟังก์ชันจัดการการกดเอา Save ออก (Unsave)
+    const handleToggleSave = async (restaurantId) => {
+        try {
+            // ยิง API ไปเอาออกหลังบ้าน
+            await apiToggleSaveRestaurant(restaurantId);
+
+            // อัปเดตหน้าจอทันทีโดยกรองร้านนี้ออกไปจาก Array
+            setUserData(prev => ({
+                ...prev,
+                savedRestaurants: prev.savedRestaurants.filter(item => item.restaurantId !== restaurantId)
+            }));
+
+            toast.success("นำออกจากรายการที่บันทึกแล้ว");
+        } catch (err) {
+            console.error("Error toggling save:", err);
+            toast.error("เกิดข้อผิดพลาด ไม่สามารถนำออกได้");
+        }
+    };
+
     const handleCancelEdit = () => {
-        // คืนค่าเดิม
         setEditForm({ name: userData.name, avatarUrl: userData.avatarUrl || '' });
         setPreviewUrl('');
         setSelectedFile(null);
@@ -140,8 +157,6 @@ const Profile = () => {
     const savedRestaurants = userData.savedRestaurants || [];
     const isOwner = userData.role === 'OWNER';
 
-    // รวมปาร์ตี้ที่ join และปาร์ตี้ที่ตัวเองเป็น leader เข้าด้วยกัน พร้อมกรองตัวซ้ำ
-    // (ใช้ Map กรองด้วย party.id โดยให้สิทธิ์ IsLeader: true ทับ IsLeader: false)
     const combinedParties = [
         ...joinedParties.map(jp => ({ ...jp.party, isLeader: false, relationId: jp.id })),
         ...partiesLed.map(party => ({ ...party, isLeader: true, relationId: party.id }))
@@ -149,22 +164,17 @@ const Profile = () => {
 
     const uniquePartiesMap = new Map();
     combinedParties.forEach(p => {
-        // ถ้ายังไม่มีใน Map หรือตัวใหม่เป็น Leader ให้บันทึกลง Map (ทับตัวเก่าที่เป็นแค่ Member)
         if (!uniquePartiesMap.has(p.id) || p.isLeader) {
             uniquePartiesMap.set(p.id, p);
         }
     });
 
     const allMyParties = Array.from(uniquePartiesMap.values());
-
-    // เรียงตามเวลาล่าสุด
     allMyParties.sort((a, b) => new Date(b.meetupTime) - new Date(a.meetupTime));
 
     const mainTitle = isOwner
         ? (userData.ownedRestaurants?.[0]?.name || 'ยังไม่ได้ตั้งชื่อร้าน')
         : userData.name;
-
-    console.log(allMyParties)
 
     return (
         <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
@@ -181,7 +191,6 @@ const Profile = () => {
             <main className="px-6 space-y-8 pt-4">
                 <section className="flex flex-col items-center text-center space-y-3">
 
-                    {/* 🌟 แสดงรููปภาพ และเปิดให้คลิกอัปโหลดถ้าอยู่ในโหมด Edit */}
                     <div className={`relative group ${isEditing ? 'cursor-pointer' : ''}`} onClick={() => isEditing && fileInputRef.current.click()}>
                         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md bg-[#2D3E25]">
                             <img
@@ -191,7 +200,6 @@ const Profile = () => {
                             />
                         </div>
 
-                        {/* ไอคอนกล้องจะโชว์เฉพาะตอนกด Edit */}
                         {isEditing && (
                             <div className="absolute bottom-0 right-0 bg-[#A65D2E] p-1.5 rounded-full text-white shadow-sm border border-white hover:bg-[#8e4f27]">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
@@ -209,9 +217,7 @@ const Profile = () => {
                             onChange={handleFileChange}
                         />
                     </div>
-
                     <div className="text-center mt-2 w-full">
-                        {/* 🌟 สลับระหว่าง Text ธรรมดา กับ Input Field */}
                         {isEditing ? (
                             <input
                                 type="text"
@@ -222,22 +228,30 @@ const Profile = () => {
                             />
                         ) : (
                             <>
-                                <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>
                                 {isOwner && (
-                                    <p className="text-sm font-semibold text-[#8B837E] mt-1">Owner: {userData.name}</p>
+                                    <div className='flex justify-center'>
+                                        <h2 className="text-xl font-extrabold text-[#2B361B]">{userData.name}</h2>
+                                        <LucideChefHat />
+                                    </div>
                                 )}
+                                <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>
                             </>
                         )}
                     </div>
 
-                    <div className="flex justify-center gap-12 w-full pt-2">
+                    {/* 🌟 1. ปรับ Stats ให้แสดงจำนวนร้านที่เซฟไว้ด้วย */}
+                    <div className="flex justify-center gap-8 sm:gap-12 w-full pt-2">
                         <div className="flex flex-col items-center">
                             <span className="text-lg font-extrabold text-[#A65D2E]">{reviews.length}</span>
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Reviews</span>
                         </div>
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center border-x border-[#EEE2D1] px-6 sm:px-10">
                             <span className="text-lg font-extrabold text-[#A65D2E]">{allMyParties.length}</span>
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Parties</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-extrabold text-[#A65D2E]">{savedRestaurants.length}</span>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Saved</span>
                         </div>
                     </div>
 
@@ -290,7 +304,6 @@ const Profile = () => {
                                     </div>
                                     <div className="flex items-center gap-2 pt-1">
                                         <div className="flex -space-x-2">
-                                            {/* โชว์รูปโปรไฟล์คนในตี้ (สูงสุด 3 คน) */}
                                             {party.members?.slice(0, 3).map((member, mIdx) => (
                                                 <div key={mIdx} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative z-10 shadow-sm">
                                                     <img
@@ -309,7 +322,6 @@ const Profile = () => {
                             );
                         })}
 
-                        {/* Host a new party Card */}
                         <div className="flex-none w-[160px] bg-[#FAF5F0] rounded-3xl p-3 border border-[#EEE2D1]/50 flex flex-col justify-center items-center text-center space-y-2 cursor-pointer hover:bg-[#F2E8DF] transition-colors">
                             <div className="w-10 h-10 rounded-full border border-[#8B837E] flex items-center justify-center text-[#8B837E]">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -321,7 +333,6 @@ const Profile = () => {
                     </div>
                 </section>
 
-                {/* 3. Saved Restaurants Section */}
                 <section className="space-y-4">
                     <h3 className="font-extrabold text-xl text-[#2B361B]">Saved Restaurants</h3>
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
@@ -342,12 +353,14 @@ const Profile = () => {
                                                 <h4 className="font-bold text-sm text-[#2B361B] truncate">{restaurant.name || 'ไม่ทราบชื่อร้าน'}</h4>
                                                 <p className="text-[10px] text-[#A8A29F] mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
                                             </div>
-                                            {/* Bookmark Icon */}
-                                            <span className="text-[#A65D2E]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                                                    <path fillRule="evenodd" d="M6.32 2.577a4.901 4.901 0 0 1 5.684 0l4.978 3.39c.673.458 1.018 1.25.962 2.062l-1.074 15.656a.75.75 0 0 1-1.341.348L12 18.337l-3.53 5.696a.75.75 0 0 1-1.342-.348L6.054 8.03A2.25 2.25 0 0 1 7.016 5.968l4.978-3.391ZM12 4.41l-4.978 3.391a.75.75 0 0 0-.322.688l.966 14.072 2.695-4.348a.75.75 0 0 1 1.278 0l2.695 4.348.966-14.072a.75.75 0 0 0-.322-.688L12 4.41Z" clipRule="evenodd" />
-                                                </svg>
-                                            </span>
+                                            {/* 🌟 2. เปลี่ยน Span เป็น Button และเรียกฟังก์ชันเมื่อกด */}
+                                            <button
+                                                onClick={() => handleToggleSave(restaurant.id)}
+                                                className="text-[#594A3D] p-1.5 rounded-full hover:bg-[#F7EAD7] transition-all active:scale-90"
+                                                title="ถอนการบันทึก"
+                                            >
+                                                <Bookmark size={20} fill="currentColor" />
+                                            </button>
                                         </div>
                                     </div>
                                 );
@@ -356,7 +369,6 @@ const Profile = () => {
                     </div>
                 </section>
 
-                {/* 4. My Reviews Section */}
                 <section className="space-y-4">
                     <h3 className="font-extrabold text-xl text-[#2B361B]">My Reviews</h3>
                     <div className="space-y-5">
