@@ -51,6 +51,3 @@ export async function apiUpdateProfile(body) {
 export async function apiToggleSaveRestaurant(restaurantId) {
   return await mainApi.post(`/restaurants/${restaurantId}/save`);
 }
-
-
-

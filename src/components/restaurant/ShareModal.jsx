@@ -17,7 +17,6 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
       color: "bg-[#00B900]",
       action: () => {
         const text = `ไปกินร้านนี้กัน! ${restaurantName} ${shareUrl}`;
-        // 🌟 ต้องใช้ encodeURIComponent เพื่อให้ภาษาไทยและเว้นวรรคไม่พัง
         window.open(
           `https://line.me/R/msg/text/?${encodeURIComponent(text)}`,
           "_blank",
@@ -29,7 +28,6 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
       icon: <Share2 className="text-white" size={24} />,
       color: "bg-[#1877F2]",
       action: () => {
-        // 🌟 Facebook ต้องการแค่ URL ที่ encode แล้ว
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
           "_blank",
@@ -42,14 +40,14 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
     navigator.clipboard.writeText(shareUrl);
 
     toast.success("คัดลอกลิงก์เรียบร้อย!", {
-      icon: "🔗", // ใส่ไอคอนน่ารักๆ ได้
+      icon: "🔗",
       style: {
-        borderRadius: "16px", // ทำมุมโค้งให้เข้ากับ UI ร้านอาหาร
-        background: "#FFF8F4", // สีครีมตามธีมแอป
-        color: "#A65D2E", // สีน้ำตาลเข้ม
+        borderRadius: "16px",
+        background: "#FFF8F4",
+        color: "#A65D2E",
         fontWeight: "bold",
         fontSize: "14px",
-        marginBottom: "80px", // 🌟 สำคัญ! ดันขึ้นหนีแถบ Bottom Bar ของมือถือ
+        marginBottom: "80px",
       },
     });
   };
@@ -77,10 +75,14 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
                 แชร์ให้เพื่อน
               </h3>
               <button
-                onClick={onClose}
-                className="p-2 bg-gray-100 rounded-full text-gray-500 cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                onTouchEnd={(e) => e.stopPropagation()}
               >
-                <X size={20} />
+                ปิด
               </button>
             </div>
 

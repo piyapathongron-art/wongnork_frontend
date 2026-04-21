@@ -21,6 +21,8 @@ import MenuSection from "../components/restaurant/MenuSection";
 import ReviewSection from "../components/restaurant/ReviewSection";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import ShareModal from "../components/restaurant/ShareModal";
+import AllReviews from "../components/restaurant/AllReviews";
+import AllMenus from "../components/restaurant/AllMenus";
 
 const RestaurantDetail = () => {
   const navigate = useNavigate();
@@ -31,8 +33,9 @@ const RestaurantDetail = () => {
   const [isLoadingRest, setIsLoadingRest] = useState(!context?.restaurant);
   const [reviewItems, setReviewItems] = useState([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
-
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showAllMenus, setShowAllMenus] = useState(false);
 
   const [isSaved, setIsSaved] = useState(false); // สถานะว่าเซฟร้านนี้หรือยัง
 
@@ -40,7 +43,9 @@ const RestaurantDetail = () => {
     setIsShareModalOpen(true);
   };
 
-  const handleBack = () => {
+  const handleBack = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigate(-1);
   };
 
@@ -247,11 +252,18 @@ const RestaurantDetail = () => {
 
       {/* 🌟 ส่งเมนูไปแสดงผล */}
       <div className="mt-12">
-        <MenuSection menuItems={menuItems} />
+        <MenuSection
+          menuItems={menuItems}
+          onViewAllClick={() => setShowAllMenus(true)}
+        />
       </div>
 
       <div className="mt-8">
-        <ReviewSection reviewItems={reviewItems} isLoading={isLoadingReviews} />
+        <ReviewSection
+          reviewItems={reviewItems}
+          isLoading={isLoadingReviews}
+          onViewAllClick={() => setShowAllReviews(true)}
+        />
       </div>
 
       <div className="fixed bottom-0 inset-x-0 px-6 py-5 bg-[#FFF8F2]/95 backdrop-blur-md border-t border-[#EEDCcc] z-50">
@@ -265,6 +277,16 @@ const RestaurantDetail = () => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         restaurant={restaurant}
+      />
+      <AllReviews
+        isOpen={showAllReviews}
+        onClose={() => setShowAllReviews(false)}
+        reviews={reviewItems}
+      />
+      <AllMenus
+        isOpen={showAllMenus}
+        onClose={() => setShowAllMenus(false)}
+        menus={menuItems}
       />
     </div>
   );
