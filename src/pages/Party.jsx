@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { apiGetParties, apiJoinParty, apiLeaveParty } from '../api/party';
 import useUserStore from '../stores/userStore';
 import calculateDistance from '../utils/distance.ustils';
+import CreatePartyModal from '../components/Modals/CreatePartyModal';
 
 import { useNavigate } from 'react-router';
 
@@ -16,6 +17,7 @@ const Party = () => {
     const [myParties, setMyParties] = useState([]);
     const [userLoc, setUserLoc] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -165,6 +167,7 @@ const Party = () => {
                 */}
                 <button 
                     className="absolute bottom-28 right-6 w-20 h-20 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] dark:border-zinc-900 z-50 active:scale-90 transition-all pointer-events-auto"
+                    onClick={() => setIsModalOpen(true)}
                 >
                     <UserPlus className="w-6 h-6 mb-1" />
                     <span className="text-[8px] font-black uppercase">Create</span>
@@ -172,6 +175,11 @@ const Party = () => {
 
                 <NavBar />
             </div>
+            <CreatePartyModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={loadData}/>
+            
         </div>
     );
 };

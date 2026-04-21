@@ -52,3 +52,33 @@ export const createRestaurantSchema = restaurantSchema;
 
 // สำหรับ Update ใช้ .partial() เพื่อให้สามารถส่งมาแค่อย่างใดอย่างหนึ่งได้
 export const updateRestaurantSchema = restaurantSchema.partial();
+
+// สร้างparty
+export const createPartySchema = z.object({
+  name: z.string()
+    .min(1, "กรุณากรอกชื่อปาร์ตี้")
+    .max(255, "ชื่อปาร์ตี้ต้องไม่เกิน 255 ตัวอักษร")
+    .optional()
+    .nullable(),
+
+  details: z.string()
+    .max(1000, "รายละเอียดปาร์ตี้ต้องไม่เกิน 1000 ตัวอักษร")
+    .optional()
+    .nullable(),
+
+  meetupTime: z.string()
+    .refine((val) => !isNaN(Date.parse(val)), "รูปแบบวันที่และเวลาไม่ถูกต้อง")
+    .transform((val) => new Date(val)),
+
+  maxParticipants: z.number({ 
+    required_error: "กรุณากรอกจำนวนคนรับ", 
+    invalid_type_error: "จำนวนคนต้องเป็นตัวเลข" 
+  }).min(2, "จำนวนคนต้องมีอย่างน้อย 2 คน"),
+
+  contactInfo: z.string()
+    .min(1, "กรุณากรอกช่องทางติดต่อ")
+    .max(255, "ช่องทางติดต่อต้องไม่เกิน 255 ตัวอักษร"),
+
+  serviceCharge: z.number().min(0).optional().default(0),
+  vat: z.number().min(0).optional().default(0),
+  });
