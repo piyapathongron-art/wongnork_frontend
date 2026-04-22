@@ -21,6 +21,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllMenus, setShowAllMenus] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // 🌟 1. Get the setter action from the store at the TOP LEVEL
   const setStoreRestaurant = useRestaurantStore((state) => state.setRestaurant);
@@ -95,23 +96,6 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
       checkSavedStatus();
     }
   }, [restaurant?.id, isOpen]);
-
-  const handleToggleSave = async () => {
-    if (!restaurant?.id) return;
-
-    setIsSaved(!isSaved);
-
-    try {
-      await apiToggleSaveRestaurant(restaurant.id);
-      if (!isSaved) {
-        toast.success("บันทึกร้านอาหารลงโปรไฟล์แล้ว");
-      }
-    } catch (error) {
-      setIsSaved(isSaved);
-      toast.error("เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
-      console.error(error);
-    }
-  };
 
   // Data helpers
   const menuItems = restaurant?.menus || restaurant?.menu || [];
