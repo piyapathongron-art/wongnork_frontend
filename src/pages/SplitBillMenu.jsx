@@ -122,7 +122,7 @@ const SplitBillMenu = () => {
         return (
             <div
                 onClick={() => handleAddMenuToBill(item)}
-                className="p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50 group"
+                className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
             >
                 {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />
@@ -143,9 +143,11 @@ const SplitBillMenu = () => {
                                     โต๊ะสั่งไปแล้ว {totalOrdered} จาน
                                 </span>
                             )}
-                            <button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm group-active:scale-95 transition-transform">
-                                <Plus size={16} />
-                            </button>
+                            {!isCompleted && (
+                                <button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm group-active:scale-95 transition-transform">
+                                    <Plus size={16} />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
