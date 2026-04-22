@@ -70,9 +70,9 @@ export const createPartySchema = z.object({
     .refine((val) => !isNaN(Date.parse(val)), "รูปแบบวันที่และเวลาไม่ถูกต้อง")
     .transform((val) => new Date(val)),
 
-  maxParticipants: z.number({ 
-    required_error: "กรุณากรอกจำนวนคนรับ", 
-    invalid_type_error: "จำนวนคนต้องเป็นตัวเลข" 
+  maxParticipants: z.number({
+    required_error: "กรุณากรอกจำนวนคนรับ",
+    invalid_type_error: "จำนวนคนต้องเป็นตัวเลข"
   }).min(2, "จำนวนคนต้องมีอย่างน้อย 2 คน"),
 
   contactInfo: z.string()
@@ -81,10 +81,10 @@ export const createPartySchema = z.object({
 
   serviceCharge: z.number().min(0).optional().default(0),
   vat: z.number().min(0).optional().default(0),
-  });
+});
 
-  // เพิ่มเมนู
-  export const createMenuSchema = z.object({
+// เพิ่มเมนู
+export const createMenuSchema = z.object({
   name: z.string()
     .min(1, "กรุณากรอกชื่อเมนู")
     .max(255, "ชื่อเมนูต้องไม่เกิน 255 ตัวอักษร"),
@@ -94,16 +94,16 @@ export const createPartySchema = z.object({
     .optional()
     .nullable(),
 
-  price: z.number({ 
-    required_error: "กรุณากรอกราคา", 
-    invalid_type_error: "ราคาต้องเป็นตัวเลข" 
+  price: z.number({
+    required_error: "กรุณากรอกราคา",
+    invalid_type_error: "ราคาต้องเป็นตัวเลข"
   }).min(0, "ราคาต้องไม่ต่ำกว่า 0"),
 
   category: z.string()
     .default("others"),
 
-  imageUrl: z.string()
-    .url("รูปแบบ URL ของรูปภาพไม่ถูกต้อง")
-    .optional()
-    .nullable(),
+  imageUrl: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.string().url("รูปแบบ URL ของรูปภาพไม่ถูกต้อง").optional().nullable()
+  ),
 });
