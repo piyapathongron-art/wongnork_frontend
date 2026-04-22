@@ -126,16 +126,32 @@ const Login = () => {
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
 
-        <div className="flex justify-center w-full">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => toast.error("ยกเลิก")}
-            useOneTap
-            theme="outline"
-            size="large"
-            width="100%"
-            shape="rectangular"
-          />
+        {/* 🌟 คอนเทนเนอร์หลัก */}
+        <div className="relative w-full h-[50px] flex justify-center items-center rounded-2xl group overflow-hidden">
+          {/* 🎨 1. ปุ่ม Custom ของเรา (ปรับ Text และ Icon ให้ดูซอฟต์และอ่านง่ายขึ้น) */}
+          <div className="absolute inset-0 flex items-center justify-center gap-2.5 bg-white border border-[#EAD9CF] rounded-2xl group-active:scale-[0.98] transition-all pointer-events-none shadow-sm">
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              className="w-4 h-4"
+              alt="google logo"
+            />
+            {/* 🌟 ปรับตรงนี้: ใช้ text-xs, font-bold สีซอฟต์ลง และไม่ใช้ uppercase แล้ว */}
+            <span className="text-xs font-bold text-[#736356]">
+              Sign in with Google
+            </span>
+          </div>
+
+          {/* 👻 2. ปุ่ม Google ของแท้ (ล่องหน) */}
+          <div className="absolute inset-0 z-10 opacity-[0.01] cursor-pointer flex justify-center overflow-hidden">
+            <div className="transform scale-[1.5]">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error("ยกเลิกการเข้าสู่ระบบ")}
+                useOneTap
+                size="large"
+              />
+            </div>
+          </div>
         </div>
 
         {/* 🌟 ปรับ mt-10 เหลือ mt-6 */}
