@@ -282,7 +282,7 @@ const SplitBillSummary = () => {
                                         )}
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-bold text-[14px] text-[#2B361B] truncate">{item.name} {item.isCustom && <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 font-medium ml-1">พิเศษ</span>}</h4>
-                                            <div className="text-[12px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()} <span className="text-[10px] text-gray-400 font-normal">/ จาน</span></div>
+                                            <div className="text-[12px] font-black text-[#A65D2E]">฿{item.price?.toLocaleString()} <span className="text-[10px] text-gray-400 font-normal">/ จาน</span></div>
                                         </div>
                                     </div>
 
