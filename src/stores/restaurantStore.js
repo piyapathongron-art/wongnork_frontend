@@ -3,12 +3,14 @@ import { apiGetRestaurants } from "../api/restaurant";
 
 const useRestaurantStore = create((set, get) => ({
   restaurants: [],
+  restaurant: null,
   filteredRestaurants: [],
   categories:[],
   selectedCategory: "ทั้งหมด",
   searchQuery: "",
   isLoading: false,
 
+  setRestaurant: (data) => set({restaurant : data}),
   setRestaurants: (data) => {
     set({ restaurants: data });
     get().applyFilter();

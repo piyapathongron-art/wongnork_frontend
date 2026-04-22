@@ -13,7 +13,7 @@ const useUserStore = create(
         // console.log(resp);
         set({ token: resp.data.token, isLogin: true });
         const getInfo = await apiGetme()
-        const userData = getInfo.data.data
+        const userData = getInfo.data.user || getInfo.data.data || getInfo.data
         // console.log(userData)
         set({ user: userData })
         // console.log("user =", user)

@@ -1,25 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
+import AddMenuModal from "../Modals/AddMenuModal";
+import useUserStore from "../../stores/userStore";
+import { string } from "zod";
+// import useRestaurantStore from "../../stores/restaurantStore";
 
-const MenuSection = ({ menuItems, onViewAllClick }) => {
+const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) => {
   // 🌟 จัดเรียงให้ Recommend ขึ้นหน้าสุดเสมอ (ลอจิกทำฝั่ง Front-end สบายใจกว่าไปแก้ดึงจาก Back)
   const sortedMenu = [...menuItems].sort((a, b) => {
     if (a.category === "Recommend" && b.category !== "Recommend") return -1;
     if (a.category !== "Recommend" && b.category === "Recommend") return 1;
     return 0;
   });
-
+  const user = useUserStore((state) => state.user)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  console.log("Debug Restaurant:", restaurant);
+  console.log("Debug User:", user);
+  
+  // เช็คว่าเป็นเจ้าของร้านนั้นไหม
+  const loggedInUserId = user?.id || user?.user?.id
+  const userRole = user?.role || user?.user?.role
+  const isRealOwner = userRole === "OWNER" && restaurant?.ownerId && String(loggedInUserId) === String(restaurant.ownerId)
   return (
     <section className="mb-8">
       <div className="flex justify-between items-end mb-4 px-6">
-        <h3 className="text-xl font-bold text-[#2C241E]">เมนู</h3>
-        {sortedMenu.length > 0 && (
-          <button
-            onClick={onViewAllClick}
-            className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer"
-          >
-            ดูเมนูทั้งหมด
-          </button>
-        )}
+        <div className="flex items-center">
+          <h3 className="text-xl font-bold text-[#2C241E]">เมนู</h3>
+        </div>
+        <div className="flex items-center">
+          {isRealOwner && (
+            <button onClick={() => setIsModalOpen(true)}
+            className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer transition-all mr-2">
+              เพิ่มเมนูของคุณ
+            </button>
+          )}
+          {sortedMenu.length > 0 && (
+            <button
+              onClick={onViewAllClick}
+              className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer"
+            >
+              ดูเมนูทั้งหมด
+            </button>
+          )}
+        </div>
       </div>
 
       {sortedMenu.length > 0 ? (
@@ -64,6 +86,11 @@ const MenuSection = ({ menuItems, onViewAllClick }) => {
           </div>
         </div>
       )}
+      <AddMenuModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        restaurantId={restaurant?.id}
+        onSuccess={onMenuUpdate} />
     </section>
   );
 };
