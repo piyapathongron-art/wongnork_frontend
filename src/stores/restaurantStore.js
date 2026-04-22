@@ -4,10 +4,25 @@ import { apiGetRestaurants } from "../api/restaurant";
 const useRestaurantStore = create((set, get) => ({
   restaurants: [],
   filteredRestaurants: [],
-  categories:[],
+  categories: [],
   selectedCategory: "ทั้งหมด",
   searchQuery: "",
   isLoading: false,
+
+  selectedRestaurant: null,
+  isSheetOpen: false,
+  showFullDetail: false,
+
+  setSelectedRestaurant: (rest) => set({ selectedRestaurant: rest }),
+  setIsSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
+  setShowFullDetail: (isShow) => set({ showFullDetail: isShow }),
+
+  clearSelection: () =>
+    set({
+      selectedRestaurant: null,
+      isSheetOpen: false,
+      showFullDetail: false,
+    }),
 
   setRestaurants: (data) => {
     set({ restaurants: data });
@@ -23,6 +38,22 @@ const useRestaurantStore = create((set, get) => ({
     set({ searchQuery: query });
     get().applyFilter();
   },
+
+  selectedRestaurant: null,
+  isSheetOpen: false,
+  showFullDetail: false,
+
+  setSelectedRestaurant: (rest) => set({ selectedRestaurant: rest }),
+  setIsSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
+  setShowFullDetail: (isShow) => set({ showFullDetail: isShow }),
+
+  clearSelection: () =>
+    set({
+      selectedRestaurant: null,
+      isSheetOpen: false,
+      showFullDetail: false,
+      mapViewState: null,
+    }),
 
   fetchRestaurants: async () => {
     set({ isLoading: true });
