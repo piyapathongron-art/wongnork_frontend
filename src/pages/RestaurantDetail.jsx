@@ -23,6 +23,7 @@ import { useNavigate, useOutletContext, useParams } from "react-router";
 import ShareModal from "../components/restaurant/ShareModal";
 import AllReviews from "../components/restaurant/AllReviews";
 import AllMenus from "../components/restaurant/AllMenus";
+import { apiGetMenuByRestaurantId } from "../api/menuApi";
 
 const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
   const navigate = useNavigate();
@@ -166,6 +167,20 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     }
   };
 
+  const handleRefreshMenu = async() => {
+    const targetId = id || restaurant?.id
+    if(!targetId) return
+    try {
+      const res = await apiGetMenuByRestaurantId(restaurant.id)
+      const updatedMenu = res.data?.data || []
+
+      setRestaurant(prev => ({
+        ...prev, menu: updatedMenu
+      }))
+    } catch(err) {
+      console.error("Handle Ref4resh err", err)
+    }
+  }
 
 
 
@@ -275,7 +290,9 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
       <div className="mt-12">
         <MenuSection
           menuItems={menuItems}
+          restaurant = {restaurant}
           onViewAllClick={() => setShowAllMenus(true)}
+          onMenuUpdate={handleRefreshMenu}
         />
       </div>
 

@@ -82,3 +82,28 @@ export const createPartySchema = z.object({
   serviceCharge: z.number().min(0).optional().default(0),
   vat: z.number().min(0).optional().default(0),
   });
+
+  // เพิ่มเมนู
+  export const createMenuSchema = z.object({
+  name: z.string()
+    .min(1, "กรุณากรอกชื่อเมนู")
+    .max(255, "ชื่อเมนูต้องไม่เกิน 255 ตัวอักษร"),
+
+  description: z.string()
+    .max(500, "รายละเอียดเมนูต้องไม่เกิน 500 ตัวอักษร")
+    .optional()
+    .nullable(),
+
+  price: z.number({ 
+    required_error: "กรุณากรอกราคา", 
+    invalid_type_error: "ราคาต้องเป็นตัวเลข" 
+  }).min(0, "ราคาต้องไม่ต่ำกว่า 0"),
+
+  category: z.string()
+    .default("others"),
+
+  imageUrl: z.string()
+    .url("รูปแบบ URL ของรูปภาพไม่ถูกต้อง")
+    .optional()
+    .nullable(),
+});
