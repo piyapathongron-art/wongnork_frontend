@@ -6,6 +6,7 @@ import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
 import { Bookmark, LucideChefHat, History, Clock, ChevronRight, X } from 'lucide-react';
+import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Helper functions for dates
@@ -14,6 +15,7 @@ const formatDate = (isoString) => {
     const date = new Date(isoString);
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
+
 
 const formatTime = (isoString) => {
     if (!isoString) return '';
@@ -42,7 +44,7 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
-    
+// 🌟 ดึงข้อมูลโปรไฟล์เมื่อเข้ามาที่หน้า
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -161,6 +163,11 @@ const Profile = () => {
     const savedRestaurants = userData.savedRestaurants || [];
     const isOwner = userData.role === 'OWNER';
 
+    // 🌟 เติมบรรทัดนี้ลงไปเพื่อดึงร้านของ Owner
+    const ownedRestaurants = userData.ownedRestaurants || [];
+
+
+
     const combinedParties = [
         ...joinedParties.map(jp => ({ ...jp.party, isLeader: false, relationId: jp.id })),
         ...partiesLed.map(party => ({ ...party, isLeader: true, relationId: party.id }))
@@ -182,9 +189,10 @@ const Profile = () => {
     activeParties.sort((a, b) => new Date(b.meetupTime) - new Date(a.meetupTime));
     pastParties.sort((a, b) => new Date(b.meetupTime) - new Date(a.meetupTime));
 
-    const mainTitle = isOwner
-        ? (userData.ownedRestaurants?.[0]?.name || 'ยังไม่ได้ตั้งชื่อร้าน')
-        : userData.name;
+    //  เปลี่ยนข้อความสำหรับคนที่เป็นเจ้าของร้าน
+    const mainTitle = isOwner ? 'Restaurant Owner' : userData.name;
+
+
 
     return (
         <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
@@ -244,7 +252,7 @@ const Profile = () => {
                                         <LucideChefHat />
                                     </div>
                                 )}
-                                <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>
+                                <h2 className="text-[10px] text-[#A8A29F] mt-0.5 truncate">{mainTitle}</h2>
                             </>
                         )}
                     </div>
@@ -261,6 +269,7 @@ const Profile = () => {
                             </span>
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Past Parties</span>
                         </div>
+
                         <div className="flex flex-col items-center">
                             <span className="text-lg font-extrabold text-[#A65D2E]">{savedRestaurants.length}</span>
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Saved</span>
@@ -309,7 +318,10 @@ const Profile = () => {
                         ) : (
                             activeParties.map((party, index) => {
                                 const restaurant = party.restaurant || {};
-                                const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80';
+                                const imageUrl =
+                                restaurant.images?.find((img) => img.isCover)?.url ||
+                                restaurant.images?.[0]?.url ||
+                                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
                                 const memberCount = party.members?.length || 1;
 
                                 return (
@@ -351,7 +363,7 @@ const Profile = () => {
                             })
                         )}
 
-                        <div 
+                        <div
                             onClick={() => navigate('/party', { state: { openCreateModal: true } })}
                             className="flex-none w-[160px] bg-[#FAF5F0] rounded-3xl p-3 border border-[#EEE2D1]/50 flex flex-col justify-center items-center text-center space-y-2 cursor-pointer hover:bg-[#F2E8DF] transition-colors"
                         >
@@ -365,41 +377,57 @@ const Profile = () => {
                     </div>
                 </section>
 
-                <section className="space-y-4">
-                    <h3 className="font-extrabold text-xl text-[#2B361B]">Saved Restaurants</h3>
-                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-                        {savedRestaurants.length === 0 ? (
-                            <p className="text-sm text-gray-400 py-2">ยังไม่มีร้านที่บันทึกไว้</p>
-                        ) : (
-                            savedRestaurants.map((saved, index) => {
-                                const restaurant = saved.restaurant || {};
-                                const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80';
 
-                                return (
-                                    <div key={saved.id || index} className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30">
-                                        <div className="w-full h-32 bg-[#2D3E25]">
-                                            <img alt={restaurant.name} className="w-full h-full object-cover" src={imageUrl} />
-                                        </div>
-                                        <div className="p-4 flex justify-between items-start">
-                                            <div className="truncate pr-2">
-                                                <h4 className="font-bold text-sm text-[#2B361B] truncate">{restaurant.name || 'ไม่ทราบชื่อร้าน'}</h4>
-                                                <p className="text-[10px] text-[#A8A29F] mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
+                {/* 🌟 เพิ่ม Section: My Restaurants (แสดงเฉพาะ OWNER) */}
+                {isOwner && (
+                    <section className="space-y-4 pt-4">
+                        <h3 className="font-extrabold text-xl text-[#2B361B]">My Restaurants</h3>
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                            {ownedRestaurants.length === 0 ? (
+                                <p className="text-sm text-gray-400 py-2">คุณยังไม่มีร้านอาหารในระบบ</p>
+                            ) : (
+                                ownedRestaurants.map((restaurant, index) => {
+                                    const imageUrl =
+                                        restaurant.images?.find((img) => img.isCover)?.url ||
+                                        restaurant.images?.[0]?.url ||
+                                        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
+
+                                    return (
+                                        <div
+                                            key={restaurant.id || index}
+                                            onClick={() => navigate(`/restaurants/${restaurant.id}`)}
+                                            className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30 cursor-pointer active:scale-95 transition-transform group hover:border-[#A65D2E]/30"
+                                        >
+                                            <div className="w-full h-32 bg-[#2D3E25] overflow-hidden">
+                                                <img
+                                                    alt={restaurant.name}
+                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                    src={imageUrl}
+                                                />
                                             </div>
-                                            {/* 🌟 2. เปลี่ยน Span เป็น Button และเรียกฟังก์ชันเมื่อกด */}
-                                            <button
-                                                onClick={() => handleToggleSave(restaurant.id)}
-                                                className="text-[#594A3D] p-1.5 rounded-full hover:bg-[#F7EAD7] transition-all active:scale-90"
-                                                title="ถอนการบันทึก"
-                                            >
-                                                <Bookmark size={20} fill="currentColor" />
-                                            </button>
+                                            <div className="p-4">
+                                                <h4 className="font-bold text-sm text-[#2B361B] truncate">
+                                                    {restaurant.name || 'ไม่ทราบชื่อร้าน'}
+                                                </h4>
+                                                <p className="text-[10px] text-[#A8A29F] mt-0.5 truncate">
+                                                    {restaurant.address || 'คลิกเพื่อดูรายละเอียด'}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </section>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </section>
+                )}
+
+                <SavedRestaurantSection 
+                    savedRestaurants={savedRestaurants} 
+                    handleToggleSave={handleToggleSave} 
+                    formatDate={formatDate} 
+                />
+
+ 
 
                 <section className="space-y-4">
                     <h3 className="font-extrabold text-xl text-[#2B361B]">My Reviews</h3>
@@ -409,7 +437,10 @@ const Profile = () => {
                         ) : (
                             reviews.map((review, index) => {
                                 const restaurant = review.restaurant || {};
-                                const imageUrl = restaurant.images?.[0]?.url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80';
+                                const imageUrl =
+                                    restaurant.images?.find((img) => img.isCover)?.url ||
+                                    restaurant.images?.[0]?.url ||
+                                    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
 
                                 return (
                                     <div key={review.id || index} className="flex gap-4 items-start">
