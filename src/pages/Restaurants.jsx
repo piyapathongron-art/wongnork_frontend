@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, Loader2, X } from "lucide-react";
+import { Outlet } from "react-router";
 import RestaurantCard from "../components/restaurant/RestaurantCard";
 import useRestaurantStore from "../stores/restaurantStore"; // 🌟 ดึง Store มาใช้
 
@@ -150,6 +151,9 @@ const Restaurants = () => {
           </div>
         )}
       </div>
+
+      {/* Render child route (RestaurantDetail) over this page */}
+      <Outlet />
     </div>
   );
 };

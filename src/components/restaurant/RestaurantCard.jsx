@@ -22,7 +22,7 @@ const RestaurantCard = ({ restaurant }) => {
 
   return (
     <div
-      onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+      onClick={() => navigate(`/restaurants/${restaurant.id}`)}
       className="bg-white rounded-3xl p-4 flex gap-4 shadow-sm border border-[#EEE2D1]/50 active:scale-95 transition-transform cursor-pointer"
     >
       <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#EAD9CF]">

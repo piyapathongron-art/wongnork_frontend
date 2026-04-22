@@ -15,14 +15,13 @@ import calculateDistance from '../utils/distance.ustils';
 //     return R * c; // Distance in km
 // };
 
-const SearchBar = ({ onSearchResultClick, onCategoryFilter }) => {
+const SearchBar = ({ onSearchResultClick, onCategoryClick }) => {
     // Categories from our system
     const categories = ["ทั้งหมด", "Shabu", "Cafe", "Japanese", "BBQ", "Thai", "Western", "Izakaya", "Dessert", "Street Food", "Fine Dining"];
 
     const selectedCategory = useRestaurantStore(state => state.selectedCategory);
     const setSelectedCategory = useRestaurantStore(state => state.setSelectedCategory);
     const restaurants = useRestaurantStore(state => state.restaurants);
-    const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants); // Added to get the filtered list
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -47,22 +46,11 @@ const SearchBar = ({ onSearchResultClick, onCategoryFilter }) => {
         }
     }, []);
 
-    // Effect to trigger map bounds adjustment when category changes
-    // We listen to selectedCategory and filteredRestaurants.
-    // We only trigger if the user explicitly clicked a category button (handled below)
+    // Handle category click directly
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
+        if (onCategoryClick) onCategoryClick();
     };
-
-    // Use an effect to wait for the store to update filteredRestaurants after setSelectedCategory
-    useEffect(() => {
-        if (onCategoryFilter && filteredRestaurants.length > 0) {
-            // Optional: If category is "ทั้งหมด", we might not want to fit bounds to the whole country,
-            // or we might. Let's do it anyway.
-            onCategoryFilter(filteredRestaurants);
-        }
-    }, [selectedCategory, filteredRestaurants, onCategoryFilter]);
-
 
     // Close dropdown when clicking outside
     useEffect(() => {

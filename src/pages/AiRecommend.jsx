@@ -255,7 +255,7 @@ const AiRecommend = () => {
                                                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#B86B25]">Recommended</span>
                                                     </div>
                                                     <button
-                                                        onClick={() => navigate(`/restaurant/${rec.restaurantId}`)}
+                                                        onClick={() => navigate(`/restaurants/${rec.restaurantId}`)}
                                                         className="p-2.5 bg-[#182806] text-white rounded-full hover:bg-[#B86B25] transition-colors"
                                                     >
                                                         <ArrowRight size={18} />
@@ -333,7 +333,7 @@ const AiRecommend = () => {
             <div className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none">
                 {/* Glass Background */}
                 <div className="absolute inset-0 bg-[#FFF8EF]/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to top, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)' }}></div>
-                
+
                 <div className="relative p-6 pb-32 pointer-events-auto">
                     <div className="max-w-4xl mx-auto">
                         {/* Helper Chips - Now set input instead of sending */}
@@ -389,9 +389,9 @@ const AiRecommend = () => {
             </div>
 
             {/* Authentication Modal */}
-            <AuthModal 
-                isOpen={isAuthModalOpen} 
-                onClose={() => setIsAuthModalOpen(false)} 
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
                 message="กรุณาล็อกอินเพื่อใช้งานผู้ช่วย AI แนะนำร้านอาหาร"
             />
         </div>

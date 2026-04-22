@@ -5,7 +5,7 @@ const useRestaurantStore = create((set, get) => ({
   restaurants: [],
   restaurant: null,
   filteredRestaurants: [],
-  categories:[],
+  categories: [],
   selectedCategory: "ทั้งหมด",
   searchQuery: "",
   isLoading: false,
@@ -25,6 +25,22 @@ const useRestaurantStore = create((set, get) => ({
     set({ searchQuery: query });
     get().applyFilter();
   },
+
+  selectedRestaurant: null,
+  isSheetOpen: false,
+  showFullDetail: false,
+
+  setSelectedRestaurant: (rest) => set({ selectedRestaurant: rest }),
+  setIsSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
+  setShowFullDetail: (isShow) => set({ showFullDetail: isShow }),
+
+  clearSelection: () =>
+    set({
+      selectedRestaurant: null,
+      isSheetOpen: false,
+      showFullDetail: false,
+      mapViewState: null,
+    }),
 
   fetchRestaurants: async () => {
     set({ isLoading: true });
