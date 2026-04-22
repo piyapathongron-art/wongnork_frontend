@@ -44,7 +44,7 @@ const Profile = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
-// 🌟 ดึงข้อมูลโปรไฟล์เมื่อเข้ามาที่หน้า
+    // 🌟 ดึงข้อมูลโปรไฟล์เมื่อเข้ามาที่หน้า
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -181,7 +181,7 @@ const Profile = () => {
     });
 
     const allMyParties = Array.from(uniquePartiesMap.values());
-    
+
     // 🌟 แยกประเภทปาร์ตี้
     const activeParties = allMyParties.filter(p => p.status === 'OPEN' || p.status === 'FULL');
     const pastParties = allMyParties.filter(p => p.status === 'COMPLETED');
@@ -252,7 +252,9 @@ const Profile = () => {
                                         <LucideChefHat />
                                     </div>
                                 )}
-                                <h2 className="text-[10px] text-[#A8A29F] mt-0.5 truncate">{mainTitle}</h2>
+                                {!isOwner && (
+                                    <h2 className="text-xl font-extrabold text-[#2B361B]">{mainTitle}</h2>)}
+                                {isOwner && <h2 className="text-[10px] text-[#A8A29F] mt-0.5 truncate">{mainTitle}</h2>}
                             </>
                         )}
                     </div>
@@ -299,7 +301,7 @@ const Profile = () => {
                     <div className="flex justify-between items-center">
                         <h3 className="font-extrabold text-xl text-[#2B361B]">My Parties</h3>
                         {pastParties.length > 0 && (
-                            <button 
+                            <button
                                 onClick={() => setIsHistoryOpen(true)}
                                 className="flex items-center gap-1.5 text-[11px] font-bold text-[#A65D2E] bg-[#F7EAD7] px-3 py-1.5 rounded-full active:scale-95 transition-transform cursor-pointer shadow-sm hover:bg-[#EAD9CF]"
                             >
@@ -308,7 +310,7 @@ const Profile = () => {
                             </button>
                         )}
                     </div>
-                    
+
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                         {activeParties.length === 0 ? (
                             <div className="flex-none w-64 py-8 flex flex-col items-center justify-center bg-white/40 rounded-3xl border border-dashed border-[#EEE2D1] text-center">
@@ -319,9 +321,9 @@ const Profile = () => {
                             activeParties.map((party, index) => {
                                 const restaurant = party.restaurant || {};
                                 const imageUrl =
-                                restaurant.images?.find((img) => img.isCover)?.url ||
-                                restaurant.images?.[0]?.url ||
-                                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
+                                    restaurant.images?.find((img) => img.isCover)?.url ||
+                                    restaurant.images?.[0]?.url ||
+                                    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
                                 const memberCount = party.members?.length || 1;
 
                                 return (
@@ -421,13 +423,13 @@ const Profile = () => {
                     </section>
                 )}
 
-                <SavedRestaurantSection 
-                    savedRestaurants={savedRestaurants} 
-                    handleToggleSave={handleToggleSave} 
-                    formatDate={formatDate} 
+                <SavedRestaurantSection
+                    savedRestaurants={savedRestaurants}
+                    handleToggleSave={handleToggleSave}
+                    formatDate={formatDate}
                 />
 
- 
+
 
                 <section className="space-y-4">
                     <h3 className="font-extrabold text-xl text-[#2B361B]">My Reviews</h3>
@@ -493,13 +495,13 @@ const Profile = () => {
                             className="fixed bottom-0 left-0 right-0 bg-[#FFF8F5] rounded-t-[3rem] z-[101] max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
                         >
                             <div className="w-12 h-1.5 bg-[#EEE2D1] rounded-full mx-auto mt-4 mb-2 shrink-0" />
-                            
+
                             <header className="px-8 py-4 flex justify-between items-center shrink-0">
                                 <div>
                                     <h2 className="text-2xl font-black text-[#2B361B] tracking-tight">Past Parties</h2>
                                     <p className="text-xs font-bold text-[#A65D2E] uppercase tracking-widest mt-0.5">Your History</p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setIsHistoryOpen(false)}
                                     className="p-2 bg-[#F7EAD7] rounded-full text-[#A65D2E] hover:bg-[#EAD9CF] transition-colors cursor-pointer"
                                 >
@@ -528,9 +530,9 @@ const Profile = () => {
                                                 className="flex items-center gap-4 p-4 bg-white rounded-[2rem] border border-[#EEE2D1]/50 shadow-sm cursor-pointer hover:border-[#A65D2E]/30 transition-all active:scale-[0.98]"
                                             >
                                                 <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#2D3E25] shrink-0">
-                                                    <img 
-                                                        src={party.restaurant?.images?.[0]?.url || 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80'} 
-                                                        alt={party.name} 
+                                                    <img
+                                                        src={party.restaurant?.images?.[0]?.url || 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80'}
+                                                        alt={party.name}
                                                         className="w-full h-full object-cover opacity-80 grayscale-[30%]"
                                                     />
                                                 </div>
