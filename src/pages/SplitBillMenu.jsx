@@ -19,6 +19,7 @@ const SplitBillMenu = () => {
     const [actionLoading, setActionLoading] = useState(false);
 
     const isLeader = party?.leaderId === user?.id;
+    const isCompleted = party?.status === 'COMPLETED';
 
     const loadData = useCallback(async () => {
         try {
@@ -52,7 +53,7 @@ const SplitBillMenu = () => {
     }, [loadData]);
 
     const handleAddMenuToBill = async (menu) => {
-        if (actionLoading) return;
+        if (actionLoading || isCompleted) return;
         setActionLoading(true);
         try {
             await apiAddOrderItem(id, { menuId: menu.id, quantity: 1, isCustom: false });
@@ -69,7 +70,7 @@ const SplitBillMenu = () => {
     };
 
     const handleKickMember = async (userId, userName) => {
-        if (!window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะ ${userName} ออกจากปาร์ตี้?`)) return;
+        if (isCompleted || !window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะ ${userName} ออกจากปาร์ตี้?`)) return;
 
         try {
             setActionLoading(true);
@@ -202,7 +203,7 @@ const SplitBillMenu = () => {
                                                 <Crown size={10} className="text-white fill-current" />
                                             </div>
                                         )}
-                                        {canKick && (
+                                        {canKick && !isCompleted && (
                                             <button
                                                 onClick={() => handleKickMember(member.user.id, member.user.name)}
                                                 className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors"
@@ -220,13 +221,13 @@ const SplitBillMenu = () => {
                     </div>
                 </div>
 
-                <div className="bg-[#EAD9CF]/40 rounded-[2rem] p-5 mb-8 border border-[#EAD9CF] flex gap-4 items-center">
+                <div className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-[#EAD9CF]/40 border-[#EAD9CF]'}`}>
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
-                        <Utensils size={20} className="text-[#A65D2E]" />
+                        {isCompleted ? <Check size={20} className="text-green-600" /> : <Utensils size={20} className="text-[#A65D2E]" />}
                     </div>
                     <div>
-                        <h3 className="font-bold text-[14px] leading-tight">กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ</h3>
-                        <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ</p>
+                        <h3 className="font-bold text-[14px] leading-tight">{isCompleted ? 'ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3>
+                        <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">{isCompleted ? 'คุณสามารถดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง แต่ไม่สามารถแก้ไขข้อมูลได้แล้ว' : 'เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ'}</p>
                     </div>
                 </div>
 
@@ -271,8 +272,11 @@ const SplitBillMenu = () => {
                             </motion.span>
                         </div>
                         {mySummary.items.length > 0 && (
-                            <div className="text-right">
-                                <p className="text-[11px] text-[#A8A29F] font-bold">ค่าอาหารสุทธิ: ฿{mySummary.summary.subtotal.toFixed(2)}</p>
+                            <div className="text-right flex flex-col items-end">
+                                <p className="text-[9px] text-[#A8A29F] font-bold leading-tight">
+                                    (ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})
+                                </p>
+                                <p className="text-[8px] text-[#A65D2E] font-black uppercase mt-0.5">* หารเท่ากัน {billSummary?.members?.length} คน</p>
                             </div>
                         )}
                     </div>
@@ -281,10 +285,10 @@ const SplitBillMenu = () => {
                         onClick={() => navigate(`/party/${id}/split-bill/summary`)}
                         className="w-full bg-[#182806] hover:bg-[#2D3E1A] text-white py-4 rounded-2xl font-bold shadow-lg shadow-black/20 active:scale-[0.98] transition-all flex justify-center items-center gap-2 cursor-pointer relative overflow-hidden"
                     >
-                        จัดการบิลทั้งโต๊ะ
+                        {isCompleted ? 'ดูสรุปบิลทั้งโต๊ะ' : 'จัดการบิลทั้งโต๊ะ'}
                         {billSummary?.tableItems?.length > 0 && (
                             <span className="absolute right-4 bg-[#A65D2E] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
-                                โต๊ะสั่งแล้ว {billSummary.tableItems.reduce((acc, curr) => acc + curr.quantity, 0)} จาน
+                                {isCompleted ? 'ยอดรวม' : 'โต๊ะสั่งแล้ว'} {billSummary.tableItems.reduce((acc, curr) => acc + curr.quantity, 0)} จาน
                             </span>
                         )}
                     </button>

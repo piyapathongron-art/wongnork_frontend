@@ -52,6 +52,11 @@ const apiGetSplitBill = async (partyId) => {
     return await mainApi.get(`/parties/${partyId}/split-bill`);
 }
 
+const apiUpdatePartySettings = async (partyId, body) => {
+    // body: { vat, serviceCharge, status }
+    return await mainApi.put(`/parties/${partyId}/settings`, body);
+}
+
 export {
     apiGetParties,
     apiGetPartyById,
@@ -63,5 +68,6 @@ export {
     apiUpdateOrderItemQuantity,
     apiToggleOrderItemSharer,
     apiRemoveOrderItem,
-    apiGetSplitBill
+    apiGetSplitBill,
+    apiUpdatePartySettings
 }

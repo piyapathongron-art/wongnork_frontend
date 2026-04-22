@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Plus, Minus, Trash2, Check, Users, Utensils, Receipt, UserIcon } from 'lucide-react';
-import { apiGetPartyById, apiGetSplitBill, apiUpdateOrderItemQuantity, apiToggleOrderItemSharer, apiRemoveOrderItem, apiAddOrderItem } from '../api/party';
+import { apiGetPartyById, apiGetSplitBill, apiUpdateOrderItemQuantity, apiToggleOrderItemSharer, apiRemoveOrderItem, apiAddOrderItem, apiUpdatePartySettings } from '../api/party';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,14 +23,22 @@ const SplitBillSummary = () => {
     const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
     const [customItemForm, setCustomItemForm] = useState({ name: '', price: '' });
 
+    // Modal state for Complete Party Confirmation
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+
+    // Leader Settings State (for inputs)
+    const [settingsForm, setSettingsForm] = useState({ vat: 0, serviceCharge: 0 });
+
     const loadData = useCallback(async () => {
         try {
             const [partyRes, billRes] = await Promise.all([
                 apiGetPartyById(id),
                 apiGetSplitBill(id)
             ]);
-            setParty(partyRes.data.data);
+            const partyData = partyRes.data.data;
+            setParty(partyData);
             setBillSummary(billRes.data.data);
+            setSettingsForm({ vat: partyData.vat, serviceCharge: partyData.serviceCharge });
         } catch (error) {
             console.error(error);
             toast.error("ไม่สามารถดึงข้อมูลบิลได้");
@@ -43,8 +51,43 @@ const SplitBillSummary = () => {
         loadData();
     }, [loadData]);
 
+    const isLeader = party?.leaderId === user?.id;
+    const isCompleted = party?.status === 'COMPLETED';
+
+    const handleUpdateSettings = async () => {
+        if (!isLeader || isCompleted || actionLoading) return;
+        setActionLoading(true);
+        try {
+            await apiUpdatePartySettings(id, {
+                vat: parseFloat(settingsForm.vat) || 0,
+                serviceCharge: parseFloat(settingsForm.serviceCharge) || 0
+            });
+            await loadData();
+            toast.success("อัปเดตข้อมูลบิลสำเร็จ");
+        } catch (error) {
+            toast.error("อัปเดตไม่สำเร็จ");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCompleteParty = async () => {
+        if (!isLeader || isCompleted || actionLoading) return;
+        setActionLoading(true);
+        try {
+            await apiUpdatePartySettings(id, { status: 'COMPLETED' });
+            await loadData();
+            setIsCompleteModalOpen(false);
+            toast.success("ปิดปาร์ตี้เรียบร้อยแล้ว!");
+        } catch (error) {
+            toast.error("ไม่สามารถปิดปาร์ตี้ได้");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleQuantityChange = async (itemId, action) => {
-        if (actionLoading) return;
+        if (actionLoading || isCompleted) return;
 
         // If decrementing to 0, show modal instead
         const item = billSummary.tableItems.find(i => i.id === itemId);
@@ -65,7 +108,7 @@ const SplitBillSummary = () => {
     };
 
     const handleDeleteItem = async () => {
-        if (!itemToDelete || actionLoading) return;
+        if (!itemToDelete || actionLoading || isCompleted) return;
         setActionLoading(true);
         try {
             await apiRemoveOrderItem(id, itemToDelete.id);
@@ -80,7 +123,7 @@ const SplitBillSummary = () => {
     };
 
     const handleToggleSharer = async (itemId, isOptIn) => {
-        if (actionLoading) return;
+        if (actionLoading || isCompleted) return;
         setActionLoading(true);
         const action = isOptIn ? 'leave' : 'join'; // If currently opted in, action is leave.
         try {
@@ -135,7 +178,10 @@ const SplitBillSummary = () => {
                     <ArrowLeft size={24} className="text-[#2B361B]" />
                 </button>
                 <div className="flex-1 overflow-hidden">
-                    <h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none">สรุปบิลรวม (Table Bill)</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none">สรุปบิลรวม</h1>
+                        {isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}
+                    </div>
                     <p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party?.name}</p>
                 </div>
             </header>
@@ -150,6 +196,9 @@ const SplitBillSummary = () => {
                         <div className="text-4xl font-black mb-1">
                             ฿{Math.ceil(billSummary?.grandTotal || 0).toLocaleString()}
                         </div>
+                        <div className="text-[10px] font-bold text-[#F7EAD7]/60 flex gap-2">
+                            <span>(ค่าอาหาร ฿{Math.ceil(billSummary?.grandTotal - (billSummary?.vatAmount + billSummary?.serviceChargeAmount) || 0).toLocaleString()} + บริการ ฿{Math.ceil(billSummary?.serviceChargeAmount || 0).toLocaleString()} + ภาษี ฿{Math.ceil(billSummary?.vatAmount || 0).toLocaleString()})</span>
+                        </div>
                         <div className="flex gap-4 mt-4">
                             <div className="bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
                                 <Users size={12} className="text-[#F7EAD7]" />
@@ -163,11 +212,51 @@ const SplitBillSummary = () => {
                     </div>
                 </div>
 
+                {/* Leader Settings: VAT & SC */}
+                {isLeader && (
+                    <div className="bg-white border border-[#EEE2D1] rounded-[1.5rem] p-5 mb-8 shadow-sm">
+                        <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <Receipt size={14} className="text-[#A65D2E]" /> ตั้งค่าค่าใช้จ่ายเพิ่มเติม (โดยหัวหน้า)
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">Service Charge (฿)</label>
+                                <input
+                                    type="number"
+                                    value={settingsForm.serviceCharge}
+                                    onChange={(e) => setSettingsForm({ ...settingsForm, serviceCharge: e.target.value })}
+                                    onBlur={handleUpdateSettings}
+                                    disabled={isCompleted || actionLoading}
+                                    placeholder="0"
+                                    className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all disabled:opacity-50"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">VAT (฿)</label>
+                                <input
+                                    type="number"
+                                    value={settingsForm.vat}
+                                    onChange={(e) => setSettingsForm({ ...settingsForm, vat: e.target.value })}
+                                    onBlur={handleUpdateSettings}
+                                    disabled={isCompleted || actionLoading}
+                                    placeholder="0"
+                                    className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all disabled:opacity-50"
+                                />
+                            </div>
+                        </div>
+                        {!isCompleted && (
+                            <p className="text-[8px] text-gray-400 mt-3 italic text-center">* ยอดเงินที่กรอกจะถูกหารเฉลี่ยให้สมาชิกทุกคนในปาร์ตี้อัตโนมัติ</p>
+                        )}
+                    </div>
+                )}
+
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-[12px] font-bold text-[#8B837E] uppercase tracking-[0.2em]">รายการอาหารในโต๊ะ</h3>
-                    <button onClick={() => setIsAddCustomModalOpen(true)} className="text-[#A65D2E] text-xs font-bold flex items-center gap-1 hover:underline">
-                        <Plus size={14} /> เพิ่มเมนูพิเศษ
-                    </button>
+                    {!isCompleted && (
+                        <button onClick={() => setIsAddCustomModalOpen(true)} className="text-[#A65D2E] text-xs font-bold flex items-center gap-1 hover:underline">
+                            <Plus size={14} /> เพิ่มเมนูพิเศษ
+                        </button>
+                    )}
                 </div>
 
                 <div className="space-y-4">
@@ -201,6 +290,7 @@ const SplitBillSummary = () => {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleToggleSharer(item.id, isOptIn)}
+                                                disabled={isCompleted}
                                                 className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isOptIn ? 'bg-[#A65D2E] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                                             >
                                                 {isOptIn ? <><Check size={12} strokeWidth={3} /> คุณร่วมหาร</> : 'ฉันไม่ได้กิน'}
@@ -217,11 +307,11 @@ const SplitBillSummary = () => {
                                         </div>
 
                                         <div className="flex items-center gap-3 bg-[#FFF8F5] p-1 rounded-xl border border-[#EEE2D1]">
-                                            <button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 hover:bg-red-50 active:scale-95 transition-colors">
+                                            <button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 hover:bg-red-50 active:scale-95 transition-colors disabled:opacity-30">
                                                 {item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}
                                             </button>
                                             <span className="font-bold text-[14px] w-4 text-center text-[#2B361B]">{item.quantity}</span>
-                                            <button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white hover:bg-[#1A2210] active:scale-95 transition-colors">
+                                            <button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white hover:bg-[#1A2210] active:scale-95 transition-colors disabled:opacity-30">
                                                 <Plus size={14} />
                                             </button>
                                         </div>
@@ -245,10 +335,28 @@ const SplitBillSummary = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Complete Party Button (Leader Only) */}
+                {isLeader && !isCompleted && (
+                    <button
+                        onClick={() => setIsCompleteModalOpen(true)}
+                        className="w-full mt-12 mb-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-sm shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                        <Check size={18} strokeWidth={3} /> ปิดจ็อบปาร์ตี้และสรุปยอดบิล
+                    </button>
+                )}
+
+                {isCompleted && (
+                    <div className="mt-12 mb-8 p-6 bg-green-50 border border-green-200 rounded-2xl text-center">
+                        <Check size={32} className="text-green-600 mx-auto mb-2" />
+                        <h4 className="text-green-800 font-bold">ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว</h4>
+                        <p className="text-green-600/70 text-[10px] mt-1">ข้อมูลถูกล็อกไว้เพื่อความถูกต้องในการโอนเงิน</p>
+                    </div>
+                )}
             </main>
 
             {/* Floating Bottom Your Summary */}
-            <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10" style={{ maskImage: 'linear-gradient(to top, black 90%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 90%, transparent 100%)' }}>
+            <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10">
                 <div className="max-w-md mx-auto">
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider flex items-center gap-1"><UserIcon size={14} /> ยอดที่คุณต้องจ่าย</span>
@@ -263,8 +371,11 @@ const SplitBillSummary = () => {
                             </motion.span>
                         </div>
                     </div>
-                    {mySummary.items.length > 0 && (
-                        <p className="text-[10px] text-[#A8A29F] font-medium text-right mb-4">รวม VAT {party?.vat}% & SC {party?.serviceCharge}% แล้ว</p>
+                    {mySummary.items.length >= 0 && (
+                        <div className="text-[9px] text-[#A8A29F] font-medium text-right mt-1 flex flex-col">
+                            <span>(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</span>
+                            <span className="text-[#A65D2E] font-bold uppercase mt-0.5">* หารเท่ากันทั้งโต๊ะ {billSummary?.members?.length} คน</span>
+                        </div>
                     )}
                 </div>
             </div>
@@ -307,6 +418,27 @@ const SplitBillSummary = () => {
                             <div className="flex gap-3">
                                 <button onClick={() => setIsAddCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-[#8B837E] hover:bg-[#EAD9CF] rounded-xl transition-colors">ยกเลิก</button>
                                 <button onClick={handleAddCustomItem} disabled={actionLoading} className="flex-1 bg-[#A65D2E] hover:bg-[#8B4D24] transition-colors text-white py-3 rounded-xl text-sm font-bold shadow-md">{actionLoading ? 'กำลังเพิ่ม...' : 'เพิ่มลงบิล'}</button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal: Complete Party Confirmation */}
+            <AnimatePresence>
+                {isCompleteModalOpen && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center px-6">
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl">
+                            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Check size={40} strokeWidth={3} />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#2B361B] mb-3">ยืนยันการสรุปยอดบิล?</h3>
+                            <p className="text-sm text-[#8B837E] mb-8 leading-relaxed">
+                                เมื่อยืนยันแล้ว สมาชิกทุกคนจะไม่สามารถแก้ไขรายการอาหารหรือจำนวนได้อีก คุณแน่ใจใช่หรือไม่?
+                            </p>
+                            <div className="flex gap-3">
+                                <button onClick={() => setIsCompleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] hover:bg-gray-200 transition-colors rounded-xl font-bold text-sm">ยังก่อน</button>
+                                <button onClick={handleCompleteParty} disabled={actionLoading} className="flex-1 py-3 bg-green-600 hover:bg-green-700 transition-colors text-white rounded-xl font-bold text-sm shadow-md">ใช่, ปิดจ็อบเลย</button>
                             </div>
                         </motion.div>
                     </motion.div>
