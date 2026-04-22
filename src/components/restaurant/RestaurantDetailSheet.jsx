@@ -25,7 +25,6 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const menuItems = restaurant?.menus || restaurant?.menu || [];
   const reviewItems = restaurant?.reviews || [];
 
-  // 💡 ทริค: ถ้า reviews ยังเป็น undefined แปลว่า HomeMap กำลังโหลด API อยู่
   const isLoadingReviews = !restaurant?.reviews;
 
   const averageRating =

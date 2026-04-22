@@ -1,20 +1,31 @@
-import React, { useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { createCustomMarkerElement } from '../utils/marker.util';
-import { add3DBuildingsLayer } from '../utils/mapLayers.util';
-import { useMapInit } from '../hooks/useMapInit';
-import useRestaurantStore from '../stores/restaurantStore';
+import React, {
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  useState,
+} from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { createCustomMarkerElement } from "../utils/marker.util";
+import { add3DBuildingsLayer } from "../utils/mapLayers.util";
+import { useMapInit } from "../hooks/useMapInit";
+import useRestaurantStore from "../stores/restaurantStore";
 
-const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Added onClick prop
+const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => {
+  // Added onClick prop
   const mapNodeRef = useRef(null);
   const mapRef = useRef(null);
-  const markerRef = useRef(null); 
+  const markerRef = useRef(null);
   const activeMarkersRef = useRef([]);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  const filteredRestaurants = useRestaurantStore(state => state.filteredRestaurants);
-  const fetchRestaurants = useRestaurantStore(state => state.fetchRestaurants);
+  const filteredRestaurants = useRestaurantStore(
+    (state) => state.filteredRestaurants,
+  );
+  const fetchRestaurants = useRestaurantStore(
+    (state) => state.fetchRestaurants,
+  );
 
   useImperativeHandle(ref, () => ({
     flyToRestaurant: (restaurant) => {
@@ -45,7 +56,7 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
       if (!mapRef.current || !restaurants || restaurants.length === 0) return;
       const bounds = new mapboxgl.LngLatBounds(
         [parseFloat(restaurants[0].lng), parseFloat(restaurants[0].lat)],
-        [parseFloat(restaurants[0].lng), parseFloat(restaurants[0].lat)]
+        [parseFloat(restaurants[0].lng), parseFloat(restaurants[0].lat)],
       );
       for (const res of restaurants) {
         const lng = parseFloat(res.lng);
@@ -56,9 +67,9 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
         padding: { top: 150, bottom: 300, left: 50, right: 50 },
         pitch: 0,
         speed: 1.2,
-        maxZoom: 16 
+        maxZoom: 16,
       });
-    }
+    },
   }));
 
   useEffect(() => {
@@ -80,20 +91,20 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
       // Only run placement logic if the parent (Modal) provided an onClick prop
       if (onClick) {
         const { lng, lat } = e.lngLat;
-        
+
         if (markerRef.current) {
           markerRef.current.setLngLat([lng, lat]);
         } else {
           // Use your signature brown color or keep the red
-          markerRef.current = new mapboxgl.Marker({ 
-            color: "#BC6C25", 
-            draggable: true 
+          markerRef.current = new mapboxgl.Marker({
+            color: "#BC6C25",
+            draggable: true,
           })
             .setLngLat([lng, lat])
             .addTo(map);
 
           // If the user drags the marker, tell the form
-          markerRef.current.on('dragend', () => {
+          markerRef.current.on("dragend", () => {
             const newPos = markerRef.current.getLngLat();
             onClick({ lngLat: newPos });
           });
@@ -112,7 +123,7 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
 
   const renderMarkers = () => {
     if (!mapRef.current) return;
-    activeMarkersRef.current.forEach(marker => marker.remove());
+    activeMarkersRef.current.forEach((marker) => marker.remove());
     activeMarkersRef.current = [];
 
     filteredRestaurants.forEach((item) => {
@@ -122,7 +133,7 @@ const MapBox = forwardRef(({ onMarkerClick, onClick, isDark }, ref) => { // Adde
 
       const el = createCustomMarkerElement(item.category);
 
-      el.addEventListener('click', (e) => {
+      el.addEventListener("click", (e) => {
         e.stopPropagation();
         mapRef.current.flyTo({
           center: [lng, lat],

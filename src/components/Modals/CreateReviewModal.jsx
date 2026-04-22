@@ -33,7 +33,7 @@ const CreateReviewModal = ({
     try {
       setIsSubmitting(true);
       const body = {
-        rating: rating,
+        rating: Number(rating),
         comment: data.comment,
       };
 
