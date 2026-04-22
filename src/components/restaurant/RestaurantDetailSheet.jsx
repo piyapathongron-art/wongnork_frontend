@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Phone, Bookmark, Share2, Star } from "lucide-react";
+import { MapPin, Bookmark, Share2, Star } from "lucide-react";
 import { useLocation } from "react-router";
 import { apiToggleSaveRestaurant, apiGetme } from "../../api/mainApi";
 import { toast } from "react-toastify";
 
+// Components
 import MenuSection from "./MenuSection";
 import ReviewSection from "./ReviewSection";
 import ShareModal from "./ShareModal";
 import AllReviews from "./AllReviews";
 import AllMenus from "./AllMenus";
+
+// Stores
+import useRestaurantStore from "../../stores/restaurantStore";
 
 const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const location = useLocation();
@@ -17,8 +21,18 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllMenus, setShowAllMenus] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
+  // 🌟 1. Get the setter action from the store at the TOP LEVEL
+  const setStoreRestaurant = useRestaurantStore((state) => state.setRestaurant);
+
+  // 🌟 2. Sync the incoming prop to the Global Store correctly
+  useEffect(() => {
+    if (restaurant) {
+      setStoreRestaurant(restaurant);
+    }
+  }, [restaurant, setStoreRestaurant]);
+
+  // Handle route changes
   useEffect(() => {
     if (location.pathname === "/") {
       setStep("half");
@@ -62,9 +76,46 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
     }
   };
 
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (!restaurant?.id) return;
+      try {
+        const res = await apiGetme();
+        const savedList = res.data?.data?.savedRestaurants || [];
+        const isAlreadySaved = savedList.some(
+          (item) => item.restaurantId === restaurant.id,
+        );
+        setIsSaved(isAlreadySaved);
+      } catch (error) {
+        console.error("Error checking saved status:", error);
+      }
+    };
+
+    if (isOpen && restaurant?.id) {
+      checkSavedStatus();
+    }
+  }, [restaurant?.id, isOpen]);
+
+  const handleToggleSave = async () => {
+    if (!restaurant?.id) return;
+
+    setIsSaved(!isSaved);
+
+    try {
+      await apiToggleSaveRestaurant(restaurant.id);
+      if (!isSaved) {
+        toast.success("บันทึกร้านอาหารลงโปรไฟล์แล้ว");
+      }
+    } catch (error) {
+      setIsSaved(isSaved);
+      toast.error("เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
+      console.error(error);
+    }
+  };
+
+  // Data helpers
   const menuItems = restaurant?.menus || restaurant?.menu || [];
   const reviewItems = restaurant?.reviews || [];
-
   const isLoadingReviews = !restaurant?.reviews;
 
   const averageRating =
@@ -89,6 +140,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
             key="sheet-container"
             className="fixed inset-0 z-50 pointer-events-none"
           >
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -101,10 +153,10 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
               className="absolute inset-0 bg-black/20 pointer-events-auto"
             />
 
+            {/* Bottom Sheet */}
             <motion.div
               initial={{ y: "100%" }}
-              // 💡 ทริค: ถ้าอยากให้แผ่นมันดันขึ้นไปชิดขอบพอดีตอนเปิดสุด ให้เปลี่ยน "5%" เป็น "0%"
-              animate={{ y: step === "half" ? "50%" : "5%" }}
+              animate={{ y: step === "half" ? "50%" : "0%" }} // Set to 0% for full height
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               drag="y"
@@ -121,12 +173,14 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                   } else if (y > 50) setStep("half");
                 }
               }}
-              className="absolute inset-x-0 bottom-0 bg-[#FFF8F4] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[90vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto"
+              className="absolute inset-x-0 bottom-0 bg-[#FFF8F4] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[95vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto"
             >
+              {/* Drag Handle */}
               <div className="w-full flex justify-center py-4 shrink-0 bg-[#FFF8F4] z-10 cursor-grab">
                 <div className="w-12 h-1.5 bg-[#EAD9CF] rounded-full" />
               </div>
 
+              {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto px-6 pb-20 no-scrollbar">
                 <div className="mb-6">
                   <h2 className="text-3xl font-bold text-[#2D3E25] tracking-tighter">
@@ -148,6 +202,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                   )}
                 </div>
 
+                {/* Quick Actions */}
                 <div className="flex gap-3 mb-8 overflow-x-auto no-scrollbar py-2">
                   <button className="flex items-center gap-2 bg-[#A65D2E] text-white px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
                     <MapPin size={18} />
@@ -167,10 +222,6 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                     />
                     <span>{isSaved ? "บันทึกแล้ว" : "บันทึก"}</span>
                   </button>
-                  {/* <button className="flex items-center gap-2 bg-white border border-[#EAD9CF] text-[#A65D2E] px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
-                    <Phone size={18} />
-                    <span>โทร</span>
-                  </button> */}
                   <button
                     onClick={() => setIsShareModalOpen(true)}
                     className="flex items-center gap-2 bg-white border border-[#EAD9CF] text-[#A65D2E] px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all shadow-sm cursor-pointer"
@@ -180,6 +231,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                   </button>
                 </div>
 
+                {/* Gallery */}
                 <div className="mb-8">
                   <h3 className="text-[11px] font-bold text-[#A8A29F] uppercase tracking-widest mb-3">
                     รูปภาพและวิดีโอ
@@ -196,9 +248,11 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                   </div>
                 </div>
 
+                {/* Sections */}
                 <div className="space-y-10">
                   <MenuSection
                     menuItems={menuItems}
+                    restaurant={restaurant} // 🌟 Prop passed here is vital for ownership check
                     onViewAllClick={() => setShowAllMenus(true)}
                   />
                   <ReviewSection
@@ -213,6 +267,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
         )}
       </AnimatePresence>
 
+      {/* Modals */}
       <AllReviews
         isOpen={showAllReviews}
         onClose={() => setShowAllReviews(false)}
@@ -223,7 +278,6 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
         onClose={() => setShowAllMenus(false)}
         menus={menuItems}
       />
-
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}

@@ -7,6 +7,7 @@ const CreateReviewModal = ({
   isOpen,
   onClose,
   restaurantId,
+  partyId, // 🌟 เพิ่ม props partyId
   onReviewSuccess,
 }) => {
   const [rating, setRating] = useState(0);
@@ -26,7 +27,7 @@ const CreateReviewModal = ({
   // 2. ฟังก์ชันตอนกดส่ง
   const onSubmit = async (data) => {
     if (rating === 0) {
-      alert("กรุณาให้คะแนนดาวด้วยครับพี่");
+      alert("กรุณาให้คะแนนดาวด้วยครับ");
       return;
     }
 
@@ -35,6 +36,7 @@ const CreateReviewModal = ({
       const body = {
         rating: Number(rating),
         comment: data.comment,
+        partyId: partyId || null, // 🌟 ส่ง partyId ไปด้วยถ้ามี
       };
 
       await apiCreateReview(restaurantId, body);
@@ -42,31 +44,31 @@ const CreateReviewModal = ({
       // ถ้าสำเร็จ
       reset(); // ล้างฟอร์ม
       setRating(0); // ล้างดาว
-      onReviewSuccess(); // เรียกฟังก์ชันให้หน้าหลักดึงรีวิวใหม่
+      if (onReviewSuccess) onReviewSuccess(); // เรียกฟังก์ชันให้หน้าหลักดึงรีวิวใหม่
       onClose(); // ปิด Modal
     } catch (error) {
       console.error("ส่งรีวิวไม่สำเร็จ:", error);
-      alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้งครับ");
+      alert(error.response?.data?.message || "เกิดข้อผิดพลาด ลองใหม่อีกครั้งครับ");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4">
+    <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4 pointer-events-none">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
         onClick={onClose}
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden pointer-events-auto">
         <header className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-[#2D3E25]">เขียนรีวิว</h2>
+          <h2 className="text-2xl font-bold text-[#2D3E25]">เขียนรีวิว ✨</h2>
           <button
             onClick={onClose}
-            className="p-2 bg-[#F4E8DB] rounded-full text-[#A67045]"
+            className="p-2 bg-[#F4E8DB] rounded-full text-[#A67045] hover:bg-[#EAD9CF] transition-colors"
           >
             <X size={20} />
           </button>
@@ -113,7 +115,7 @@ const CreateReviewModal = ({
             </div>
             <textarea
               {...register("comment", {
-                required: "บอกความรู้สึกหน่อยครับพี่",
+                required: "บอกความรู้สึกหน่อยครับ",
               })}
               placeholder="รสชาติเป็นยังไงบ้าง? บริการดีไหม?"
               className="w-full bg-[#FBF7F4] border border-[#EAD9CF] rounded-3xl p-4 pl-12 h-32 text-sm focus:outline-none focus:ring-2 focus:ring-[#A67045]/20 resize-none"
@@ -132,7 +134,7 @@ const CreateReviewModal = ({
             className={`w-full py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95 ${
               isSubmitting
                 ? "bg-gray-300"
-                : "bg-[#A67045] text-white shadow-[#A67045]/30"
+                : "bg-[#182806] text-white shadow-[#182806]/20"
             }`}
           >
             {isSubmitting ? "กำลังส่ง..." : "ส่งรีวิวเลย"}
