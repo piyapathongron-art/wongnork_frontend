@@ -28,6 +28,16 @@ const useUserStore = create(
         const resp = await apiRegister(body);
         return resp;
       },
+      fetchMe: async () => {
+        try {
+          const getInfo = await apiGetme();
+          const userData = getInfo.data.user || getInfo.data.data || getInfo.data;
+          set({ user: userData });
+          return userData;
+        } catch (error) {
+          console.error("Fetch me failed", error);
+        }
+      },
       logout: async () => {
         set({ user: null, token: null, isLogin: false });
       },

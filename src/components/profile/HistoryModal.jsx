@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { History, X, Clock, LucideChefHat, ChevronRight } from 'lucide-react';
 
-const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, navigate, formatDate }) => {
+const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, onPartyClick, navigate, formatDate }) => {
     return (
         <AnimatePresence>
             {isHistoryOpen && (
@@ -54,8 +54,7 @@ const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, navigate, 
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: idx * 0.05 }}
                                             onClick={() => {
-                                                setIsHistoryOpen(false);
-                                                navigate(`/party/${party.id}/split-bill`);
+                                                onPartyClick(party);
                                             }}
                                             className="flex items-center gap-4 p-4 bg-white rounded-[2rem] border border-[#EEE2D1]/50 shadow-sm cursor-pointer hover:border-[#A65D2E]/30 transition-all active:scale-[0.98]"
                                         >

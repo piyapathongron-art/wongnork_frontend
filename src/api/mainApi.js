@@ -47,6 +47,10 @@ export async function apiUpdateProfile(body) {
   return await mainApi.put("/auth/profile", body); // ใช้ PATCH หรือ PUT ตามที่หลังบ้านกำหนด
 }
 
+export async function apiGetPublicProfile(id) {
+  return await mainApi.get("/auth/profile/" + id);
+}
+
 // ฟังก์ชันสำหรับ Toggle Save Restaurant
 export async function apiToggleSaveRestaurant(restaurantId) {
   return await mainApi.post(`/restaurants/${restaurantId}/save`);
