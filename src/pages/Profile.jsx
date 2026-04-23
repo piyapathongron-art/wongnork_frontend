@@ -163,17 +163,17 @@ const Profile = () => {
 
     if (loading) {
         return (
-            <div className="w-full min-h-screen flex justify-center items-center bg-[#FFF8F5]">
-                <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
+            <div className="w-full min-h-screen flex justify-center items-center bg-base-100">
+                <span className="text-accent font-bold animate-pulse tracking-widest">LOADING...</span>
             </div>
         );
     }
 
     if (error || !userData) {
         return (
-            <div className="w-full min-h-screen flex flex-col justify-center items-center bg-[#FFF8F5] px-6">
+            <div className="w-full min-h-screen flex flex-col justify-center items-center bg-base-100 px-6">
                 <span className="text-red-500 font-bold mb-4">{error || 'ไม่พบข้อมูลผู้ใช้'}</span>
-                <button onClick={handleLogout} className="bg-[#A65D2E] text-white px-6 py-2 rounded-full text-sm">
+                <button onClick={handleLogout} className="bg-accent text-white px-6 py-2 rounded-full text-sm">
                     ออกจากระบบ
                 </button>
             </div>
@@ -214,7 +214,7 @@ const Profile = () => {
     const mainTitle = isOwner ? 'Restaurant Owner' : userData.name;
 
     return (
-        <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
+        <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-base-100 text-base-content pb-32 font-sans">
 
             <header className="sticky top-0 w-full z-40 flex items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
                 {!isMe && (
@@ -271,7 +271,7 @@ const Profile = () => {
                                 value={editForm.name}
                                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                 placeholder="ใส่ชื่อของคุณ"
-                                className="text-xl font-extrabold text-[#2B361B] bg-white border-b-2 border-[#A65D2E] focus:outline-none text-center px-2 py-1 w-full max-w-[250px] rounded-lg shadow-sm"
+                                className="text-xl font-extrabold text-base-content bg-base-100 border-b-2 border-accent focus:outline-none text-center px-2 py-1 w-full max-w-[250px] rounded-lg shadow-sm"
                             />
                         ) : (
                             <>
@@ -291,19 +291,19 @@ const Profile = () => {
                     {/*  1. Stats */}
                     <div className="flex justify-center gap-8 sm:gap-12 w-full pt-2">
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-extrabold text-[#A65D2E]">{reviews.length}</span>
-                            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Reviews</span>
+                            <span className="text-lg font-extrabold text-accent">{reviews.length}</span>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-base-content/50">Reviews</span>
                         </div>
-                        <div className="flex flex-col items-center border-x border-[#EEE2D1] px-6 sm:px-10">
-                            <span className="text-lg font-extrabold text-[#A65D2E]">
+                        <div className="flex flex-col items-center border-x border-base-content/10 px-6 sm:px-10">
+                            <span className="text-lg font-extrabold text-accent">
                                 {allMyParties.filter(p => p.status === 'COMPLETED').length}
                             </span>
-                            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Past Parties</span>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-base-content/50">Past Parties</span>
                         </div>
 
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-extrabold text-[#A65D2E]">{savedRestaurants.length}</span>
-                            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#8B837E]">Saved</span>
+                            <span className="text-lg font-extrabold text-accent">{savedRestaurants.length}</span>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-base-content/50">Saved</span>
                         </div>
                     </div>
 

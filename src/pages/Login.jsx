@@ -28,7 +28,7 @@ const Login = () => {
       <div className="text-center mb-2 sm:mb-4 animate-fade-up">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
-          <span className="text-[#A65D2E] block">NORK</span>
+          <span className="text-accent block">NORK</span>
         </h1>
         <p className="text-[#2D3E25] font-medium mt-1 sm:mt-2 text-sm sm:text-base">
           Eat | Share | Connect
@@ -77,7 +77,7 @@ const Login = () => {
                 </label>
                 <button
                   type="button"
-                  className="text-[9px] font-black text-[#A65D2E] uppercase hover:underline cursor-pointer"
+                  className="text-[9px] font-black text-accent uppercase hover:underline cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -159,7 +159,7 @@ const Login = () => {
           Don't have an account?{" "}
           <button
             type="button"
-            className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
+            className="uppercase text-accent pl-1 cursor-pointer"
             onClick={() => navigate("/register")}
           >
             Sign Up

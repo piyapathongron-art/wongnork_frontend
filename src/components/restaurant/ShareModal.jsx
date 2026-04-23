@@ -68,10 +68,10 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25 }}
-            className="fixed inset-x-0 bottom-0 z-[201] bg-white rounded-t-[2.5rem] p-8 pb-12 shadow-2xl max-w-[500px] mx-auto"
+            className="fixed inset-x-0 bottom-0 z-[201] bg-base-100 rounded-t-[2.5rem] p-8 pb-12 shadow-2xl max-w-[500px] mx-auto"
           >
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-bold text-[#2D3E25]">
+              <h3 className="text-xl font-bold text-base-content">
                 แชร์ให้เพื่อน
               </h3>
               <button
@@ -111,7 +111,7 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
               </p>
               <button
                 onClick={copyToClipboard}
-                className="text-[10px] font-bold text-[#A65D2E] cursor-pointer"
+                className="text-[10px] font-bold text-accent cursor-pointer"
               >
                 COPY
               </button>

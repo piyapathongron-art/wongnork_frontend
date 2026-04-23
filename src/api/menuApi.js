@@ -8,12 +8,12 @@ const apiCreateMenu = async (restaurantId, body) => {
     return await mainApi.post(`/restaurants/${restaurantId}/menus`, body);
 }
 
-const apiUpdateMenu = async (menuId, body) => {
-    return await mainApi.put(`/menus/${menuId}`, body);
+const apiUpdateMenu = async (restaurantId, menuId, body) => {
+    return await mainApi.put(`/restaurants/${restaurantId}/menus/${menuId}`, body);
 }
 
-const apiDeleteMenu = async (menuId) => {
-    return await mainApi.delete(`/menus/${menuId}`);
+const apiDeleteMenu = async (restaurantId, menuId) => {
+    return await mainApi.delete(`/restaurants/${restaurantId}/menus/${menuId}`);
 }
 
 export {

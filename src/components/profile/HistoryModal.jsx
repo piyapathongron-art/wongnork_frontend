@@ -22,18 +22,18 @@ const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, onPartyCli
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 bg-[#FFF8F5] rounded-t-[3rem] z-[101] max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
+                        className="fixed bottom-0 left-0 right-0 bg-base-100 rounded-t-[3rem] z-[101] max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
                     >
-                        <div className="w-12 h-1.5 bg-[#EEE2D1] rounded-full mx-auto mt-4 mb-2 shrink-0" />
+                        <div className="w-12 h-1.5 bg-base-300 rounded-full mx-auto mt-4 mb-2 shrink-0" />
 
                         <header className="px-8 py-4 flex justify-between items-center shrink-0">
                             <div>
-                                <h2 className="text-2xl font-black text-[#2B361B] tracking-tight">Past Parties</h2>
-                                <p className="text-xs font-bold text-[#A65D2E] uppercase tracking-widest mt-0.5">Your History</p>
+                                <h2 className="text-2xl font-black text-base-content tracking-tight">Past Parties</h2>
+                                <p className="text-xs font-bold text-accent uppercase tracking-widest mt-0.5">Your History</p>
                             </div>
                             <button
                                 onClick={() => setIsHistoryOpen(false)}
-                                className="p-2 bg-[#F7EAD7] rounded-full text-[#A65D2E] hover:bg-[#EAD9CF] transition-colors cursor-pointer"
+                                className="p-2 bg-base-200 rounded-full text-accent hover:bg-base-300 transition-colors cursor-pointer"
                             >
                                 <X size={20} />
                             </button>
@@ -56,7 +56,7 @@ const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, onPartyCli
                                             onClick={() => {
                                                 onPartyClick(party);
                                             }}
-                                            className="flex items-center gap-4 p-4 bg-white rounded-[2rem] border border-[#EEE2D1]/50 shadow-sm cursor-pointer hover:border-[#A65D2E]/30 transition-all active:scale-[0.98]"
+                                            className="flex items-center gap-4 p-4 bg-base-100 rounded-[2rem] border border-base-content/10 shadow-sm cursor-pointer hover:border-accent/30 transition-all active:scale-[0.98]"
                                         >
                                             <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[#2D3E25] shrink-0">
                                                 <img
@@ -67,12 +67,12 @@ const HistoryModal = ({ isHistoryOpen, setIsHistoryOpen, pastParties, onPartyCli
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-0.5">
-                                                    <h4 className="font-bold text-[#2B361B] truncate text-sm">{party.name}</h4>
+                                                    <h4 className="font-bold text-base-content truncate text-sm">{party.name}</h4>
                                                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${party.status === 'COMPLETED' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}>
                                                         {party.status}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-[10px] font-bold text-[#8B837E]">
+                                                <div className="flex items-center gap-3 text-[10px] font-bold text-base-content/50">
                                                     <div className="flex items-center gap-1">
                                                         <Clock size={10} />
                                                         {formatDate(party.meetupTime)}

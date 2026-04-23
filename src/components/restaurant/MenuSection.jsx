@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import AddMenuModal from "../Modals/AddMenuModal";
 import useUserStore from "../../stores/userStore";
 import { string } from "zod";
+import { Pencil, Trash2 } from "lucide-react";
+import { apiDeleteMenu } from "../../api/menuApi";
+import { toast } from "react-toastify";
 // import useRestaurantStore from "../../stores/restaurantStore";
 
 const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) => {
@@ -13,30 +16,51 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
   });
   const user = useUserStore((state) => state.user)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenu, setSelectedMenu] = useState(null)
   console.log("Debug Restaurant:", restaurant);
   console.log("Debug User:", user);
-  
+
   // เช็คว่าเป็นเจ้าของร้านนั้นไหม
   const loggedInUserId = user?.id || user?.user?.id
   const userRole = user?.role || user?.user?.role
   const isRealOwner = userRole === "OWNER" && restaurant?.ownerId && String(loggedInUserId) === String(restaurant.ownerId)
+
+  const handleAddClick = () => {
+    setSelectedMenu(null)
+    setIsModalOpen(true)
+  }
+  const handleEditClick = (menu) => {
+    setSelectedMenu(menu)
+    setIsModalOpen(true)
+  }
+  const handleDelete = async (menuId) => {
+    if (window.confirm("Are you sure to delete?")) {
+      try {
+        await apiDeleteMenu(restaurant.id, menuId)
+        onMenuUpdate()
+      } catch (err) {
+        console.log("Delete Function err", err)
+        toast.error("Cannot Delete")
+      }
+    }
+  }
   return (
     <section className="mb-8">
       <div className="flex justify-between items-end mb-4 px-6">
         <div className="flex items-center">
-          <h3 className="text-xl font-bold text-[#2C241E]">เมนู</h3>
+          <h3 className="text-xl font-bold text-base-content">เมนู</h3>
         </div>
         <div className="flex items-center">
           {isRealOwner && (
-            <button onClick={() => setIsModalOpen(true)}
-            className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer transition-all mr-2">
+            <button onClick={handleAddClick}
+              className="text-[13px] font-bold text-accent hover:underline cursor-pointer transition-all mr-2">
               เพิ่มเมนูของคุณ
             </button>
           )}
           {sortedMenu.length > 0 && (
             <button
               onClick={onViewAllClick}
-              className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer"
+              className="text-[13px] font-bold text-accent hover:underline cursor-pointer"
             >
               ดูเมนูทั้งหมด
             </button>
@@ -49,8 +73,22 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
           {sortedMenu.map((menu, index) => (
             <div
               key={menu.id || index}
-              className="shrink-0 w-[240px] snap-center rounded-[2rem] overflow-hidden bg-[#F4E8DB] p-4 flex flex-col shadow-sm border border-[#EAD9CF]"
+              className="shrink-0 w-[240px] snap-center rounded-[2rem] overflow-hidden bg-base-200 p-4 flex flex-col shadow-sm border border-base-300 relative group shrink-0" 
             >
+              {isRealOwner && (
+                <div className="absolute top-3 right-3 flex gap-2 z-10">
+                  <button onClick={() => handleEditClick(menu)}
+                    className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                    title="แก้ไขเมนู">
+                      <Pencil size={14}/>
+                  </button>
+                  <button onClick={() => handleDelete(menu.id)}
+                    className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                    title="ลบเมนู">
+                      <Trash2 size={14}/>
+                  </button>
+                </div>
+              )}
               <img
                 src={
                   menu.imageUrl ||
@@ -60,17 +98,17 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
                 alt={menu.name}
               />
               <div className="flex flex-col flex-grow">
-                <h4 className="font-bold text-[17px] mb-1.5 text-[#2C241E] leading-tight line-clamp-1">
+                <h4 className="font-bold text-[17px] mb-1.5 text-base-content leading-tight line-clamp-1">
                   {menu.name}
                 </h4>
-                <p className="text-[13px] mb-4 line-clamp-2 text-[#7A6A5E] leading-relaxed">
+                <p className="text-[13px] mb-4 line-clamp-2 text-base-content/50 leading-relaxed">
                   {menu.description || "เมนูแสนอร่อยจากทางร้าน"}
                 </p>
                 <div className="mt-auto flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#A67045]/60 bg-white/40 px-2 py-1 rounded-lg">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent/60 bg-white/40 px-2 py-1 rounded-lg">
                     {menu.category === "Recommend" ? "แนะนำ" : "ทั่วไป"}
                   </span>
-                  <p className="font-black text-lg text-[#A67045]">
+                  <p className="font-black text-lg text-accent">
                     ฿
                     {menu.price ? Math.round(menu.price).toLocaleString() : "0"}
                   </p>
@@ -81,8 +119,8 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
         </div>
       ) : (
         <div className="px-6">
-          <div className="bg-[#F4E8DB]/50 p-6 rounded-[2rem] text-center">
-            <p className="text-[#7A6A5E] font-medium">ยังไม่มีข้อมูลเมนู</p>
+          <div className="bg-base-200/50 p-6 rounded-[2rem] text-center">
+            <p className="text-base-content/50 font-medium">ยังไม่มีข้อมูลเมนู</p>
           </div>
         </div>
       )}
@@ -90,6 +128,7 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         restaurantId={restaurant?.id}
+        editData={selectedMenu}
         onSuccess={onMenuUpdate} />
     </section>
   );

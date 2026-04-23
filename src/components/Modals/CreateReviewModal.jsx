@@ -63,12 +63,12 @@ const CreateReviewModal = ({
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden pointer-events-auto">
+      <div className="relative w-full max-w-md bg-base-100 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden pointer-events-auto">
         <header className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-[#2D3E25]">เขียนรีวิว ✨</h2>
+          <h2 className="text-2xl font-bold text-base-content">เขียนรีวิว ✨</h2>
           <button
             onClick={onClose}
-            className="p-2 bg-[#F4E8DB] rounded-full text-[#A67045] hover:bg-[#EAD9CF] transition-colors"
+            className="p-2 bg-base-200 rounded-full text-accent hover:bg-base-300 transition-colors"
           >
             <X size={20} />
           </button>
@@ -76,8 +76,8 @@ const CreateReviewModal = ({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* ส่วนการเลือกดาว */}
-          <div className="flex flex-col items-center py-4 bg-[#FFF8F4] rounded-3xl border border-[#EAD9CF]/50">
-            <p className="text-sm font-bold text-[#A67045] mb-3 uppercase tracking-widest">
+          <div className="flex flex-col items-center py-4 bg-base-200/50 rounded-3xl border border-base-300/50">
+            <p className="text-sm font-bold text-accent mb-3 uppercase tracking-widest">
               ความพึงพอใจ
             </p>
             <div className="flex gap-2">
@@ -103,14 +103,14 @@ const CreateReviewModal = ({
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-xs text-[#7A6A5E] font-medium">
+            <p className="mt-3 text-xs text-base-content/50 font-medium">
               {rating > 0 ? `คุณให้ ${rating} คะแนน` : "แตะเพื่อเลือกคะแนน"}
             </p>
           </div>
 
           {/* ส่วนพิมพ์คอมเมนต์ */}
           <div className="relative">
-            <div className="absolute top-4 left-4 text-[#A67045]">
+            <div className="absolute top-4 left-4 text-accent">
               <MessageSquare size={18} />
             </div>
             <textarea
@@ -118,7 +118,7 @@ const CreateReviewModal = ({
                 required: "บอกความรู้สึกหน่อยครับ",
               })}
               placeholder="รสชาติเป็นยังไงบ้าง? บริการดีไหม?"
-              className="w-full bg-[#FBF7F4] border border-[#EAD9CF] rounded-3xl p-4 pl-12 h-32 text-sm focus:outline-none focus:ring-2 focus:ring-[#A67045]/20 resize-none"
+              className="w-full bg-base-200/50 border border-base-300 rounded-3xl p-4 pl-12 h-32 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
             />
             {errors.comment && (
               <p className="text-red-500 text-xs mt-1 ml-4">
@@ -134,7 +134,7 @@ const CreateReviewModal = ({
             className={`w-full py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95 ${
               isSubmitting
                 ? "bg-gray-300"
-                : "bg-[#182806] text-white shadow-[#182806]/20"
+                : "bg-secondary text-white shadow-secondary/20"
             }`}
           >
             {isSubmitting ? "กำลังส่ง..." : "ส่งรีวิวเลย"}

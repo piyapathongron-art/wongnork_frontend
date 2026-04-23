@@ -11,8 +11,8 @@ function ThemeToggleButton() {
             onClick={toggleTheme}
             // Removed absolute positioning so it follows the flex layout of the parent
             className="p-3 rounded-full shadow-lg transition-all duration-300 
-                 bg-white dark:bg-gray-800 text-gray-800 dark:text-yellow-400 
-                 hover:scale-110 active:scale-95 border border-gray-200 dark:border-gray-700"
+                 bg-base-100 text-base-content
+                 hover:scale-110 active:scale-95 border border-base-content/10 "
             aria-label="Toggle Theme"
         >
             {isDark ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6 text-gray-600" />}

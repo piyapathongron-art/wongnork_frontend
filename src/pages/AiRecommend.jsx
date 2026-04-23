@@ -140,23 +140,23 @@ const AiRecommend = () => {
     };
 
     return (
-        <div className="relative h-screen bg-[#FFF8EF] text-[#232415] font-sans overflow-hidden">
+        <div className="relative h-screen bg-base-100 text-base-content font-sans overflow-hidden">
             {/* Glass Header Background */}
             <div className="absolute top-0 left-0 right-0 h-32 z-30 pointer-events-none">
-                <div className="absolute inset-0 bg-[#FFF8EF]/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' }}></div>
+                <div className="absolute inset-0 bg-base-100/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' }}></div>
             </div>
 
             {/* Header - Compact Single Line */}
             <header className="absolute top-0 left-0 right-0 px-6 pt-8 pb-4 flex items-center gap-4 z-40">
                 <div className="flex flex-1 items-baseline gap-2 overflow-hidden">
                     <h1 className="text-xl font-bold text-[#182806] whitespace-nowrap drop-shadow-sm">Wongnork</h1>
-                    <span className="text-sm font-light italic text-[#B86B25] whitespace-nowrap drop-shadow-sm">Bon Appétit</span>
+                    <span className="text-sm font-light italic text-primary whitespace-nowrap drop-shadow-sm">Bon Appétit</span>
                 </div>
 
                 <div className="relative" ref={menuRef}>
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 bg-white/50 backdrop-blur-md hover:bg-[#F2E8D9] rounded-full transition-colors text-[#182806] shadow-sm border border-[#F2E8D9]/50"
+                        className="p-2 bg-white/50 backdrop-blur-md hover:bg-base-200 rounded-full transition-colors text-[#182806] shadow-sm border border-[#F2E8D9]/50"
                     >
                         <MoreVertical size={20} />
                     </button>
@@ -167,16 +167,16 @@ const AiRecommend = () => {
                                 initial={{ opacity: 0, scale: 0.9, x: -10, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, x: -10, y: 10 }}
-                                className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-[#F2E8D1] overflow-hidden z-50"
+                                className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-base-content/10 overflow-hidden z-50"
                             >
                                 <button
                                     onClick={() => {
                                         clearMessages();
                                         setShowMenu(false);
                                     }}
-                                    className="w-full px-4 py-3 text-left flex items-center gap-3 text-sm font-bold text-[#182806] hover:bg-[#FFF8EF] transition-colors"
+                                    className="w-full px-4 py-3 text-left flex items-center gap-3 text-sm font-bold text-[#182806] hover:bg-base-100 transition-colors"
                                 >
-                                    <Trash2 size={16} className="text-[#B86B25]" />
+                                    <Trash2 size={16} className="text-primary" />
                                     ล้างประวัติการคุย
                                 </button>
                             </motion.div>
@@ -203,16 +203,16 @@ const AiRecommend = () => {
                             <motion.div
                                 variants={itemVariants}
                                 className={`max-w-[90%] px-5 py-4 shadow-sm relative group ${msg.type === 'user'
-                                    ? 'bg-[#ffffff] text-[#232415] rounded-[1.5rem] rounded-br-[0.5rem]'
-                                    : 'bg-[#F2E8D9] text-[#182806] rounded-[1.5rem] rounded-bl-[0.5rem]'
+                                    ? 'bg-base-300 text-base-content rounded-[1.5rem] rounded-br-[0.5rem]'
+                                    : 'bg-base-200 text-base-content rounded-[1.5rem] rounded-bl-[0.5rem]'
                                     }`}
                             >
                                 {msg.type === 'ai' && (
                                     <div className="flex items-center gap-2 mb-2">
-                                        <div className="p-1 bg-white rounded-full text-[#B86B25] shadow-sm">
+                                        <div className="p-1 bg-white rounded-full text-primary shadow-sm">
                                             <Sparkles size={12} fill="currentColor" className='animate-pulse' />
                                         </div>
-                                        <span className="text-[9px] font-bold uppercase tracking-widest text-[#B86B25]">Wongnork AI</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Wongnork AI</span>
                                     </div>
                                 )}
 
@@ -240,7 +240,7 @@ const AiRecommend = () => {
                                                         className="w-full h-full object-cover"
                                                     />
                                                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
-                                                        <Star size={12} fill="#B86B25" className="text-[#B86B25]" />
+                                                        <Star size={12} fill="#B86B25" className="text-primary" />
                                                         <span className="text-[10px] font-bold text-[#182806]">Featured</span>
                                                     </div>
                                                 </div>
@@ -252,7 +252,7 @@ const AiRecommend = () => {
                                                         <h3 className="text-xl font-bold text-[#182806] mb-0.5">
                                                             {rec.name}
                                                         </h3>
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#B86B25]">Recommended</span>
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Recommended</span>
                                                     </div>
                                                     <button
                                                         onClick={() => navigate(`/restaurants/${rec.restaurantId}`)}
@@ -268,15 +268,15 @@ const AiRecommend = () => {
 
                                                 <div className="space-y-4">
                                                     <div className="flex items-center gap-3">
-                                                        <h4 className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#B86B25]">Signature Menus</h4>
-                                                        <div className="h-[1px] flex-1 bg-[#F2E8D9]" />
+                                                        <h4 className="text-[9px] font-bold uppercase tracking-[0.15em] text-primary">Signature Menus</h4>
+                                                        <div className="h-[1px] flex-1 bg-base-200" />
                                                     </div>
 
                                                     <div className="grid grid-cols-1 gap-3">
                                                         {rec.recommendedMenus && rec.recommendedMenus.map((menu, mIdx) => (
                                                             <div
                                                                 key={mIdx}
-                                                                className="flex items-center gap-3 p-2.5 rounded-[1.2rem] bg-[#FFF8EF] border border-[#F2E8D9]"
+                                                                className="flex items-center gap-3 p-2.5 rounded-[1.2rem] bg-base-100 border border-[#F2E8D9]"
                                                             >
                                                                 {menu.imageUrl && (
                                                                     <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
@@ -289,7 +289,7 @@ const AiRecommend = () => {
                                                                 )}
                                                                 <div className="flex-1">
                                                                     <p className="text-xs font-bold text-[#182806]">{menu.name}</p>
-                                                                    <p className="text-[10px] text-[#B86B25] font-black">
+                                                                    <p className="text-[10px] text-primary font-black">
                                                                         ฿{menu.price.toLocaleString()}
                                                                     </p>
                                                                 </div>
@@ -309,7 +309,7 @@ const AiRecommend = () => {
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-3 bg-[#F2E8D9] px-5 py-3 rounded-full w-fit shadow-sm"
+                            className="flex items-center gap-3 bg-base-200 px-5 py-3 rounded-full w-fit shadow-sm"
                         >
                             <div className="flex gap-1">
                                 {[0, 0.2, 0.4].map((d) => (
@@ -321,7 +321,7 @@ const AiRecommend = () => {
                                     />
                                 ))}
                             </div>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#B86B25] italic">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary italic">
                                 Thinking...
                             </span>
                         </motion.div>
@@ -332,7 +332,7 @@ const AiRecommend = () => {
             {/* Input Section - Adjusted for NavBar and UX requests */}
             <div className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none">
                 {/* Glass Background */}
-                <div className="absolute inset-0 bg-[#FFF8EF]/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to top, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)' }}></div>
+                <div className="absolute inset-0 bg-base-100/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to top, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)' }}></div>
 
                 <div className="relative p-6 pb-32 pointer-events-auto">
                     <div className="max-w-4xl mx-auto">
@@ -347,9 +347,9 @@ const AiRecommend = () => {
                             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 px-6">
                                 {[
                                     { label: 'ใกล้ฉัน', text: 'แนะนำร้านอาหารยอดนิยมใกล้ฉัน', icon: <MapPin size={14} /> },
-                                    { label: 'สายชาบู', text: 'ช่วยแนะนำร้านชาบูที่คนรีวิวเยอะๆ หน่อย', icon: <Flame size={14} className="text-[#B86B25]" /> },
-                                    { label: 'คาเฟ่ & ขนม', text: 'คาเฟ่ที่ถ่ายรูปสวยและมีขนมอร่อย', icon: <Coffee size={14} className="text-[#B86B25]" /> },
-                                    { label: 'พิซซ่า', text: 'ร้านพิซซ่าเตาถ่านที่อร่อยที่สุด', icon: <Pizza size={14} className="text-[#B86B25]" /> }
+                                    { label: 'สายชาบู', text: 'ช่วยแนะนำร้านชาบูที่คนรีวิวเยอะๆ หน่อย', icon: <Flame size={14} className="text-primary" /> },
+                                    { label: 'คาเฟ่ & ขนม', text: 'คาเฟ่ที่ถ่ายรูปสวยและมีขนมอร่อย', icon: <Coffee size={14} className="text-primary" /> },
+                                    { label: 'พิซซ่า', text: 'ร้านพิซซ่าเตาถ่านที่อร่อยที่สุด', icon: <Pizza size={14} className="text-primary" /> }
                                 ].map((chip) => (
                                     <motion.button
                                         key={chip.label}
@@ -378,7 +378,7 @@ const AiRecommend = () => {
                                 disabled={isLoading}
                                 className={`absolute right-2 p-3 rounded-full transition-all flex items-center justify-center ${input.trim() && !isLoading
                                     ? 'bg-[#182806] text-white shadow-lg'
-                                    : 'bg-[#F2E8D9] text-[#182806]/20'
+                                    : 'bg-primary text-color-base-300'
                                     }`}
                             >
                                 <Send size={18} />

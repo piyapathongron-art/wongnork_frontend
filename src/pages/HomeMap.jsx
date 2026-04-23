@@ -70,7 +70,7 @@ const HomeMap = () => {
   };
 
   return (
-    <div className="w-full h-screen relative overflow-hidden bg-white dark:bg-black touch-none">
+    <div className="w-full h-screen relative overflow-hidden bg-white  touch-none">
       <div className="absolute inset-0 z-0">
         <Suspense
           fallback={<div className="h-full w-full bg-zinc-900 animate-pulse" />}
@@ -106,13 +106,13 @@ const HomeMap = () => {
       {user?.role === "OWNER" && (
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="fixed bottom-24 right-6 z-40 w-16 h-16 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-white dark:border-zinc-900 active:scale-95 transition-transform"
+          className="fixed bottom-24 right-6 z-40 w-16 h-16 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-white  active:scale-95 transition-transform"
         >
           <Store className="w-6 h-6" />
           <span className="text-[8px] font-black uppercase mt-0.5 tracking-tighter">
             Add Shop
           </span>
-          <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white dark:border-zinc-900">
+          <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white ">
             <Plus className="w-3 h-3 text-white" />
           </div>
         </button>
@@ -126,7 +126,7 @@ const HomeMap = () => {
       />
 
       {showFullDetail && (
-        <div className="fixed inset-0 z-[100] bg-white dark:bg-zinc-950">
+        <div className="fixed inset-0 z-[100] bg-white">
           <RestaurantDetail
             restaurant={selectedRestaurant}
             onBack={() => {
