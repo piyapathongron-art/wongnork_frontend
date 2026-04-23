@@ -19,7 +19,12 @@ const Party = () => {
     const [userLoc, setUserLoc] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
+    // 🌟 Search & Filter States
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
+    const categories = ["ทั้งหมด", "Shabu", "Cafe", "Japanese", "BBQ", "Thai", "Western", "Izakaya", "Dessert", "Street Food", "Fine Dining"];
+
     // 🌟 Dynamic Error Modal State
     const [errorModal, setErrorModal] = useState({
         isOpen: false,
@@ -27,22 +32,36 @@ const Party = () => {
         message: ''
     });
 
-    // 🌟 รวมปาร์ตี้ที่เราเป็น Leader และที่เรา Join อยู่จาก UserStore (ข้อมูลใน Store มีความสัมพันธ์ครบ)
+    // 🌟 รวมปาร์ตี้ที่เราเป็น Leader และที่เรา Join อยู่จาก UserStore
     const myJoinedGroups = React.useMemo(() => {
         if (!isLogin || !user) return [];
-        
-        // ดึงจาก partiesLed และ joinedParties โดยตรง
         const led = user.partiesLed || [];
         const joined = (user.joinedParties || []).map(jp => jp.party).filter(p => !!p);
 
         const combined = [...led, ...joined];
-        // Unique by ID เพื่อป้องกันข้อมูลซ้ำ
         const unique = combined.reduce((acc, curr) => {
             if (!acc.find(p => p.id === curr.id)) acc.push(curr);
             return acc;
         }, []);
         return unique;
     }, [user, isLogin]);
+
+    // 🌟 Filtered Parties Logic
+    const filteredDiscovery = React.useMemo(() => {
+        return parties
+            .filter(p => !myJoinedGroups.some(myP => myP.id === p.id)) // ไม่ใช่กลุ่มที่เข้าอยู่แล้ว
+            .filter(p => {
+                const matchesSearch =
+                    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    p.restaurant?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+
+                const matchesCategory =
+                    selectedCategory === 'ทั้งหมด' ||
+                    p.restaurant?.category === selectedCategory;
+
+                return matchesSearch && matchesCategory;
+            });
+    }, [parties, myJoinedGroups, searchQuery, selectedCategory]);
 
     // 🌟 Auto open modal if navigated from Profile with state
     useEffect(() => {
@@ -66,7 +85,6 @@ const Party = () => {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            // ดึงข้อมูลปาร์ตี้ทั้งหมด และ อัปเดตข้อมูลตัวเองใน Store พร้อมกันเพื่อให้ Current Groups อัปเดต
             const [partiesRes] = await Promise.all([
                 apiGetParties(),
                 isLogin ? fetchMe() : Promise.resolve()
@@ -97,10 +115,10 @@ const Party = () => {
         try {
             await apiJoinParty(partyId);
             toast.success("เข้าร่วมปาร์ตี้สำเร็จ!");
-            await loadData(); // 🌟 อัปเดต Store และลิสต์ทันที
+            await loadData();
         } catch (err) {
             const errorMsg = err.response?.data?.error || err.response?.data?.message;
-            
+
             if (errorMsg === "คุณกำลังอยู่ในปาร์ตี้ของร้านนี้ที่ยังไม่จบ") {
                 setErrorModal({
                     isOpen: true,
@@ -113,6 +131,12 @@ const Party = () => {
                     title: "เวลาทับซ้อนกัน! ⏰",
                     message: "คุณมีนัดปาร์ตี้อื่นในช่วงเวลาใกล้เคียงกันอยู่แล้ว (ห่างกันไม่เกิน 1 ชม.) ลองเช็คตารางเวลาอีกครั้งนะครับ"
                 });
+            } else if (errorMsg === "Party is not open for joining") {
+                setErrorModal({
+                    isOpen: true,
+                    title: "ปาร์ตี้นี้อาจเต็มหรือปิดรับแล้ว! 🚫",
+                    message: "ปาร์ตี้นี้อาจเต็มหรือปิดรับแล้ว ลองหากลุ่มอื่นดูนะครับ"
+                });
             } else {
                 toast.error(errorMsg || "Join failed");
             }
@@ -123,7 +147,7 @@ const Party = () => {
         try {
             await apiLeaveParty(partyId);
             toast.success("ออกจากปาร์ตี้แล้ว");
-            await loadData(); 
+            await loadData();
         } catch (err) {
             toast.error("Leave failed");
         }
@@ -135,9 +159,9 @@ const Party = () => {
             {/* 1. MAIN SCROLL CONTAINER */}
             <div
                 id="scroll-container"
-                className="flex-1 overflow-y-auto pt-6 px-4 pb-48 no-scrollbar scroll-smooth"
+                className="flex-1 overflow-y-auto pt-4 px-4 pb-48 no-scrollbar scroll-smooth"
             >
-                <div className="flex flex-col gap-6 max-w-md mx-auto">
+                <div className="flex flex-col gap-2 max-w-md mx-auto">
 
                     {/* 📸 SECTION: YOUR CURRENT GROUPS (IG Stories Style) */}
                     {myJoinedGroups.length > 0 && (
@@ -192,33 +216,67 @@ const Party = () => {
                     )}
 
                     {/* SECTION: DISCOVER HEADER */}
-                    <header className="text-center py-2">
-                        <h1 className="text-2xl font-black tracking-[0.2em] text-[#2B361B] dark:text-white uppercase">
+                    <header className="px-2 text-left">
+                        <h1 className="text-2xl font-black tracking-[0.2em] text-[#2B361B] dark:text-white uppercase mb-4">
                             Discover Nearby
                         </h1>
+
+                        {/* 🔍 SEARCH & FILTER SECTION */}
+                        <div className="flex flex-col gap-4">
+                            {/* Search Input */}
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
+                                    <Search size={18} strokeWidth={2.5} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="ค้นหาชื่อกลุ่ม หรือชื่อร้าน..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-[#BC6C25]/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm group-hover:bg-white"
+                                />
+                            </div>
+
+                            {/* Category Chips */}
+                            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat
+                                            ? 'bg-[#182806] text-white border-[#182806] shadow-md'
+                                            : 'bg-white/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white'
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </header>
 
                     {/* SECTION: NEARBY LIST */}
-                    <div key="discovery-list" className="flex flex-col gap-6">
+                    <div key="discovery-list" className="flex flex-col gap-6 mt-2">
                         {loading && parties.length === 0 ? (
                             <div className="text-center py-20 opacity-20 font-black uppercase text-[10px]">Searching...</div>
                         ) : (
-                            parties
-                                .filter(p => !myJoinedGroups.some(myP => myP.id === p.id))
-                                .map((p) => (
-                                    <PartyCard
-                                        key={`discover-${p.id}`}
-                                        party={p}
-                                        onJoin={() => handleJoin(p.id)}
-                                        isJoined={false}
-                                    />
-                                ))
+                            filteredDiscovery.map((p) => (
+                                <PartyCard
+                                    key={`discover-${p.id}`}
+                                    party={p}
+                                    onJoin={() => handleJoin(p.id)}
+                                    isJoined={false}
+                                />
+                            ))
                         )}
 
-                        {!loading && parties.filter(p => !myJoinedGroups.some(myP => myP.id === p.id)).length === 0 && (
-                            <div className="text-center py-10 opacity-40">
-                                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4" />
-                                <p className="text-[10px] font-black uppercase tracking-widest">No more parties nearby</p>
+                        {!loading && filteredDiscovery.length === 0 && (
+                            <div className="text-center py-20 opacity-40">
+                                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" />
+                                <p className="text-[10px] font-black uppercase tracking-widest leading-loose">
+                                    ไม่พบปาร์ตี้ที่ตรงกับเงื่อนไข<br />
+                                    ลองค้นหาด้วยคำอื่นดูนะ!
+                                </p>
                             </div>
                         )}
                     </div>
@@ -247,12 +305,12 @@ const Party = () => {
             <AnimatePresence>
                 {errorModal.isOpen && (
                     <div className="fixed inset-0 z-[150] flex items-center justify-center px-6">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
                             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         />
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -265,7 +323,7 @@ const Party = () => {
                             <p className="text-sm text-[#8B837E] mb-8 leading-relaxed px-2">
                                 {errorModal.message}
                             </p>
-                            <button 
+                            <button
                                 onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
                                 className="w-full py-4 rounded-2xl font-black text-sm bg-[#182806] text-white shadow-lg active:scale-[0.98] transition-all"
                             >
