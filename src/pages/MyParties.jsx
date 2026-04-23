@@ -96,13 +96,49 @@ const MyParties = () => {
                 </div>
             </div>
 
+            {/* 📸 Active Highlights (IG Stories Style) */}
+            <div className="mt-4 mb-2">
+                <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 py-2">
+                    {mockParties.map((party) => (
+                        <div 
+                            key={`story-${party.id}`}
+                            onClick={() => {
+                                document.getElementById(party.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }}
+                            className="flex-none flex flex-col items-center gap-1.5 w-20 cursor-pointer active:scale-95 transition-transform"
+                        >
+                            {/* Circle Image with Gradient Border */}
+                            <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-[#A65D2E] via-[#F7EAD7] to-[#BC6C25] shadow-md">
+                                <div className="w-[64px] h-[64px] rounded-full border-2 border-white overflow-hidden bg-gray-100">
+                                    <img 
+                                        src={party.restaurantImage} 
+                                        alt={party.restaurantName} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                {party.currentMembers >= party.maxMembers && (
+                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-[8px] font-black text-white px-2 py-0.5 rounded-full uppercase border-2 border-white shadow-sm">
+                                        Full
+                                    </div>
+                                )}
+                            </div>
+                            {/* Short Description */}
+                            <span className="text-[10px] font-bold text-[#2B361B] truncate w-full text-center leading-tight">
+                                {party.restaurantName.split(' ')[0]}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Party List */}
-            <div className="px-6 mt-4 flex flex-col gap-5">
+            <div className="px-6 mt-2 flex flex-col gap-5">
                 {mockParties.map(party => {
                     const isFull = party.currentMembers >= party.maxMembers;
                     return (
                         <div 
                             key={party.id}
+                            id={party.id}
                             className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-[#EEE2D1]/50 active:scale-[0.98] transition-transform cursor-pointer"
                         >
                             <div className="relative h-32 bg-gray-200">

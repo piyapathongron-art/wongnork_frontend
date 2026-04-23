@@ -203,7 +203,7 @@ const SplitBillSummary = () => {
                                 <h3 className="font-bold text-[14px]">{hasReviewed ? 'ได้รับรีวิวของคุณแล้ว' : 'ประทับใจมื้อนี้แค่ไหน?'}</h3>
                                 <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหารเพื่อรับ Dining EXP'}</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => !hasReviewed && setIsReviewModalOpen(true)}
                                 disabled={hasReviewed}
                                 className={`px-5 py-2.5 rounded-full text-[11px] font-black transition-all ${hasReviewed ? 'bg-white/10 text-white/40' : 'bg-[#A65D2E] text-white shadow-lg active:scale-95'}`}
@@ -244,30 +244,7 @@ const SplitBillSummary = () => {
                             return (
                                 <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className={`p-4 rounded-[1.5rem] bg-white border shadow-sm transition-all ${isOptIn ? 'border-[#A65D2E] ring-1 ring-[#A65D2E]/10' : 'border-[#EEE2D1] opacity-70'}`}>
                                     <div className="flex gap-3 mb-3">{item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-lg object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-12 h-12 rounded-lg bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={16} className="text-[#A65D2E]" /></div>)}<div className="flex-1 min-w-0"><h4 className="font-bold text-[14px] text-[#2B361B] truncate">{item.name} {item.isCustom && <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 font-medium ml-1">พิเศษ</span>}</h4><div className="text-[12px] font-black text-[#A65D2E]">฿{item.price?.toLocaleString()} <span className="text-[10px] text-gray-400 font-normal">/ จาน</span></div></div></div>
-                                    <div className="flex items-center gap-2">
-                                        <button 
-                                            onClick={() => handleToggleSharer(item.id, isOptIn)} 
-                                            disabled={isCompleted} 
-                                            className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isOptIn ? 'bg-[#A65D2E] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                                        >
-                                            {isOptIn ? <><Check size={12} strokeWidth={3} /> คุณร่วมหาร</> : 'ฉันไม่ได้กิน'}
-                                        </button>
-                                        {item.sharers.length > 0 && (
-                                            <div className="flex -space-x-1">
-                                                {item.sharers.slice(0, 3).map(s => (
-                                                    <img 
-                                                        key={s.id} 
-                                                        onClick={() => navigate(s.id === user?.id ? '/profile' : `/profile/${s.id}`)}
-                                                        src={s.avatarUrl || `https://i.pravatar.cc/150?u=${s.id}`} 
-                                                        alt={s.name} 
-                                                        className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 object-cover shadow-sm cursor-pointer active:scale-90 transition-transform" 
-                                                        title={s.name} 
-                                                    />
-                                                ))}
-                                                {item.sharers.length > 3 && <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[8px] font-bold text-gray-600 shadow-sm">+{item.sharers.length - 3}</div>}
-                                            </div>
-                                        )}
-                                    </div><div className="flex items-center gap-3 bg-[#FFF8F5] p-1 rounded-xl border border-[#EEE2D1]"><button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 hover:bg-red-50 active:scale-95 transition-colors disabled:opacity-30">{item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}</button><span className="font-bold text-[14px] w-4 text-center text-[#2B361B]">{item.quantity}</span><button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white hover:bg-[#1A2210] active:scale-95 transition-colors disabled:opacity-30"><Plus size={14} /></button></div></div>
+                                    <div className="flex items-center justify-between border-t border-[#EEE2D1]/50 pt-3"><div className="flex items-center gap-2"><button onClick={() => handleToggleSharer(item.id, isOptIn)} disabled={isCompleted} className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isOptIn ? 'bg-[#A65D2E] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{isOptIn ? <><Check size={12} strokeWidth={3} /> คุณร่วมหาร</> : 'ฉันไม่ได้กิน'}</button>{item.sharers.length > 0 && (<div className="flex -space-x-1">{item.sharers.slice(0, 3).map(s => (<img key={s.id} src={s.avatarUrl || `https://i.pravatar.cc/150?u=${s.id}`} alt={s.name} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 object-cover shadow-sm" title={s.name} />))}{item.sharers.length > 3 && <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[8px] font-bold text-gray-600 shadow-sm">+{item.sharers.length - 3}</div>}</div>)}</div><div className="flex items-center gap-3 bg-[#FFF8F5] p-1 rounded-xl border border-[#EEE2D1]"><button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 hover:bg-red-50 active:scale-95 transition-colors disabled:opacity-30">{item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}</button><span className="font-bold text-[14px] w-4 text-center text-[#2B361B]">{item.quantity}</span><button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white hover:bg-[#1A2210] active:scale-95 transition-colors disabled:opacity-30"><Plus size={14} /></button></div></div>
                                     {isOptIn && item.costPerPerson > 0 && (<div className="mt-3 bg-[#FFF8F5] rounded-xl p-2.5 flex justify-between items-center border border-[#EEE2D1]"><span className="text-[10px] font-bold text-[#8B837E]">คุณหารอยู่ที่:</span><span className="text-[13px] font-black text-[#A65D2E]">฿{Math.ceil(item.costPerPerson).toLocaleString()}</span></div>)}
                                 </motion.div>
                             );
@@ -296,10 +273,10 @@ const SplitBillSummary = () => {
             <AnimatePresence>{isCompleteModalOpen && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center px-6"><motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl"><div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><Check size={40} strokeWidth={3} /></div><h3 className="text-xl font-black text-[#2B361B] mb-3">ยืนยันการสรุปยอดบิล?</h3><p className="text-sm text-[#8B837E] mb-8 leading-relaxed">เมื่อยืนยันแล้ว สมาชิกทุกคนจะไม่สามารถแก้ไขรายการอาหารหรือจำนวนได้อีก คุณแน่ใจใช่หรือไม่?</p><div className="flex gap-3"><button onClick={() => setIsCompleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] hover:bg-gray-200 transition-colors rounded-xl font-bold text-sm">ยังก่อน</button><button onClick={handleCompleteParty} disabled={actionLoading} className="flex-1 py-3 bg-green-600 hover:bg-green-700 transition-colors text-white rounded-xl font-bold text-sm shadow-md">ใช่, ปิดจ็อบเลย</button></div></motion.div></motion.div>)}</AnimatePresence>
 
             {/* 🌟 Review Modal */}
-            <CreateReviewModal 
-                isOpen={isReviewModalOpen} 
-                onClose={() => setIsReviewModalOpen(false)} 
-                restaurantId={party?.restaurant?.id} 
+            <CreateReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                restaurantId={party?.restaurant?.id}
                 partyId={id}
                 onReviewSuccess={() => {
                     setHasHasReviewed(true);
