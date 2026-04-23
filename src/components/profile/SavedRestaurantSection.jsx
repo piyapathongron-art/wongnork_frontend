@@ -15,12 +15,13 @@ const SavedRestaurantSection = ({ savedRestaurants, handleToggleSave, formatDate
                 ) : (
                     savedRestaurants.map((saved, index) => {
                         const restaurant = saved.restaurant || {};
-                        const imageUrl = restaurant.images?.find((img) => img.isCover)?.url || 
-                                         restaurant.images?.[0]?.url || 
-                                         'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80';
+                        const imageUrl = restaurant.images?.find((img) => img.isCover)?.url ||
+                            restaurant.images?.[0]?.url ||
+                            'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80';
 
                         return (
-                            <div key={saved.id || index} className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30">
+
+                            <div key={saved.id || index} className="flex-none w-64 bg-white rounded-3xl overflow-hidden shadow-sm border border-[#EEE2D1]/30" onClick={() => navigate(`/restaurants/${restaurant.id}`)}>
                                 <div className="w-full h-32 bg-[#2D3E25]">
                                     <img alt={restaurant.name} className="w-full h-full object-cover" src={imageUrl} />
                                 </div>
@@ -38,6 +39,7 @@ const SavedRestaurantSection = ({ savedRestaurants, handleToggleSave, formatDate
                                     </button>
                                 </div>
                             </div>
+
                         );
                     })
                 )}
