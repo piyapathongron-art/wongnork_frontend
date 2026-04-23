@@ -4,7 +4,7 @@ import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant, apiGetPublicProfil
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
-import { LucideChefHat, AlertCircle } from 'lucide-react';
+import { LucideChefHat, AlertCircle, ArrowLeft } from 'lucide-react';
 import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import ReviewSection from '../components/profile/ReviewSection';
 import MyRestaurantsSection from '../components/profile/MyRestaurantsSection';
@@ -216,8 +216,16 @@ const Profile = () => {
     return (
         <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans">
 
-            <header className="sticky top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
-                <h1 className="text-xl font-extrabold text-[#A65D2E]">{isMe ? 'My Profile' : 'Profile'}</h1>
+            <header className="sticky top-0 w-full z-40 flex items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
+                {!isMe && (
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        className="p-2 -ml-2 mr-2 rounded-full hover:bg-[#F7EAD7] transition-colors cursor-pointer"
+                    >
+                        <ArrowLeft size={24} className="text-[#2B361B]" />
+                    </button>
+                )}
+                <h1 className="text-xl font-extrabold text-[#A65D2E] flex-1">{isMe ? 'My Profile' : 'Profile'}</h1>
                 {isMe && (
                     <button onClick={handleLogout} className="text-[#A65D2E] hover:bg-[#F7EAD7] p-2 rounded-full transition-colors cursor-pointer" title="Logout">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
