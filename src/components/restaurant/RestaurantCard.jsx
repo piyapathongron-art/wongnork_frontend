@@ -1,9 +1,30 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { Star, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router";
+import calculateDistance from "../../utils/distance.ustils";
 
 const RestaurantCard = ({ restaurant }) => {
   const navigate = useNavigate();
+  const [userLocation, setUserlocation] = useState(null)
+
+  useEffect(() => {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {setUserlocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })},
+        (error) => console.log("Location access denied")
+      )
+    }
+  }, [])
+
+  const distance = userLocation ? calculateDistance(
+    userLocation.lat,
+    userLocation.lng,
+    restaurant.lat,
+    restaurant.lng
+  ) : null
 
   // จัดการรูปภาพ
   const coverImage =
@@ -50,7 +71,7 @@ const RestaurantCard = ({ restaurant }) => {
           </div>
           <div className="flex items-center gap-1">
             <MapPin size={12} className="text-accent" />
-            <span>2.5 km</span>
+            <span>{distance !== null ? `${distance.toFixed(1)} km` : "Calculating ..."}</span>
           </div>
         </div>
       </div>
