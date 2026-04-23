@@ -43,7 +43,7 @@ const SplitBillMenu = () => {
             setParty(partyData);
             setBillSummary(billRes.data.data);
 
-            // 🌟 เช็คว่า User นี้รีวิวปาร์ตี้นี้ไปหรือยัง
+            // เช็คว่า User นี้รีวิวปาร์ตี้นี้ไปหรือยัง
             if (partyData.restaurant?.reviews) {
                 const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
                 if (myReview) setHasHasReviewed(true);
@@ -153,29 +153,29 @@ const SplitBillMenu = () => {
             <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
                 <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
-                <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none truncate">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party.name}</p></div>
+                <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
                 <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
             </header>
 
             <main className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6">
                 {/* 🌟 Review Prompt for Completed Party */}
                 {isCompleted && (
-                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-5 rounded-[2rem] bg-white border border-[#A67045]/20 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#A67045]/5 rounded-full -mr-8 -mt-8" />
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#F4E8DB] rounded-2xl flex items-center justify-center shrink-0">
-                                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-[#A67045] fill-current animate-pulse'}`} />
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+                                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-yellow-400 fill-current animate-bounce'}`} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-bold text-[14px] text-[#2B361B]">{hasReviewed ? 'ขอบคุณสำหรับการรีวิว!' : 'รสชาติเป็นยังไงบ้าง?'}</h3>
-                                <p className="text-[10px] text-[#8B837E] mt-0.5">{hasReviewed ? 'รีวิวของคุณช่วยเพื่อนๆ ได้มากเลยครับ' : 'ร่วมแบ่งปันประสบการณ์มื้อนี้ของคุณ'}</p>
+                                <h3 className="font-bold text-[14px]">{hasReviewed ? 'ได้รับรีวิวของคุณแล้ว' : 'ประทับใจมื้อนี้แค่ไหน?'}</h3>
+                                <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหาร'}</p>
                             </div>
                             <button
                                 onClick={() => !hasReviewed && setIsReviewModalOpen(true)}
                                 disabled={hasReviewed}
-                                className={`px-4 py-2 rounded-full text-[11px] font-bold transition-all ${hasReviewed ? 'bg-gray-100 text-gray-400' : 'bg-[#182806] text-white shadow-md active:scale-95'}`}
+                                className={`px-5 py-2.5 rounded-full text-[11px] font-black transition-all ${hasReviewed ? 'bg-white/10 text-white/40' : 'bg-[#A65D2E] text-white shadow-lg active:scale-95'}`}
                             >
-                                {hasReviewed ? 'รีวิวแล้ว' : 'รีวิวเลย'}
+                                {hasReviewed ? 'รีวิวแล้ว' : 'เขียนรีวิว'}
                             </button>
                         </div>
                     </motion.div>
@@ -187,7 +187,7 @@ const SplitBillMenu = () => {
                         {sortedMembers?.map((member) => (
                             <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
                                 <div className="relative">
-                                    <div 
+                                    <div
                                         onClick={() => handleAvatarClick(member.user.id)}
                                         className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200 cursor-pointer active:scale-95 transition-transform"
                                     >
@@ -236,7 +236,7 @@ const SplitBillMenu = () => {
             />
 
             {/* 🌟 Profile Quick View Sheet */}
-            <ProfileQuickViewSheet 
+            <ProfileQuickViewSheet
                 isOpen={isProfileSheetOpen}
                 userId={selectedUserId}
                 onClose={() => setIsProfileSheetOpen(false)}

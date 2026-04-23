@@ -201,7 +201,7 @@ const SplitBillSummary = () => {
                             </div>
                             <div className="flex-1">
                                 <h3 className="font-bold text-[14px]">{hasReviewed ? 'ได้รับรีวิวของคุณแล้ว' : 'ประทับใจมื้อนี้แค่ไหน?'}</h3>
-                                <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหารเพื่อรับ Dining EXP'}</p>
+                                <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหาร'}</p>
                             </div>
                             <button
                                 onClick={() => !hasReviewed && setIsReviewModalOpen(true)}
@@ -223,6 +223,7 @@ const SplitBillSummary = () => {
                         <div className="flex gap-4 mt-4"><div className="bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2"><Users size={12} className="text-[#F7EAD7]" /><span className="text-xs font-medium">{billSummary?.members?.length} คน</span></div><div className="bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2"><Utensils size={12} className="text-[#F7EAD7]" /><span className="text-xs font-medium">{billSummary?.tableItems?.reduce((acc, curr) => acc + curr.quantity, 0)} จาน</span></div></div>
                     </div>
                 </div>
+                {isCompleted && (<div className="mt-12 mb-8 p-6 bg-green-50 border border-green-200 rounded-2xl text-center"><Check size={32} className="text-green-600 mx-auto mb-2" /><h4 className="text-green-800 font-bold">ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว</h4><p className="text-green-600/70 text-[10px] mt-1">ข้อมูลถูกล็อกไว้เพื่อความถูกต้องในการโอนเงิน</p></div>)}
 
                 {isLeader && (
                     <div className="bg-white border border-[#EEE2D1] rounded-[1.5rem] p-5 mb-8 shadow-sm">
@@ -253,7 +254,6 @@ const SplitBillSummary = () => {
                 </div>
 
                 {isLeader && !isCompleted && (<button onClick={() => setIsCompleteModalOpen(true)} className="w-full mt-12 mb-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"><Check size={18} strokeWidth={3} /> ปิดจ็อบปาร์ตี้และสรุปยอดบิล</button>)}
-                {isCompleted && (<div className="mt-12 mb-8 p-6 bg-green-50 border border-green-200 rounded-2xl text-center"><Check size={32} className="text-green-600 mx-auto mb-2" /><h4 className="text-green-800 font-bold">ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว</h4><p className="text-green-600/70 text-[10px] mt-1">ข้อมูลถูกล็อกไว้เพื่อความถูกต้องในการโอนเงิน</p></div>)}
             </main>
 
             <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10">

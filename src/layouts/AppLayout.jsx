@@ -13,7 +13,7 @@ const AppLayout = () => {
     fetchRestaurants();
   }, []);
   return (
-    <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col">
+    <div className="fixed inset-0 w-full h-screen overflow-hidden bg-[#FFF8F5] flex flex-col font-primary">
       <main className="flex-grow relative h-full">
         <Outlet />
       </main>
