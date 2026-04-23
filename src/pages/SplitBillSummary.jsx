@@ -45,6 +45,7 @@ const SplitBillSummary = () => {
     // UI States
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -92,6 +93,37 @@ const SplitBillSummary = () => {
 
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
+
+    // 🌟 Socket Listener for Unread Messages & Room Management
+    useEffect(() => {
+        const token = useUserStore.getState().token;
+        if (!token || !id) return;
+
+        const socket = getSocket(token);
+
+        // 1. เข้าห้องแชททันทีที่เข้าหน้าจอ เพื่อรอรับ Notification
+        socket.emit("join_room", id);
+
+        const handleNewMessage = (msg) => {
+            // ถ้าแชทปิดอยู่ และคนส่งไม่ใช่ตัวเรา -> ให้ขึ้นจุดแดง
+            if (!isChatOpen && msg.userId !== user?.id) {
+                setHasUnreadMessages(true);
+            }
+        };
+
+        socket.on('receive_message', handleNewMessage);
+
+        return () => {
+            socket.off('receive_message', handleNewMessage);
+            // ออกจากห้องเมื่อออกจากหน้าจอ
+            socket.emit("leave_room", id);
+        };
+    }, [id, isChatOpen, user?.id]);
+
+    // เคลียร์จุดแดงเมื่อเปิดแชท
+    useEffect(() => {
+        if (isChatOpen) setHasUnreadMessages(false);
+    }, [isChatOpen]);
 
     // Handle Scrolling logic
     const handleScroll = (e) => {
@@ -262,10 +294,12 @@ const SplitBillSummary = () => {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => setIsChatOpen(true)}
-                        className="p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative pointer-events-auto"
+                        className={`p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative ${hasUnreadMessages ? 'animate-pulse' : ''}`}
                     >
                         <MessageSquare size={20} />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                        {hasUnreadMessages && (
+                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                        )}
                     </button>
                     <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
                 </div>

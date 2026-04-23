@@ -43,6 +43,7 @@ const SplitBillMenu = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -90,6 +91,37 @@ const SplitBillMenu = () => {
         loadData();
     }, [loadData]);
 
+    // 🌟 Socket Listener for Unread Messages & Room Management
+    useEffect(() => {
+        const token = useUserStore.getState().token;
+        if (!token || !id) return;
+
+        const socket = getSocket(token);
+
+        // 1. เข้าห้องแชททันทีที่เข้าหน้าจอ เพื่อรอรับ Notification
+        socket.emit("join_room", id);
+
+        const handleNewMessage = (msg) => {
+            // ถ้าแชทปิดอยู่ และคนส่งไม่ใช่ตัวเรา -> ให้ขึ้นจุดแดง
+            if (!isChatOpen && msg.userId !== user?.id) {
+                setHasUnreadMessages(true);
+            }
+        };
+
+        socket.on('receive_message', handleNewMessage);
+
+        return () => {
+            socket.off('receive_message', handleNewMessage);
+            // ออกจากห้องเมื่อออกจากหน้าจอ
+            socket.emit("leave_room", id);
+        };
+    }, [id, isChatOpen, user?.id]);
+
+    // เคลียร์จุดแดงเมื่อเปิดแชท
+    useEffect(() => {
+        if (isChatOpen) setHasUnreadMessages(false);
+    }, [isChatOpen]);
+
     const handleScroll = (e) => {
         if (e.target.scrollTop > 400) setShowBackToTop(true);
         else setShowBackToTop(false);
@@ -111,7 +143,7 @@ const SplitBillMenu = () => {
         try {
             await apiAddOrderItem(id, { menuId: menu.id, quantity: 1, isCustom: false });
 
-            // 🌟 1. ส่ง System Message แจ้งเตือนในแบท
+            // 🌟 ส่ง System Message แจ้งเตือนในแบท
             const { token } = useUserStore.getState();
             const socket = getSocket(token);
             socket.emit('send_message', {
@@ -203,15 +235,17 @@ const SplitBillMenu = () => {
             <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
                 <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
-                <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
+                <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบนบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
 
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => setIsChatOpen(true)}
-                        className="p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative"
+                        className={`p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative ${hasUnreadMessages ? 'animate-pulse' : ''}`}
                     >
                         <MessageSquare size={20} />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                        {hasUnreadMessages && (
+                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                        )}
                     </button>
                     <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
                 </div>

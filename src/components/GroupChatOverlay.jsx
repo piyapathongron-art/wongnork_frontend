@@ -16,11 +16,9 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const { messages, setMessages } = useSocket(party?.id);
     const socket = getSocket(token);
 
-    // 🌟 1. ดึงประวัติแชทและจัดการ Room
+    // 🌟 1. ดึงประวัติแชท (ไม่ต้องจัดการ Room เพราะ Parent ทำแล้ว)
     useEffect(() => {
         if (!party?.id || !isOpen) return;
-
-        socket.emit("join_room", party.id);
 
         const fetchMessages = async () => {
             try {
@@ -38,7 +36,6 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
         return () => {
             socket.off('display_typing');
             socket.off('hide_typing');
-            socket.emit("leave_room", party.id);
         };
     }, [isOpen, party?.id, token]);
 
