@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Bookmark, Share2, Star } from "lucide-react";
-import { useLocation } from "react-router";
+import { Bookmark, Share2, Star, Navigation } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 import { apiToggleSaveRestaurant, apiGetme } from "../../api/mainApi";
 import { toast } from "react-toastify";
 
@@ -17,15 +17,19 @@ import useRestaurantStore from "../../stores/restaurantStore";
 import { apiGetMenuByRestaurantId } from "../../api/menuApi";
 
 const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
+  const navigate = useNavigate();
   const location = useLocation();
   const [step, setStep] = useState("half");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [showAllMenus, setShowAllMenus] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  const showAllMenus = location.hash === "#menus";
+  const showAllReviews = location.hash === "#reviews";
+
   // 🌟 1. Get the setter action from the store at the TOP LEVEL
-  const setSelectedRestaurant = useRestaurantStore((state) => state.setSelectedRestaurant);
+  const setSelectedRestaurant = useRestaurantStore(
+    (state) => state.setSelectedRestaurant,
+  );
 
   // 🌟 2. Sync the incoming prop to the Global Store correctly
   useEffect(() => {
@@ -117,14 +121,21 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
     }
   };
 
-  const handleRefresh = async () => {
-    try{
-      const res = await apiGetMenuByRestaurantId(restaurant.id)
-      setSelectedRestaurant({...restaurant, menus: res.data.data})
-    } catch(err) {
-      console.log("handleRefresh err", err)
+  const handleRefreshMenu = async () => {
+    const targetId = id || restaurant?.id;
+    if (!targetId) return;
+    try {
+      const res = await apiGetMenuByRestaurantId(restaurant.id);
+      const updatedMenu = res.data?.data || [];
+
+      setRestaurant((prev) => ({
+        ...prev,
+        menu: updatedMenu,
+      }));
+    } catch (err) {
+      console.error("Handle Ref4resh err", err);
     }
-  }
+  };
 
   return (
     <>
@@ -198,10 +209,15 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
 
                 {/* Quick Actions */}
                 <div className="flex gap-3 mb-8 overflow-x-auto no-scrollbar py-2">
-                  <button className="flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
-                    <MapPin size={18} />
+                  <a
+                    href="https://www.google.com/maps"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-[#A65D2E] text-white px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Navigation size={18} />
                     <span>เส้นทาง</span>
-                  </button>
+                  </a>
                   <button
                     onClick={handleToggleSave}
                     className={`flex items-center gap-2 border px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer ${
@@ -246,13 +262,14 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                 <div className="space-y-10">
                   <MenuSection
                     menuItems={menuItems}
-                    restaurant={restaurant} // 🌟 Prop passed here is vital for ownership check
-                    onViewAllClick={() => setShowAllMenus(true)}
+                    restaurant={restaurant}
+                    onViewAllClick={() => navigate("#menus")}
+                    onMenuUpdate={handleRefreshMenu}
                   />
                   <ReviewSection
                     reviewItems={reviewItems}
                     isLoading={isLoadingReviews}
-                    onViewAllClick={() => setShowAllReviews(true)}
+                    onViewAllClick={() => navigate("#reviews")}
                   />
                 </div>
               </div>
@@ -264,15 +281,13 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
       {/* Modals */}
       <AllReviews
         isOpen={showAllReviews}
-        onClose={() => setShowAllReviews(false)}
+        onClose={() => navigate(-1)}
         reviews={reviewItems}
       />
       <AllMenus
         isOpen={showAllMenus}
-        onClose={() => setShowAllMenus(false)}
+        onClose={() => navigate(-1)}
         menus={menuItems}
-        restaurant={restaurant}
-        onMenuUpdate={handleRefresh}
       />
       <ShareModal
         isOpen={isShareModalOpen}

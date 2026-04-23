@@ -1,267 +1,181 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
-import useUserStore from "../stores/userStore";
-import { registerSchema } from "../validations/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast, ToastContainer } from "react-toastify";
+import React from "react";
+import { Eye, EyeOff, Loader2, User, Mail, Lock } from "lucide-react";
+import { useRegisterLogic } from "../hooks/useRegisterLogic";
 
 const Register = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const navigate = useNavigate();
-
-  const registerUser = useUserStore((state) => state.register);
+  const {
+    form,
+    showPassword,
+    setShowPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+    onSubmit,
+    navigate,
+  } = useRegisterLogic();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
+  } = form;
 
-  const onSubmit = async (data) => {
-    try {
-      // new Promise((resolve) => setTimeout(resolve, 5000));
-      console.log("Submit Data:", data);
-      const resp = await registerUser(data);
-      console.log("Response:", resp);
-      toast.success("ลงทะเบียนสำเร็จ โปรดตรวจสอบ Email เพื่อยืนยันตัวตน");
-      navigate("/login");
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-      console.log(errorMsg);
-      toast.error(errorMsg);
-    }
-  };
+  const inputClass =
+    "w-full bg-[#EAD9CF]/60 border-none rounded-xl py-3.5 px-4 pl-11 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all text-sm";
 
   return (
-    <>
-      {/* Logo Section */}
-      <div className="text-center mb-4 animate-fade-up">
-        <h1 className="text-4xl font-bold tracking-tighter leading-none">
+    <div className="flex flex-col items-center justify-start min-h-screen w-full max-w-sm mx-auto px-4 pt-4 pb-8 overflow-y-auto no-scrollbar">
+      <div className="text-center mb-2s sm:mb-4 animate-fade-up shrink-0">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
           <span className="text-accent block">NORK</span>
         </h1>
-        <p className="text-[#2D3E25] font-medium mt-2">Eat | Share | Connect</p>
-        <div className="w-48 h-[1px] bg-gray-300 mt-6 mx-auto"></div>
-        <div className="text-[25px] text-[#2D3E25] font-bold mt-3">Sign up</div>
+        <p className="text-[#2D3E25] font-medium mt-1 sm:mt-2 text-sm sm:text-base">
+          Eat | Share | Connect
+        </p>
+        <div className="w-32 sm:w-48 h-[1px] bg-gray-300 mt-4 sm:mt-6 mx-auto"></div>
+        <div className="text-[20px] sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
+          Sign up
+        </div>
       </div>
 
-      {/* Form Card */}
-      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-6 px-8 shadow-xl animate-fade-up">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <fieldset disabled={isSubmitting}>
-            {/* Full Name Input */}
+      {/* Form Card: สไตล์เดียวกับ Login */}
+      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] mt-2 py-6 px-6 sm:py-8 sm:px-8 shadow-xl animate-fade-up flex flex-col shrink-0">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <fieldset disabled={isSubmitting} className="space-y-4">
+            {/* Full Name */}
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widests mb-1 ml-1">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1">
                 Full Name
               </label>
-              <input
-                {...register("name")}
-                type="text"
-                placeholder="Name"
-                className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
-                  errors.name ? "ring-2 ring-red-400" : ""
-                }`}
-              />
+              <div className="relative">
+                <User
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  size={16}
+                />
+                <input
+                  {...register("name")}
+                  type="text"
+                  placeholder="Name"
+                  className={`${inputClass} ${errors.name ? "ring-2 ring-red-400" : ""}`}
+                />
+              </div>
               {errors.name && (
-                <p className="text-[10px] text-red-500 mt-1 ml-1">
+                <p className="text-[9px] text-red-500 mt-1 ml-1 font-bold italic">
                   {errors.name.message}
                 </p>
               )}
             </div>
 
-            {/* Email Address Input */}
+            {/* Email Address */}
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 mt-2 ml-1">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1">
                 Email Address
               </label>
-              <input
-                {...register("email")}
-                type="email"
-                placeholder="Email"
-                className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
-                  errors.email ? "ring-2 ring-red-400" : ""
-                }`}
-              />
+              <div className="relative">
+                <Mail
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  size={16}
+                />
+                <input
+                  {...register("email")}
+                  type="email"
+                  placeholder="Email"
+                  className={`${inputClass} ${errors.email ? "ring-2 ring-red-400" : ""}`}
+                />
+              </div>
               {errors.email && (
-                <p className="text-[10px] text-red-500 mt-1 ml-1">
+                <p className="text-[9px] text-red-500 mt-1 ml-1 font-bold italic">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Password Input */}
+            {/* Password */}
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 mt-2 ml-1">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1">
                 Password
               </label>
               <div className="relative">
+                <Lock
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  size={16}
+                />
                 <input
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   placeholder="•••••••••"
-                  className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
-                    errors.password ? "ring-2 ring-red-400" : ""
-                  }`}
+                  className={`${inputClass} ${errors.password ? "ring-2 ring-red-400" : ""}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#A65D2E] cursor-pointer"
                 >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                      />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-[10px] text-red-500 mt-1 ml-1">
+                <p className="text-[9px] text-red-500 mt-1 ml-1 font-bold italic">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            {/* Confirm Password Input พร้อมปุ่มเปิด-ปิดตา */}
+            {/* Confirm Password */}
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 mt-2 ml-1">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1">
                 Confirm Password
               </label>
               <div className="relative">
+                <Lock
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  size={16}
+                />
                 <input
                   {...register("confirmPassword")}
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="•••••••••"
-                  className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
-                    errors.confirmPassword ? "ring-2 ring-red-400" : ""
-                  }`}
+                  className={`${inputClass} ${errors.confirmPassword ? "ring-2 ring-red-400" : ""}`}
                 />
-                {/* ปุ่มเปิด-ปิดตาสำหรับ Confirm Password */}
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#A65D2E] cursor-pointer"
                 >
                   {showConfirmPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
-                      />
-                    </svg>
+                    <EyeOff size={18} />
                   ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12.25a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                      />
-                    </svg>
+                    <Eye size={18} />
                   )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-[10px] text-red-500 mt-1 ml-1">
+                <p className="text-[9px] text-red-500 mt-1 ml-1 font-bold italic">
                   {errors.confirmPassword.message}
                 </p>
               )}
             </div>
 
+            {/* Submit Button */}
             <button
-  type="submit"
-  disabled={isSubmitting} 
-  className={`w-full flex justify-center items-center font-semibold py-2 rounded-xl shadow-lg transition-all mt-4 
-    ${isSubmitting 
-      ? "bg-gray-400 cursor-not-allowed text-white" 
-      : "bg-accent hover:bg-accent/80 text-white shadow-orange-900/20 transform active:scale-[0.98] cursor-pointer" // สีปุ่มปกติ
-    }`}
->
- 
-  {isSubmitting ? (
-    <>
-      
-      <svg 
-        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" 
-        xmlns="http://www.w3.org/2000/svg" 
-        fill="none" 
-        viewBox="0 0 24 24"
-      >
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      กำลังส่งอีเมล...
-    </>
-  ) : (
-    "Create Account"
-  )}
-</button>
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-[#A65D2E] hover:bg-[#8e4f27] text-white font-semibold py-3 rounded-xl shadow-lg transform active:scale-[0.98] transition-all mt-2 cursor-pointer disabled:bg-gray-400 flex justify-center items-center"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />{" "}
+                  Processing...
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </button>
           </fieldset>
         </form>
 
-        {/* Divider */}
-        <div className="relative flex items-center py-6">
+        {/* Divider: เส้นสีเทาแบบ Login */}
+        <div className="relative flex items-center py-5 sm:py-8">
           <div className="flex-grow border-t border-gray-200"></div>
           <span className="flex-shrink mx-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
             Or Register
@@ -269,28 +183,37 @@ const Register = () => {
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
 
-        {/* Google Button */}
-        <button className="w-full bg-[#FEF1E9] border border-orange-100 flex items-center justify-center gap-3 py-3 rounded-xl hover:bg-white transition-colors cursor-pointer">
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          <span className="text-gray-600 font-medium text-sm">Google</span>
-        </button>
+        {/* Google Button: ใช้โครงสร้างล่องหนแบบเดียวกับ Login */}
+        <div className="relative w-full h-[50px] flex justify-center items-center rounded-2xl group overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center gap-2.5 bg-white border border-[#EAD9CF] rounded-2xl group-active:scale-[0.98] transition-all pointer-events-none shadow-sm">
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              className="w-4 h-4"
+              alt="google logo"
+            />
+            <span className="text-xs font-bold text-[#736356]">
+              Sign up with Google
+            </span>
+          </div>
+          {/* ล่องหนให้กดทะลุ (ต้องให้เพื่อนใส่ GoogleLogin ตรงนี้ทีหลังถ้าจะใช้) */}
+          <div className="absolute inset-0 z-10 opacity-[0.01] cursor-pointer flex justify-center overflow-hidden">
+            {/* พี่เอา <GoogleLogin /> มาใส่ครอบตรงนี้ได้เลยครับเหมือนหน้า Login */}
+          </div>
+        </div>
 
-        {/* Bottom Link */}
-        <span className="flex text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-10 justify-center">
+        {/* Bottom Link: สไตล์ตรงกับ Login */}
+        <div className="flex text-[10px] font-bold text-gray-500 uppercase tracking-normal mt-6 justify-center">
           Already have an account?{" "}
           <button
+            type="button"
+            className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
             onClick={() => navigate("/login")}
-            className="uppercase text-accent pl-1 cursor-pointer hover:underline"
           >
             Sign In
           </button>
-        </span>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

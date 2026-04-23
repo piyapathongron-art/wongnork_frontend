@@ -3,12 +3,15 @@ import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
 import { useAuthLogic } from "../hooks/useAuthLogic";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import VerifyEmailModal from "../components/auth/VerifyEmailModal";
 
 const Login = () => {
   const {
     form,
     showPassword,
     setShowPassword,
+    showVerifyModal,
+    setShowVerifyModal,
     submitLogin,
     handleGoogleSuccess,
     navigate,
@@ -75,12 +78,12 @@ const Login = () => {
                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
                   Password
                 </label>
-                <button
+                {/* <button
                   type="button"
                   className="text-[9px] font-black text-accent uppercase hover:underline cursor-pointer"
                 >
                   Forgot Password?
-                </button>
+                </button> */}
               </div>
               <div className="relative">
                 <Lock
@@ -165,6 +168,11 @@ const Login = () => {
             Sign Up
           </button>
         </div>
+        {/* 🌟 2. เรียกใช้ Modal ตรงบรรทัดสุดท้ายก่อนปิด </> */}
+        <VerifyEmailModal
+          isOpen={showVerifyModal}
+          onClose={() => setShowVerifyModal(false)}
+        />
       </div>
     </>
   );

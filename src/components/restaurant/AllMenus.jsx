@@ -1,43 +1,51 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pencil, Trash2 } from "lucide-react";
+import { X, Pencil, Trash2 } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
 import useUserStore from "../../stores/userStore";
 import { apiDeleteMenu } from "../../api/menuApi";
 import AddMenuModal from "../Modals/AddMenuModal";
 import { toast } from "react-toastify";
 
-const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedMenu, setSelectedMenu] = useState(null)
+const AllMenus = ({
+  isOpen,
+  onClose,
+  menus = [],
+  restaurant,
+  onMenuUpdate,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState(null);
 
-  const user = useUserStore((state) => state.user)
+  const user = useUserStore((state) => state.user);
 
-  const loggedInUserId = user?.id || user?.user?.id
-  const userRole = user?.role || user?.user?.role
-  const isRealOwner = userRole === "OWNER" && restaurant?.ownerId &&
-    String(loggedInUserId) === String(restaurant.ownerId)
+  const loggedInUserId = user?.id || user?.user?.id;
+  const userRole = user?.role || user?.user?.role;
+  const isRealOwner =
+    userRole === "OWNER" &&
+    restaurant?.ownerId &&
+    String(loggedInUserId) === String(restaurant.ownerId);
 
   const handleEdit = (menu) => {
-    setSelectedMenu(menu)
-    setIsModalOpen(true)
-  }
+    setSelectedMenu(menu);
+    setIsModalOpen(true);
+  };
 
   const handleDelete = async (menuId) => {
     if (window.confirm("Are you sure to delete?")) {
       try {
-        await apiDeleteMenu(restaurant.id, menuId)
-        if(onMenuUpdate) await onMenuUpdate()
+        await apiDeleteMenu(restaurant.id, menuId);
+        if (onMenuUpdate) await onMenuUpdate();
       } catch (err) {
-        console.log("Delete Function err", err)
-        toast.error("Cannot Delete")
+        console.log("Delete Function err", err);
+        toast.error("Cannot Delete");
       }
     }
-  }
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-end pointer-events-none">
+        <div className="fixed inset-0 z-[300] flex justify-end pointer-events-none">
           {/* 🛡️ แผ่นกระจกใสกันผี */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -54,7 +62,7 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
             onTouchEnd={(e) => e.stopPropagation()}
           />
 
-          {/* 🌟 แผ่นเมนู (เด้งขึ้นมาจากข้างล่าง) */}
+          {/* 🌟 แผ่นเมนู */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -67,13 +75,19 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
               <h2 className="text-xl font-bold text-base-content">
                 เมนูทั้งหมด ({menus.length})
               </h2>
+              {/* 🌟 ย้ายปุ่มกลับมาขวา */}
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   onClose();
                 }}
-                onTouchEnd={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
                 className="p-2 text-base-content bg-base-200/50 rounded-full active:scale-90 transition-transform cursor-pointer"
               >
                 <X size={20} className="text-accent" />
@@ -81,7 +95,7 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
             </div>
 
             {/* --- Content --- */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar pb-32">
               {menus.length > 0 ? (
                 menus.map((menu, index) => (
                   <div
@@ -89,19 +103,23 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
                     className="flex gap-4 bg-base-100 p-4 rounded-3xl shadow-sm border border-base-content/10 relative group"
                   >
                     {isRealOwner && (
-                <div className="absolute top-3 right-3 flex gap-2 z-10">
-                  <button onClick={() => handleEdit(menu)}
-                    className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
-                    title="แก้ไขเมนู">
-                      <Pencil size={14}/>
-                  </button>
-                  <button onClick={() => handleDelete(menu.id)}
-                    className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
-                    title="ลบเมนู">
-                      <Trash2 size={14}/>
-                  </button>
-                </div>
-              )}
+                      <div className="absolute top-3 right-3 flex gap-2 z-10">
+                        <button
+                          onClick={() => handleEdit(menu)}
+                          className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                          title="แก้ไขเมนู"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(menu.id)}
+                          className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                          title="ลบเมนู"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
                     {/* รูปเมนู */}
                     <img
                       src={
@@ -111,8 +129,6 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
                       alt={menu.name}
                       className="w-24 h-24 object-cover rounded-2xl bg-base-300 shrink-0"
                     />
-
-                    {/* รายละเอียดเมนู */}
                     <div className="flex flex-col justify-between flex-1 py-1">
                       <div>
                         <h4 className="text-[15px] font-bold text-base-content leading-tight">
@@ -137,13 +153,13 @@ const AllMenus = ({ isOpen, onClose, menus = [], restaurant, onMenuUpdate }) => 
           </motion.div>
         </div>
       )}
-      <AddMenuModal 
-      isOpen = {isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      restaurantId={restaurant?.id}
-      editData={selectedMenu}
-      onSuccess={onMenuUpdate}/>
-      
+      <AddMenuModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        restaurantId={restaurant?.id}
+        editData={selectedMenu}
+        onSuccess={onMenuUpdate}
+      />
     </AnimatePresence>
   );
 };
