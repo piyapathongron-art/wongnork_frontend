@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
+import ProfileQuickViewSheet from '../components/profile/ProfileQuickViewSheet';
 
 const SplitBillMenu = () => {
     const { id } = useParams();
@@ -24,6 +25,10 @@ const SplitBillMenu = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [hasReviewed, setHasHasReviewed] = useState(false);
 
+    // Profile Quick View State
+    const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
+
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
 
@@ -38,8 +43,7 @@ const SplitBillMenu = () => {
             setParty(partyData);
             setBillSummary(billRes.data.data);
 
-            // 🌟 เช็คว่า User นี้รีวิวปาร์ตี้นี้ไปหรือยัง (สมมติว่า backend ส่งข้อมูลรีวิวมาในปาร์ตี้ หรือเราเช็คจากรายการรีวิวของร้าน)
-            // ในที่นี้เราจะเช็คว่าในรายการ reviews ของร้าน มีอันไหนที่มี userId และ partyId ตรงกับเราไหม
+            // 🌟 เช็คว่า User นี้รีวิวปาร์ตี้นี้ไปหรือยัง
             if (partyData.restaurant?.reviews) {
                 const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
                 if (myReview) setHasHasReviewed(true);
@@ -63,6 +67,15 @@ const SplitBillMenu = () => {
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    const handleAvatarClick = (clickedUserId) => {
+        if (clickedUserId === user?.id) {
+            navigate('/profile');
+        } else {
+            setSelectedUserId(clickedUserId);
+            setIsProfileSheetOpen(true);
+        }
+    };
 
     const handleAddMenuToBill = async (menu) => {
         if (actionLoading || isCompleted) return;
@@ -175,7 +188,7 @@ const SplitBillMenu = () => {
                             <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
                                 <div className="relative">
                                     <div 
-                                        onClick={() => navigate(member.user.id === user?.id ? '/profile' : `/profile/${member.user.id}`)}
+                                        onClick={() => handleAvatarClick(member.user.id)}
                                         className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200 cursor-pointer active:scale-95 transition-transform"
                                     >
                                         <img src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`} alt={member.user.name} className="w-full h-full object-cover" />
@@ -220,6 +233,14 @@ const SplitBillMenu = () => {
                     loadData();
                     toast.success("ขอบคุณสำหรับรีวิวครับ!");
                 }}
+            />
+
+            {/* 🌟 Profile Quick View Sheet */}
+            <ProfileQuickViewSheet 
+                isOpen={isProfileSheetOpen}
+                userId={selectedUserId}
+                onClose={() => setIsProfileSheetOpen(false)}
+                navigate={navigate}
             />
         </div>
     );
