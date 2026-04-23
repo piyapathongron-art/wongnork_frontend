@@ -14,12 +14,16 @@ export const useThemeStore = create((set, get) => ({
 
     initTheme: () => {
         const dark = get().isDark
+        const theme = dark ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', theme)
         document.documentElement.classList.toggle('dark', dark)
     },
     toggleTheme: () => {
-        const current = get().isDark
-        const nextDark = !current
-        localStorage.setItem('theme', nextDark ? 'dark' : 'light')
+        const nextDark = !get().isDark
+        const nextTheme = nextDark ? 'dark' : 'light'
+        
+        localStorage.setItem('theme', nextTheme)
+        document.documentElement.setAttribute('data-theme', nextTheme)
         document.documentElement.classList.toggle('dark', nextDark)
         set({isDark: nextDark})
     }

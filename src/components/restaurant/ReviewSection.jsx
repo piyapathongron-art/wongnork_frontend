@@ -5,11 +5,11 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
   return (
     <section className="mb-8 px-6">
       <div className="flex justify-between items-end mb-4">
-        <h3 className="text-xl font-bold text-[#2C241E]">รีวิว</h3>
+        <h3 className="text-xl font-bold text-base-content">รีวิว</h3>
         {reviewItems.length > 0 && (
           <button
             onClick={onViewAllClick}
-            className="text-[13px] font-bold text-[#A67045] hover:underline cursor-pointer"
+            className="text-[13px] font-bold text-accent hover:underline cursor-pointer"
           >
             ดูทั้งหมด ({reviewItems.length})
           </button>
@@ -17,8 +17,8 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-6 text-[#A67045]">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#A67045]"></div>
+        <div className="flex justify-center items-center py-6 text-accent">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
           <span className="ml-3 text-sm font-bold">กำลังดึงรีวิว...</span>
         </div>
       ) : (
@@ -37,7 +37,7 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
               return (
                 <div
                   key={rev.id || index}
-                  className="bg-[#F4E8DB] p-6 rounded-[2rem] shadow-sm"
+                  className="bg-base-200 p-6 rounded-[2rem] shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -47,10 +47,10 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
                         alt={rev.user?.name || "User"}
                       />
                       <div>
-                        <h4 className="text-[15px] font-bold text-[#2C241E] block">
+                        <h4 className="text-[15px] font-bold text-base-content block">
                           {rev.user?.name || "ไม่ระบุชื่อ"}
                         </h4>
-                        <span className="text-[11px] text-[#A68F7E] block mt-0.5">
+                        <span className="text-[11px] text-base-content/40 block mt-0.5">
                           {formattedDate}
                         </span>
                       </div>
@@ -68,11 +68,11 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
                       ))}
                     </div>
                   </div>
-                  <p className="text-[14px] text-[#7A6A5E] leading-relaxed font-medium">
+                  <p className="text-[14px] text-base-content/50 leading-relaxed font-medium">
                     {rev.comment ? (
                       `"${rev.comment}"`
                     ) : (
-                      <span className="italic text-[#A68F7E] text-xs">
+                      <span className="italic text-base-content/40 text-xs">
                         ให้คะแนนโดยไม่มีความคิดเห็น
                       </span>
                     )}
@@ -81,8 +81,8 @@ const ReviewSection = ({ reviewItems, isLoading, onViewAllClick }) => {
               );
             })
           ) : (
-            <div className="bg-[#F4E8DB]/50 p-6 rounded-[2rem] text-center">
-              <p className="text-[#7A6A5E] font-medium">
+            <div className="bg-base-200/50 p-6 rounded-[2rem] text-center">
+              <p className="text-base-content/50 font-medium">
                 ยังไม่มีรีวิวสำหรับร้านนี้ เป็นคนแรกที่รีวิวสิ!
               </p>
             </div>

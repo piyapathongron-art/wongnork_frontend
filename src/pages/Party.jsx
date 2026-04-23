@@ -99,7 +99,7 @@ const Party = () => {
     };
 
     return (
-        <div className="fixed inset-0 bg-[#FDF2ED] dark:bg-black overflow-hidden flex flex-col font-sans">
+        <div className="fixed inset-0 bg-base-100  overflow-hidden flex flex-col font-sans">
             
             {/* 1. MAIN SCROLL CONTAINER */}
             {/* FIX: Increased pb-48 (192px) to ensure the last card 
@@ -115,7 +115,7 @@ const Party = () => {
                     <div key={`my-parties-container-${myParties.length}`} className="flex flex-col gap-6">
                         {myParties.length > 0 && (
                             <>
-                                <h2 className="text-center text-[10px] font-black tracking-[0.3em] text-[#BC6C25] uppercase">
+                                <h2 className="text-center text-[10px] font-black tracking-[0.3em] text-primary uppercase">
                                     — Your Current Groups —
                                 </h2>
                                 {myParties.map(party => (
@@ -127,14 +127,14 @@ const Party = () => {
                                         />
                                     </div>
                                 ))}
-                                <div className="h-px bg-[#BC6C25]/20 w-full mt-4 mb-2" />
+                                <div className="h-px bg-primary/20 w-full mt-4 mb-2" />
                             </>
                         )}
                     </div>
 
                     {/* SECTION: DISCOVER HEADER */}
                     <header className="text-center py-2">
-                        <h1 className="text-2xl font-black tracking-[0.2em] text-[#2B361B] dark:text-white uppercase">
+                        <h1 className="text-2xl font-black tracking-[0.2em] text-base-content  uppercase">
                             Discover Nearby
                         </h1>
                     </header>
@@ -158,7 +158,7 @@ const Party = () => {
 
                         {!loading && parties.filter(p => !myParties.some(myP => myP.id === p.id)).length === 0 && (
                             <div className="text-center py-10 opacity-40">
-                                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4" />
+                                <Search className="w-10 h-10 mx-auto text-primary mb-4" />
                                 <p className="text-[10px] font-black uppercase tracking-widest">No more parties nearby</p>
                             </div>
                         )}
@@ -176,7 +176,7 @@ const Party = () => {
                     to the NavBar but away from the list content. 
                 */}
                 <button 
-                    className="absolute bottom-28 right-6 w-20 h-20 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] dark:border-zinc-900 z-50 active:scale-90 transition-all pointer-events-auto"
+                    className="absolute bottom-28 right-6 w-20 h-20 bg-primary text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] z-50 active:scale-90 transition-all pointer-events-auto"
                     onClick={() => setIsModalOpen(true)}
                 >
                     <UserPlus className="w-6 h-6 mb-1" />

@@ -22,29 +22,29 @@ const PostMealSummary = () => {
           <CheckCircle2 size={64} className="text-green-500" />
         </div>
 
-        <h1 className="text-2xl font-extrabold text-[#2C241E] mb-2">
+        <h1 className="text-2xl font-extrabold text-base-content mb-2">
           ชำระเงินเรียบร้อย!
         </h1>
-        <p className="text-[#7A6A5E] mb-6 font-medium">
+        <p className="text-base-content/50 mb-6 font-medium">
           บิลของกลุ่มคุณที่ {mockRestaurantName}
         </p>
 
-        <div className="bg-[#F4E8DB] rounded-2xl p-4 mb-8">
-          <div className="flex justify-between items-center mb-2 text-[#7A6A5E] text-sm">
+        <div className="bg-base-200 rounded-2xl p-4 mb-8">
+          <div className="flex justify-between items-center mb-2 text-base-content/50 text-sm">
             <span className="flex items-center gap-1">
               <Receipt size={16} /> ยอดรวม
             </span>
             <span className="font-bold">฿{mockBill.total}</span>
           </div>
-          <div className="flex justify-between items-center text-[#7A6A5E] text-sm mb-4">
+          <div className="flex justify-between items-center text-base-content/50 text-sm mb-4">
             <span className="flex items-center gap-1">
               <Users size={16} /> สมาชิก
             </span>
             <span className="font-bold">{mockBill.members} คน</span>
           </div>
           <div className="border-t border-[#EEDCcc]/50 pt-4 flex justify-between items-center">
-            <span className="text-[#2C241E] font-bold">ส่วนของคุณ</span>
-            <span className="text-2xl font-black text-[#A67045]">
+            <span className="text-base-content font-bold">ส่วนของคุณ</span>
+            <span className="text-2xl font-black text-accent">
               ฿{mockBill.myShare}
             </span>
           </div>

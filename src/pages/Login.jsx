@@ -76,7 +76,7 @@ const Login = () => {
       <div className="text-center mb-4 animate-fade-up">
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
-          <span className="text-[#A65D2E] block">NORK</span>
+          <span className="text-accent block">NORK</span>
         </h1>
         <p className="text-[#2D3E25] font-medium mt-2">Eat | Share | Connect</p>
         <div className="w-48 h-[1px] bg-gray-300 mt-6 mx-auto"></div>
@@ -102,7 +102,7 @@ const Login = () => {
                 })}
                 type="email"
                 placeholder="Email"
-                className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                   errors.email ? "ring-2 ring-red-400" : ""
                 }`}
               />
@@ -121,7 +121,7 @@ const Login = () => {
                 </label>
                 <button
                   type="button"
-                  className="text-[10px] font-bold text-[#A65D2E] uppercase tracking-widest hover:underline cursor-pointer"
+                  className="text-[10px] font-bold text-accent uppercase tracking-widest hover:underline cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -137,7 +137,7 @@ const Login = () => {
                   })}
                   type={showPassword ? "text" : "password"}
                   placeholder="•••••••••"
-                  className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                  className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-4 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                     errors.password ? "ring-2 ring-red-400" : ""
                   }`}
                 />
@@ -145,7 +145,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#A65D2E] transition-colors cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent transition-colors cursor-pointer"
                 >
                   {showPassword ? (
                     <svg
@@ -194,7 +194,7 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#A65D2E] hover:bg-[#8e4f27] text-white font-semibold py-3 rounded-xl shadow-lg shadow-orange-900/20 transform active:scale-[0.98] transition-all mt-5 cursor-pointer"
+              className="w-full bg-accent hover:bg-accent/80 text-white font-semibold py-3 rounded-xl shadow-lg shadow-orange-900/20 transform active:scale-[0.98] transition-all mt-5 cursor-pointer"
             >
               Sign In
             </button>
@@ -225,7 +225,7 @@ const Login = () => {
           Don't have an account?{" "}
           <button
             type="button"
-            className="uppercase text-[#A65D2E] pl-1 cursor-pointer"
+            className="uppercase text-accent pl-1 cursor-pointer"
             onClick={() => navigate("/register")}
           >
             Sign Up

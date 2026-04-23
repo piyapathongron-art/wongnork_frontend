@@ -95,7 +95,7 @@ const SplitBillMenu = () => {
 
     if (loading && !party) {
         return (
-            <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
+            <div className="w-full min-h-screen bg-base-100 flex justify-center items-center">
                 <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
             </div>
         );
@@ -122,12 +122,12 @@ const SplitBillMenu = () => {
             <div onClick={() => handleAddMenuToBill(item)} className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}>
                 {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
+                    <h4 className="font-bold text-[15px] text-base-content truncate leading-tight">{item.name}</h4>
                     <div className="flex items-center justify-between mt-2">
                         <p className="text-[13px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()}</p>
                         <div className="flex items-center gap-2">
                             {totalOrdered > 0 && (<span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-0.5 rounded-md">โต๊ะสั่งแล้ว {totalOrdered}</span>)}
-                            {!isCompleted && (<button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-95"><Plus size={16} /></button>)}
+                            {!isCompleted && (<button className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-95"><Plus size={16} /></button>)}
                         </div>
                     </div>
                 </div>
@@ -136,9 +136,9 @@ const SplitBillMenu = () => {
     };
 
     return (
-        <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] overflow-hidden">
+        <div className="relative w-full h-screen bg-base-100 text-base-content overflow-hidden">
             <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
-                <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
+                <div className="absolute inset-0 bg-base-100/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
                 <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none truncate">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party.name}</p></div>
                 <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
@@ -150,11 +150,11 @@ const SplitBillMenu = () => {
                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-5 rounded-[2rem] bg-white border border-[#A67045]/20 shadow-sm relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-[#A67045]/5 rounded-full -mr-8 -mt-8" />
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#F4E8DB] rounded-2xl flex items-center justify-center shrink-0">
-                                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-[#A67045] fill-current animate-pulse'}`} />
+                            <div className="w-12 h-12 bg-base-200 rounded-2xl flex items-center justify-center shrink-0">
+                                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-accent fill-current animate-pulse'}`} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-bold text-[14px] text-[#2B361B]">{hasReviewed ? 'ขอบคุณสำหรับการรีวิว!' : 'รสชาติเป็นยังไงบ้าง?'}</h3>
+                                <h3 className="font-bold text-[14px] text-base-content">{hasReviewed ? 'ขอบคุณสำหรับการรีวิว!' : 'รสชาติเป็นยังไงบ้าง?'}</h3>
                                 <p className="text-[10px] text-[#8B837E] mt-0.5">{hasReviewed ? 'รีวิวของคุณช่วยเพื่อนๆ ได้มากเลยครับ' : 'ร่วมแบ่งปันประสบการณ์มื้อนี้ของคุณ'}</p>
                             </div>
                             <button
@@ -185,13 +185,13 @@ const SplitBillMenu = () => {
                     </div>
                 </div>
 
-                <div className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-[#EAD9CF]/40 border-[#EAD9CF]'}`}>
+                <div className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-base-300/40 border-[#EAD9CF]'}`}>
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">{isCompleted ? <Check size={20} className="text-green-600" /> : <Utensils size={20} className="text-[#A65D2E]" />}</div>
                     <div><h3 className="font-bold text-[14px] leading-tight">{isCompleted ? 'ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3><p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">{isCompleted ? 'คุณสามารถดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง แต่ไม่สามารถแก้ไขข้อมูลได้แล้ว' : 'เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ'}</p></div>
                 </div>
 
                 <div className="space-y-3 mb-10">
-                    <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><div className="h-px flex-1 bg-[#EAD9CF]" />เมนูทั้งหมดจากร้าน<div className="h-px flex-1 bg-[#EAD9CF]" /></h3>
+                    <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><div className="h-px flex-1 bg-base-300" />เมนูทั้งหมดจากร้าน<div className="h-px flex-1 bg-base-300" /></h3>
                     {menuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)}
                 </div>
             </main>

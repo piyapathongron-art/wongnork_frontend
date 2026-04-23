@@ -3,10 +3,10 @@ import React from 'react';
 const ReviewSection = ({ reviews, formatDate }) => {
     return (
         <section className="space-y-4">
-            <h3 className="font-extrabold text-xl text-[#2B361B]">My Reviews</h3>
+            <h3 className="font-extrabold text-xl text-base-content">My Reviews</h3>
             <div className="space-y-5">
                 {reviews.length === 0 ? (
-                    <p className="text-sm text-center text-gray-400 py-4">ยังไม่มีข้อมูลรีวิว</p>
+                    <p className="text-sm text-center text-base-content/50 py-4">ยังไม่มีข้อมูลรีวิว</p>
                 ) : (
                     reviews.map((review, index) => {
                         const restaurant = review.restaurant || {};
@@ -17,12 +17,12 @@ const ReviewSection = ({ reviews, formatDate }) => {
 
                         return (
                             <div key={review.id || index} className="flex gap-4 items-start">
-                                <div className="w-16 h-16 rounded-2xl overflow-hidden flex-none bg-[#2D3E25]">
+                                <div className="w-16 h-16 rounded-2xl overflow-hidden flex-none bg-base-300">
                                     <img alt={restaurant.name} className="w-full h-full object-cover" src={imageUrl} />
                                 </div>
                                 <div className="space-y-1 w-full">
                                     <div className="flex justify-between items-center w-full">
-                                        <h4 className="font-bold text-[13px] text-[#2B361B]">{restaurant.name || 'ร้านอาหาร'}</h4>
+                                        <h4 className="font-bold text-[13px] text-base-content">{restaurant.name || 'ร้านอาหาร'}</h4>
                                         <span className="text-[10px] text-[#A8A29F] font-medium">{formatDate(review.createdAt)}</span>
                                     </div>
                                     <div className="flex text-[#A65D2E]">
@@ -32,7 +32,7 @@ const ReviewSection = ({ reviews, formatDate }) => {
                                             </svg>
                                         ))}
                                     </div>
-                                    <p className="text-[11px] text-[#7A7571] line-clamp-2 leading-relaxed pr-2">
+                                    <p className="text-[11px] text-base-content/50 line-clamp-2 leading-relaxed pr-2">
                                         {review.comment}
                                     </p>
                                 </div>

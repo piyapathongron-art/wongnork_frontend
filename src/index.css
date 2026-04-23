@@ -14,6 +14,31 @@
   }
 }
 
+@plugin "daisyui" {
+  themes: light --default, dark:
+}
+[data-theme="light"] {
+  --color-primary: #BC6C25;
+  --color-secondary: #2B361B;
+  --color-accent: #A65D2E;
+  --color-neutral: #2B361B;
+  --color-base-100: #FFF8F5;
+  --color-base-200: #F7EAD7;
+  --color-base-300: #EAD9CF;
+  --color-base-content: #2B361B;
+}
+
+[data-theme="dark"] {
+  --color-primary: #D99453;
+  --color-secondary: #8C9D5B;
+  --color-accent: #59AEC5;
+  --color-neutral: #1A1614;
+  --color-base-100: #1A1614;
+  --color-base-200: #252019;
+  --color-base-300: #332C25;
+  --color-base-content: #F7EAD7;
+}
+
 @import "react-toastify/dist/ReactToastify.css";
 
 @theme {

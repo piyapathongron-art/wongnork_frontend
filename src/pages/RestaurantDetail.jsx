@@ -175,7 +175,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
       const updatedMenu = res.data?.data || []
 
       setRestaurant(prev => ({
-        ...prev, menu: updatedMenu
+        ...prev, menus: updatedMenu
       }))
     } catch(err) {
       console.error("Handle Ref4resh err", err)
@@ -188,8 +188,8 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
 
   if (isLoadingRest) {
     return (
-      <div className="fixed inset-0 bg-[#FFF8F2] z-[110] flex items-center justify-center">
-        <span className="text-[#A67045] font-bold animate-pulse">
+      <div className="fixed inset-0 bg-base-100 z-[110] flex items-center justify-center">
+        <span className="text-accent font-bold animate-pulse">
           กำลังโหลดข้อมูลร้าน...
         </span>
       </div>
@@ -198,7 +198,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
 
   if (!restaurant) return null;
 
-  const menuItems = restaurant?.menus || [];
+  const menuItems = restaurant?.menus || restaurant?.menu || [];
 
   const avgRating =
     reviewItems.length > 0
@@ -213,12 +213,12 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop";
 
   return (
-    <div className="fixed inset-0 bg-[#FFF8F2] overflow-y-auto z-[200] pb-32">
-      <header className="fixed top-0 inset-x-0 z-[210] flex justify-between items-center px-6 py-5 bg-[#FFF8F2]/90 backdrop-blur-md border-b border-[#EEDCcc]/50">
+    <div className="fixed inset-0 bg-base-100 overflow-y-auto z-[200] pb-32">
+      <header className="fixed top-0 inset-x-0 z-[210] flex justify-between items-center px-6 py-5 bg-base-100/90 backdrop-blur-md border-b border-base-content/10">
         <button onClick={handleBack} className="p-2 active:scale-90 transition">
           <ArrowLeft size={22} className="text-[#594A3D] cursor-pointer" />
         </button>
-        <h1 className="text-sm font-bold text-[#332B25] tracking-wide truncate px-4">
+        <h1 className="text-sm font-bold text-base-content tracking-wide truncate px-4">
           {restaurant?.name}
         </h1>
 
@@ -325,6 +325,8 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
         isOpen={showAllMenus}
         onClose={() => setShowAllMenus(false)}
         menus={menuItems}
+        restaurant={restaurant}
+        onMenuUpdate={handleRefreshMenu}
       />
     </div>
   );

@@ -104,13 +104,13 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
                         />
                         <motion.div 
                             initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl"
+                            className="relative bg-base-100 w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl"
                         >
                             <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${type === 'danger' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-500'}`}>
                                 <AlertTriangle size={40} strokeWidth={2.5} />
                             </div>
-                            <h3 className="text-xl font-black text-[#2B361B] mb-2">{title}</h3>
-                            <p className="text-sm text-[#8B837E] mb-8 leading-relaxed">{desc}</p>
+                            <h3 className="text-xl font-black text-base-content mb-2">{title}</h3>
+                            <p className="text-sm text-base-content/50 mb-8 leading-relaxed">{desc}</p>
                             <div className="flex flex-col gap-2">
                                 <button 
                                     onClick={onConfirm} disabled={isLoading}
@@ -118,7 +118,7 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
                                 >
                                     {isLoading ? 'กำลังดำเนินการ...' : confirmText}
                                 </button>
-                                <button onClick={onClose} className="w-full py-3 text-sm font-bold text-[#8B837E] hover:bg-gray-100 rounded-xl transition-colors">ยกเลิก</button>
+                                <button onClick={onClose} className="w-full py-3 text-sm font-bold text-base-content/50 hover:bg-base-200 rounded-xl transition-colors">ยกเลิก</button>
                             </div>
                         </motion.div>
                     </div>
@@ -129,23 +129,23 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
 
     return (
         <div className="relative" ref={menuRef}>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-[#F7EAD7] transition-colors text-[#2B361B]">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-base-200 transition-colors text-base-content">
                 <MoreVertical size={20} />
             </button>
 
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div initial={{ opacity: 0, scale: 0.9, y: -10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#EEE2D1] overflow-hidden z-50"
+                        className="absolute right-0 mt-2 w-56 bg-base-100 rounded-2xl shadow-xl border border-base-content/10 overflow-hidden z-50"
                     >
                         <div className="py-2">
                             {isLeader && !isCompleted && (
-                                <button onClick={() => { setIsEditModalOpen(true); setIsMenuOpen(false); }} className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-[#2B361B] hover:bg-[#FFF8F5] transition-colors">
-                                    <Edit3 size={16} className="text-[#A65D2E]" /> แก้ไขข้อมูลปาร์ตี้
+                                <button onClick={() => { setIsEditModalOpen(true); setIsMenuOpen(false); }} className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-base-content hover:bg-base-200 transition-colors">
+                                    <Edit3 size={16} className="text-accent" /> แก้ไขข้อมูลปาร์ตี้
                                 </button>
                             )}
-                            <button onClick={() => { setIsLeaveModalOpen(true); setIsMenuOpen(false); }} disabled={isCompleted} className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-[#2B361B] hover:bg-[#FFF8F5] transition-colors disabled:opacity-50">
-                                <LogOut size={16} className="text-[#A65D2E]" /> ออกจากปาร์ตี้
+                            <button onClick={() => { setIsLeaveModalOpen(true); setIsMenuOpen(false); }} disabled={isCompleted} className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-base-content hover:bg-base-200 transition-colors disabled:opacity-50">
+                                <LogOut size={16} className="text-accent" /> ออกจากปาร์ตี้
                             </button>
                             {isLeader && !isCompleted && (
                                 <button onClick={() => { setIsCancelModalOpen(true); setIsMenuOpen(false); }} className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors">
@@ -173,25 +173,25 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
                         <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 pointer-events-auto">
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditModalOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
                             <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                                className="relative bg-[#FFF8F5] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-[#EEE2D1] overflow-hidden"
+                                className="relative bg-base-100 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-base-content/10 overflow-hidden"
                             >
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-black text-[#2B361B]">แก้ไขปาร์ตี้ ✨</h3>
-                                    <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-[#F7EAD7] rounded-full transition-colors"><X size={20} /></button>
+                                    <h3 className="text-xl font-black text-base-content">แก้ไขปาร์ตี้ ✨</h3>
+                                    <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-base-200 rounded-full transition-colors"><X size={20} /></button>
                                 </div>
                                 <form onSubmit={handleEditSubmit} className="space-y-4">
-                                    <div className="space-y-1"><label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1"><Hash size={12} /> ชื่อกลุ่ม</label>
-                                        <input type="text" required value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold" />
+                                    <div className="space-y-1"><label className="text-[10px] font-bold text-base-content/50 uppercase tracking-widest ml-1 flex items-center gap-1"><Hash size={12} /> ชื่อกลุ่ม</label>
+                                        <input type="text" required value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-base-100 border border-base-content/10 rounded-xl py-3 px-4 outline-none focus:border-accent transition-all text-sm font-bold text-base-content" />
                                     </div>
-                                    <div className="space-y-1"><label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1"><Users size={12} /> จำนวนคนรับ (Max)</label>
-                                        <input type="number" required min={party.members.length} value={editForm.maxMembers} onChange={(e) => setEditForm({ ...editForm, maxMembers: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold" />
-                                        <p className="text-[9px] text-[#A65D2E] font-medium ml-1">* ห้ามน้อยกว่า {party.members.length} คนที่มีอยู่</p>
+                                    <div className="space-y-1"><label className="text-[10px] font-bold text-base-content/50 uppercase tracking-widest ml-1 flex items-center gap-1"><Users size={12} /> จำนวนคนรับ (Max)</label>
+                                        <input type="number" required min={party.members.length} value={editForm.maxMembers} onChange={(e) => setEditForm({ ...editForm, maxMembers: e.target.value })} className="w-full bg-base-100 border border-base-content/10 rounded-xl py-3 px-4 outline-none focus:border-accent transition-all text-sm font-bold text-base-content" />
+                                        <p className="text-[9px] text-accent font-medium ml-1">* ห้ามน้อยกว่า {party.members.length} คนที่มีอยู่</p>
                                     </div>
-                                    <div className="space-y-1"><label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1"><Clock size={12} /> เวลานัดหมาย</label>
-                                        <input type="datetime-local" required value={editForm.meetupTime} onChange={(e) => setEditForm({ ...editForm, meetupTime: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold" />
+                                    <div className="space-y-1"><label className="text-[10px] font-bold text-base-content/50 uppercase tracking-widest ml-1 flex items-center gap-1"><Clock size={12} /> เวลานัดหมาย</label>
+                                        <input type="datetime-local" required value={editForm.meetupTime} onChange={(e) => setEditForm({ ...editForm, meetupTime: e.target.value })} className="w-full bg-base-100 border border-base-content/10 rounded-xl py-3 px-4 outline-none focus:border-accent transition-all text-sm font-bold text-base-content" />
                                     </div>
                                     <div className="pt-4 flex gap-3">
-                                        <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-[#8B837E] hover:bg-[#EAD9CF] rounded-xl transition-colors">ยกเลิก</button>
+                                        <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-base-content/50 hover:bg-base-300 rounded-xl transition-colors">ยกเลิก</button>
                                         <button type="submit" disabled={isLoading} className="flex-1 bg-[#182806] hover:bg-[#2D3E1A] transition-colors text-white py-3 rounded-xl text-sm font-bold shadow-md flex items-center justify-center gap-2">
                                             {isLoading ? 'กำลังบันทึก...' : <><Check size={16} /> บันทึก</>}
                                         </button>

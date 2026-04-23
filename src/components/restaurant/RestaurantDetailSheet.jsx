@@ -12,6 +12,7 @@ import AllMenus from "./AllMenus";
 
 // Stores
 import useRestaurantStore from "../../stores/restaurantStore";
+import { apiGetMenuByRestaurantId } from "../../api/menuApi";
 
 const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const location = useLocation();
@@ -21,14 +22,14 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const [showAllMenus, setShowAllMenus] = useState(false);
 
   // 🌟 1. Get the setter action from the store at the TOP LEVEL
-  const setStoreRestaurant = useRestaurantStore((state) => state.setRestaurant);
+  const setSelectedRestaurant = useRestaurantStore((state) => state.setSelectedRestaurant);
 
   // 🌟 2. Sync the incoming prop to the Global Store correctly
   useEffect(() => {
     if (restaurant) {
-      setStoreRestaurant(restaurant);
+      setSelectedRestaurant(restaurant);
     }
-  }, [restaurant, setStoreRestaurant]);
+  }, [restaurant, setSelectedRestaurant]);
 
   // Handle route changes
   useEffect(() => {
@@ -55,6 +56,15 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
       onClose();
     }
   };
+
+  const handleRefresh = async () => {
+    try{
+      const res = await apiGetMenuByRestaurantId(restaurant.id)
+      setSelectedRestaurant({...restaurant, menus: res.data.data})
+    } catch(err) {
+      console.log("handleRefresh err", err)
+    }
+  }
 
   return (
     <>
@@ -97,30 +107,30 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                   } else if (y > 50) setStep("half");
                 }
               }}
-              className="absolute inset-x-0 bottom-0 bg-[#FFF8F4] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[95vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto"
+              className="absolute inset-x-0 bottom-0 bg-base-100 rounded-t-[2.5rem] shadow-2xl flex flex-col h-[95vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto"
             >
               {/* Drag Handle */}
-              <div className="w-full flex justify-center py-4 shrink-0 bg-[#FFF8F4] z-10 cursor-grab">
-                <div className="w-12 h-1.5 bg-[#EAD9CF] rounded-full" />
+              <div className="w-full flex justify-center py-4 shrink-0 bg-base-100 z-10 cursor-grab">
+                <div className="w-12 h-1.5 bg-base-300 rounded-full" />
               </div>
 
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto px-6 pb-20 no-scrollbar">
                 <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-[#2D3E25] tracking-tighter">
+                  <h2 className="text-3xl font-bold text-base-content tracking-tighter">
                     {restaurant.name}
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="flex items-center gap-1 text-[#A65D2E] font-bold">
+                    <span className="flex items-center gap-1 text-accent font-bold">
                       {averageRating} <Star size={14} fill="currentColor" />
                     </span>
                     <span className="text-gray-400">|</span>
-                    <span className="text-[#A65D2E] text-sm font-bold uppercase tracking-wider">
+                    <span className="text-accent text-sm font-bold uppercase tracking-wider">
                       {restaurant.category || "ร้านอาหาร"}
                     </span>
                   </div>
                   {restaurant.description && (
-                    <p className="text-sm text-[#7A6A5E] mt-3 leading-relaxed line-clamp-3 font-medium">
+                    <p className="text-sm text-base-content/50 mt-3 leading-relaxed line-clamp-3 font-medium">
                       {restaurant.description}
                     </p>
                   )}
@@ -128,17 +138,17 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
 
                 {/* Quick Actions */}
                 <div className="flex gap-3 mb-8 overflow-x-auto no-scrollbar py-2">
-                  <button className="flex items-center gap-2 bg-[#A65D2E] text-white px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
+                  <button className="flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
                     <MapPin size={18} />
                     <span>เส้นทาง</span>
                   </button>
-                  <button className="flex items-center gap-2 bg-white border border-[#EAD9CF] text-[#A65D2E] px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
+                  <button className="flex items-center gap-2 bg-base-100 border border-base-300 text-accent px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
                     <Bookmark size={18} />
                     <span>บันทึก</span>
                   </button>
                   <button
                     onClick={() => setIsShareModalOpen(true)}
-                    className="flex items-center gap-2 bg-white border border-[#EAD9CF] text-[#A65D2E] px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 bg-base-100 border border-base-300 text-accent px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all shadow-sm cursor-pointer"
                   >
                     <Share2 size={18} />
                     <span>แชร์</span>
@@ -147,7 +157,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
 
                 {/* Gallery */}
                 <div className="mb-8">
-                  <h3 className="text-[11px] font-bold text-[#A8A29F] uppercase tracking-widest mb-3">
+                  <h3 className="text-[11px] font-bold text-base-content/40 uppercase tracking-widest mb-3">
                     รูปภาพและวิดีโอ
                   </h3>
                   <div className="flex gap-3 overflow-x-auto no-scrollbar">
@@ -156,7 +166,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                         key={index}
                         src={img.url}
                         alt={`img-${index}`}
-                        className="w-44 h-32 object-cover bg-[#EAD9CF] rounded-2xl shrink-0 shadow-sm border border-[#EEE2D1]/50"
+                        className="w-44 h-32 object-cover bg-base-300 rounded-2xl shrink-0 shadow-sm border border-base-content/10"
                       />
                     ))}
                   </div>
@@ -191,6 +201,8 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
         isOpen={showAllMenus}
         onClose={() => setShowAllMenus(false)}
         menus={menuItems}
+        restaurant={restaurant}
+        onMenuUpdate={handleRefresh}
       />
       <ShareModal
         isOpen={isShareModalOpen}

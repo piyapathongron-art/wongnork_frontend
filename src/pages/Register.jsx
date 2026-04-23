@@ -49,7 +49,7 @@ const Register = () => {
       <div className="text-center mb-4 animate-fade-up">
         <h1 className="text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
-          <span className="text-[#A65D2E] block">NORK</span>
+          <span className="text-accent block">NORK</span>
         </h1>
         <p className="text-[#2D3E25] font-medium mt-2">Eat | Share | Connect</p>
         <div className="w-48 h-[1px] bg-gray-300 mt-6 mx-auto"></div>
@@ -69,7 +69,7 @@ const Register = () => {
                 {...register("name")}
                 type="text"
                 placeholder="Name"
-                className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                   errors.name ? "ring-2 ring-red-400" : ""
                 }`}
               />
@@ -89,7 +89,7 @@ const Register = () => {
                 {...register("email")}
                 type="email"
                 placeholder="Email"
-                className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                   errors.email ? "ring-2 ring-red-400" : ""
                 }`}
               />
@@ -110,14 +110,14 @@ const Register = () => {
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   placeholder="•••••••••"
-                  className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                  className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                     errors.password ? "ring-2 ring-red-400" : ""
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#A65D2E] cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent cursor-pointer"
                 >
                   {showPassword ? (
                     <svg
@@ -174,7 +174,7 @@ const Register = () => {
                   {...register("confirmPassword")}
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="•••••••••"
-                  className={`w-full bg-[#EAD9CF] bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
+                  className={`w-full bg-base-300 bg-opacity-60 border-none rounded-xl py-2 px-4 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all ${
                     errors.confirmPassword ? "ring-2 ring-red-400" : ""
                   }`}
                 />
@@ -182,7 +182,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#A65D2E] cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-accent cursor-pointer"
                 >
                   {showConfirmPassword ? (
                     <svg
@@ -235,7 +235,7 @@ const Register = () => {
   className={`w-full flex justify-center items-center font-semibold py-2 rounded-xl shadow-lg transition-all mt-4 
     ${isSubmitting 
       ? "bg-gray-400 cursor-not-allowed text-white" 
-      : "bg-[#A65D2E] hover:bg-[#8e4f27] text-white shadow-orange-900/20 transform active:scale-[0.98] cursor-pointer" // สีปุ่มปกติ
+      : "bg-accent hover:bg-accent/80 text-white shadow-orange-900/20 transform active:scale-[0.98] cursor-pointer" // สีปุ่มปกติ
     }`}
 >
  
@@ -284,7 +284,7 @@ const Register = () => {
           Already have an account?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="uppercase text-[#A65D2E] pl-1 cursor-pointer hover:underline"
+            className="uppercase text-accent pl-1 cursor-pointer hover:underline"
           >
             Sign In
           </button>

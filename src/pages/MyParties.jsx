@@ -71,11 +71,11 @@ const MyParties = () => {
     };
 
     return (
-        <div className="w-full min-h-screen bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans overflow-y-auto">
+        <div className="w-full min-h-screen bg-base-100 text-base-content pb-32 font-sans overflow-y-auto">
             {/* Header */}
-            <div className="sticky top-0 z-40 bg-[#FFF8F5]/90 backdrop-blur-md px-6 pt-6 pb-4 shadow-sm">
+            <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur-md px-6 pt-6 pb-4 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-extrabold text-[#A65D2E]">Open Parties</h1>
+                    <h1 className="text-2xl font-extrabold text-accent">Open Parties</h1>
                     <button 
                         onClick={handleCreateClick}
                         className="bg-[#A65D2E] text-white px-4 py-2 rounded-full text-xs font-bold shadow-sm active:scale-95 transition-transform cursor-pointer"
@@ -84,14 +84,14 @@ const MyParties = () => {
                     </button>
                 </div>
                 
-                <div className="flex items-center bg-white rounded-full px-4 py-3 shadow-sm border border-[#EEE2D1]">
+                <div className="flex items-center bg-white rounded-full px-4 py-3 shadow-sm border border-base-content/10">
                     <Search size={18} className="text-[#A8A29F]" />
                     <input 
                         type="text" 
                         placeholder="ค้นหาปาร์ตี้ที่น่าสนใจ..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none px-3 text-sm text-[#2B361B] placeholder:text-[#A8A29F]"
+                        className="flex-1 bg-transparent border-none outline-none px-3 text-sm text-base-content placeholder:text-[#A8A29F]"
                     />
                 </div>
             </div>
@@ -103,13 +103,13 @@ const MyParties = () => {
                     return (
                         <div 
                             key={party.id}
-                            className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-[#EEE2D1]/50 active:scale-[0.98] transition-transform cursor-pointer"
+                            className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-base-content/10/50 active:scale-[0.98] transition-transform cursor-pointer"
                         >
                             <div className="relative h-32 bg-gray-200">
                                 <img src={party.restaurantImage} alt="restaurant" className="w-full h-full object-cover" />
                                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                                    <Clock size={12} className="text-[#A65D2E]" />
-                                    <span className="text-[10px] font-bold text-[#A65D2E]">{formatDate(party.meetupTime)}</span>
+                                    <Clock size={12} className="text-accent" />
+                                    <span className="text-[10px] font-bold text-accent">{formatDate(party.meetupTime)}</span>
                                 </div>
                                 {isFull && (
                                     <div className="absolute top-3 right-3 bg-red-500/90 backdrop-blur px-3 py-1 rounded-full shadow-sm">
@@ -119,9 +119,9 @@ const MyParties = () => {
                             </div>
                             
                             <div className="p-5">
-                                <h3 className="font-bold text-[16px] text-[#2B361B] mb-1 line-clamp-1">{party.name}</h3>
-                                <div className="flex items-center gap-1.5 text-[12px] text-[#8B837E] font-medium mb-4">
-                                    <MapPin size={14} className="text-[#A65D2E]" />
+                                <h3 className="font-bold text-[16px] text-base-content mb-1 line-clamp-1">{party.name}</h3>
+                                <div className="flex items-center gap-1.5 text-[12px] text-base-content/50 font-medium mb-4">
+                                    <MapPin size={14} className="text-accent" />
                                     <span className="truncate">{party.restaurantName} • {party.distance}</span>
                                 </div>
                                 
@@ -130,13 +130,13 @@ const MyParties = () => {
                                         <img src={party.leader.avatarUrl} alt={party.leader.name} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" />
                                         <div className="flex flex-col">
                                             <span className="text-[9px] text-[#A8A29F] uppercase tracking-wider font-bold">Leader</span>
-                                            <span className="text-[12px] font-bold text-[#2B361B]">{party.leader.name}</span>
+                                            <span className="text-[12px] font-bold text-base-content">{party.leader.name}</span>
                                         </div>
                                     </div>
                                     
                                     <div className="flex flex-col items-end gap-1">
-                                        <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#2B361B]">
-                                            <Users size={14} className={isFull ? "text-red-500" : "text-[#A65D2E]"} />
+                                        <div className="flex items-center gap-1.5 text-[12px] font-bold text-base-content">
+                                            <Users size={14} className={isFull ? "text-red-500" : "text-accent"} />
                                             <span className={isFull ? "text-red-500" : ""}>{party.currentMembers}/{party.maxMembers}</span>
                                         </div>
                                     </div>
