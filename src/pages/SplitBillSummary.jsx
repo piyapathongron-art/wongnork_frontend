@@ -1,27 +1,27 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { 
-    ArrowLeft, 
-    Plus, 
-    Minus, 
-    Trash2, 
-    Check, 
-    Users, 
-    Utensils, 
-    Receipt, 
-    UserIcon, 
+import {
+    ArrowLeft,
+    Plus,
+    Minus,
+    Trash2,
+    Check,
+    Users,
+    Utensils,
+    Receipt,
+    UserIcon,
     Star,
     ArrowUp,
-    MessageSquare 
+    MessageSquare
 } from 'lucide-react';
-import { 
-    apiGetPartyById, 
-    apiGetSplitBill, 
-    apiUpdateOrderItemQuantity, 
-    apiToggleOrderItemSharer, 
-    apiRemoveOrderItem, 
-    apiAddOrderItem, 
-    apiUpdatePartySettings 
+import {
+    apiGetPartyById,
+    apiGetSplitBill,
+    apiUpdateOrderItemQuantity,
+    apiToggleOrderItemSharer,
+    apiRemoveOrderItem,
+    apiAddOrderItem,
+    apiUpdatePartySettings
 } from '../api/party';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
 import GroupChatOverlay from '../components/GroupChatOverlay';
+import { getSocket } from '../services/socket';
 
 const SplitBillSummary = () => {
     const { id } = useParams();
@@ -40,7 +41,7 @@ const SplitBillSummary = () => {
     const [billSummary, setBillSummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-    
+
     // UI States
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -147,6 +148,16 @@ const SplitBillSummary = () => {
         setActionLoading(true);
         try {
             await apiUpdateOrderItemQuantity(id, itemId, action);
+
+            // 🌟 ส่ง System Message
+            const { token } = useUserStore.getState();
+            const socket = getSocket(token);
+            socket.emit('send_message', {
+                text: `${user.name} ได้ปรับจำนวน ${item.name} เป็น ${action === 'increment' ? item.quantity + 1 : item.quantity - 1} จาน`,
+                partyId: id,
+                type: 'SYSTEM'
+            });
+
             await loadData();
         } catch (error) {
             toast.error("เกิดข้อผิดพลาด");
@@ -160,6 +171,16 @@ const SplitBillSummary = () => {
         setActionLoading(true);
         try {
             await apiRemoveOrderItem(id, itemToDelete.id);
+
+            // 🌟 ส่ง System Message
+            const { token } = useUserStore.getState();
+            const socket = getSocket(token);
+            socket.emit('send_message', {
+                text: `${user.name} ได้ลบรายการ ${itemToDelete.name} ออกจากบิลโต๊ะ`,
+                partyId: id,
+                type: 'SYSTEM'
+            });
+
             toast.success("ลบรายการสำเร็จ");
             setItemToDelete(null);
             await loadData();
@@ -174,8 +195,19 @@ const SplitBillSummary = () => {
         if (actionLoading || isCompleted) return;
         setActionLoading(true);
         const action = isOptIn ? 'leave' : 'join';
+        const item = billSummary.tableItems.find(i => i.id === itemId);
         try {
             await apiToggleOrderItemSharer(id, itemId, action);
+
+            // 🌟 ส่ง System Message
+            const { token } = useUserStore.getState();
+            const socket = getSocket(token);
+            socket.emit('send_message', {
+                text: `${user.name} ได้${isOptIn ? 'ถอนตัวจากการหาร' : 'เข้าร่วมหาร'} ${item.name}`,
+                partyId: id,
+                type: 'SYSTEM'
+            });
+
             await loadData();
         } catch (error) {
             toast.error("ไม่สามารถเปลี่ยนสถานะได้");
@@ -226,9 +258,9 @@ const SplitBillSummary = () => {
                     <div className="flex items-center gap-2"><h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none">สรุปบิลรวม</h1>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
                     <p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party?.name}</p>
                 </div>
-                
+
                 <div className="flex items-center gap-1">
-                    <button 
+                    <button
                         onClick={() => setIsChatOpen(true)}
                         className="p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative pointer-events-auto"
                     >
@@ -239,7 +271,7 @@ const SplitBillSummary = () => {
                 </div>
             </header>
 
-            <main 
+            <main
                 ref={scrollRef}
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto no-scrollbar px-6 pt-6 pb-48 scroll-smooth"
@@ -332,7 +364,7 @@ const SplitBillSummary = () => {
             </AnimatePresence>
 
             {/* 💬 Shared Group Chat Overlay */}
-            <GroupChatOverlay 
+            <GroupChatOverlay
                 isOpen={isChatOpen}
                 onClose={() => setIsChatOpen(false)}
                 party={party}

@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { 
-    ArrowLeft, 
-    Receipt, 
-    Check, 
-    Utensils, 
-    AlertCircle, 
-    X, 
-    Users, 
-    Plus, 
-    Crown, 
-    User as UserIcon, 
-    Star, 
+import {
+    ArrowLeft,
+    Receipt,
+    Check,
+    Utensils,
+    AlertCircle,
+    X,
+    Users,
+    Plus,
+    Crown,
+    User as UserIcon,
+    Star,
     MessageSquare,
     Search,
     ArrowUp
@@ -25,6 +25,7 @@ import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
 import ProfileQuickViewSheet from '../components/profile/ProfileQuickViewSheet';
 import GroupChatOverlay from '../components/GroupChatOverlay';
+import { getSocket } from '../services/socket';
 
 const SplitBillMenu = () => {
     const { id } = useParams();
@@ -109,10 +110,21 @@ const SplitBillMenu = () => {
         setActionLoading(true);
         try {
             await apiAddOrderItem(id, { menuId: menu.id, quantity: 1, isCustom: false });
+
+            // 🌟 1. ส่ง System Message แจ้งเตือนในแบท
+            const { token } = useUserStore.getState();
+            const socket = getSocket(token);
+            socket.emit('send_message', {
+                text: `${user.name} ได้เพิ่ม ${menu.name} ลงในบิลแล้ว`,
+                partyId: id,
+                type: 'SYSTEM'
+            });
+
             toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`, { autoClose: 1000, position: "top-center", theme: "dark" });
             const billRes = await apiGetSplitBill(id);
             setBillSummary(billRes.data.data);
         } catch (error) {
+            console.log(error)
             toast.error(error.response?.data?.message || "เกิดข้อผิดพลาด");
         } finally {
             setActionLoading(false);
@@ -135,7 +147,7 @@ const SplitBillMenu = () => {
 
     const filteredMenuItems = React.useMemo(() => {
         if (!searchQuery.trim()) return menuItems;
-        return menuItems.filter(item => 
+        return menuItems.filter(item =>
             item.name?.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [menuItems, searchQuery]);
@@ -166,9 +178,9 @@ const SplitBillMenu = () => {
         const tableItem = billSummary?.tableItems?.find(ti => ti.name === item.name && !ti.isCustom);
         const totalOrdered = tableItem ? tableItem.quantity : 0;
         return (
-            <motion.div 
+            <motion.div
                 layout
-                onClick={() => handleAddMenuToBill(item)} 
+                onClick={() => handleAddMenuToBill(item)}
                 className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
             >
                 {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
@@ -192,9 +204,9 @@ const SplitBillMenu = () => {
                 <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
                 <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
-                
+
                 <div className="flex items-center gap-1">
-                    <button 
+                    <button
                         onClick={() => setIsChatOpen(true)}
                         className="p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative"
                     >
@@ -205,7 +217,7 @@ const SplitBillMenu = () => {
                 </div>
             </header>
 
-            <main 
+            <main
                 ref={scrollRef}
                 onScroll={handleScroll}
                 className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6 scroll-smooth"
@@ -267,7 +279,7 @@ const SplitBillMenu = () => {
                             เมนูจากร้าน {party.restaurant?.name}
                             <div className="h-px flex-1 bg-[#EAD9CF]" />
                         </h3>
-                        
+
                         {/* 🔍 Search Menu Input */}
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
@@ -320,7 +332,7 @@ const SplitBillMenu = () => {
             </AnimatePresence>
 
             {/* 💬 Shared Group Chat Overlay */}
-            <GroupChatOverlay 
+            <GroupChatOverlay
                 isOpen={isChatOpen}
                 onClose={() => setIsChatOpen(false)}
                 party={party}
@@ -332,7 +344,7 @@ const SplitBillMenu = () => {
                 isOpen={isReviewModalOpen}
                 onClose={() => setIsReviewModalOpen(false)}
                 restaurantId={party?.restaurantId}
-                partyId={id} 
+                partyId={id}
                 onReviewSuccess={() => {
                     setHasHasReviewed(true);
                     loadData();
