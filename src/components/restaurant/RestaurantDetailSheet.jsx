@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Bookmark, Share2, Star } from "lucide-react";
 import { useLocation } from "react-router";
+import { apiToggleSaveRestaurant, apiGetme } from "../../api/mainApi";
+import { toast } from "react-toastify";
 
 // Components
 import MenuSection from "./MenuSection";
@@ -19,6 +21,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showAllMenus, setShowAllMenus] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // 🌟 1. Get the setter action from the store at the TOP LEVEL
   const setStoreRestaurant = useRestaurantStore((state) => state.setRestaurant);
@@ -36,6 +39,63 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
       setStep("half");
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (!restaurant?.id) return;
+      try {
+        const res = await apiGetme();
+        const savedList = res.data?.data?.savedRestaurants || [];
+        const isAlreadySaved = savedList.some(
+          (item) => item.restaurantId === restaurant.id,
+        );
+        setIsSaved(isAlreadySaved);
+      } catch (error) {
+        console.error("Error checking saved status:", error);
+      }
+    };
+
+    if (isOpen && restaurant?.id) {
+      checkSavedStatus();
+    }
+  }, [restaurant?.id, isOpen]);
+
+  const handleToggleSave = async () => {
+    if (!restaurant?.id) return;
+
+    setIsSaved(!isSaved);
+
+    try {
+      await apiToggleSaveRestaurant(restaurant.id);
+      if (!isSaved) {
+        toast.success("บันทึกร้านอาหารลงโปรไฟล์แล้ว");
+      }
+    } catch (error) {
+      setIsSaved(isSaved);
+      toast.error("เกิดข้อผิดพลาด ไม่สามารถบันทึกได้");
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (!restaurant?.id) return;
+      try {
+        const res = await apiGetme();
+        const savedList = res.data?.data?.savedRestaurants || [];
+        const isAlreadySaved = savedList.some(
+          (item) => item.restaurantId === restaurant.id,
+        );
+        setIsSaved(isAlreadySaved);
+      } catch (error) {
+        console.error("Error checking saved status:", error);
+      }
+    };
+
+    if (isOpen && restaurant?.id) {
+      checkSavedStatus();
+    }
+  }, [restaurant?.id, isOpen]);
 
   // Data helpers
   const menuItems = restaurant?.menus || restaurant?.menu || [];
@@ -132,9 +192,19 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
                     <MapPin size={18} />
                     <span>เส้นทาง</span>
                   </button>
-                  <button className="flex items-center gap-2 bg-white border border-[#EAD9CF] text-[#A65D2E] px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer">
-                    <Bookmark size={18} />
-                    <span>บันทึก</span>
+                  <button
+                    onClick={handleToggleSave}
+                    className={`flex items-center gap-2 border px-5 py-2.5 rounded-2xl shrink-0 text-sm font-bold active:scale-95 transition-all cursor-pointer ${
+                      isSaved
+                        ? "bg-[#F4E8DB] border-[#F4E8DB] text-[#A67045]"
+                        : "bg-white border-[#EAD9CF] text-[#A65D2E]"
+                    }`}
+                  >
+                    <Bookmark
+                      size={18}
+                      fill={isSaved ? "currentColor" : "none"}
+                    />
+                    <span>{isSaved ? "บันทึกแล้ว" : "บันทึก"}</span>
                   </button>
                   <button
                     onClick={() => setIsShareModalOpen(true)}
