@@ -49,7 +49,7 @@ const Party = () => {
     // 🌟 Filtered Parties Logic
     const filteredDiscovery = React.useMemo(() => {
         return parties
-            .filter(p => !myJoinedGroups.some(myP => myP.id === p.id)) // ไม่ใช่กลุ่มที่เข้าอยู่แล้ว
+            .filter(p => !myJoinedGroups.some(myP => myP.id === p.id))
             .filter(p => {
                 const matchesSearch =
                     p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -159,13 +159,13 @@ const Party = () => {
             {/* 1. MAIN SCROLL CONTAINER */}
             <div
                 id="scroll-container"
-                className="flex-1 overflow-y-auto pt-4 px-4 pb-48 no-scrollbar scroll-smooth"
+                className="flex-1 overflow-y-auto px-4 pb-48 no-scrollbar scroll-smooth"
             >
-                <div className="flex flex-col gap-2 max-w-md mx-auto">
+                <div className="flex flex-col gap-2 max-w-md mx-auto pt-4">
 
                     {/* 📸 SECTION: YOUR CURRENT GROUPS (IG Stories Style) */}
                     {myJoinedGroups.length > 0 && (
-                        <div className="flex flex-col gap-3 pt-2">
+                        <div className="flex flex-col gap-3 pt-2 mb-4">
                             <h2 className="px-2 text-[10px] font-black tracking-[0.2em] text-[#BC6C25] uppercase opacity-70">
                                 Your Current Groups
                             </h2>
@@ -204,7 +204,7 @@ const Party = () => {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <span className="text-[10px] font-bold text-[#2B361B] truncate w-full text-center leading-tight">
+                                            <span className="text-[10px] font-bold text-[#2B361B] dark:text-white truncate w-full text-center leading-tight">
                                                 {party.name?.split(' ')[0] || 'Party'}
                                             </span>
                                         </div>
@@ -215,15 +215,14 @@ const Party = () => {
                         </div>
                     )}
 
-                    {/* SECTION: DISCOVER HEADER */}
-                    <header className="px-2 text-left">
+                    {/* SECTION: DISCOVER HEADER (Sticky) */}
+                    <header className="sticky top-0 z-40 bg-[#FDF2ED]/90 dark:bg-black/90 backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-[#BC6C25]/5 mb-2">
                         <h1 className="text-2xl font-black tracking-[0.2em] text-[#2B361B] dark:text-white uppercase mb-4">
                             Discover Nearby
                         </h1>
 
                         {/* 🔍 SEARCH & FILTER SECTION */}
                         <div className="flex flex-col gap-4">
-                            {/* Search Input */}
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
                                     <Search size={18} strokeWidth={2.5} />
@@ -233,19 +232,18 @@ const Party = () => {
                                     placeholder="ค้นหาชื่อกลุ่ม หรือชื่อร้าน..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-[#BC6C25]/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm group-hover:bg-white"
+                                    className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm"
                                 />
                             </div>
 
-                            {/* Category Chips */}
                             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                                 {categories.map((cat) => (
                                     <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat
-                                            ? 'bg-[#182806] text-white border-[#182806] shadow-md'
-                                            : 'bg-white/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white'
+                                                ? 'bg-[#182806] text-white border-[#182806] shadow-md'
+                                                : 'bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800'
                                             }`}
                                     >
                                         {cat}
