@@ -5,12 +5,12 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
     const scrollRef = useRef(null);
 
     const maxSlots = party.maxParticipants || 4;
-    const guestsOnly = party.members?.filter(m => 
+    const guestsOnly = party.members?.filter(m =>
         m.userId?.toString() !== party.leaderId?.toString()
     ) || [];
 
     const currentMemberCount = 1 + guestsOnly.length;
-    const additionalSlots = maxSlots - 1; 
+    const additionalSlots = maxSlots - 1;
 
     const scroll = (direction) => {
         if (scrollRef.current) {
@@ -21,8 +21,8 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
 
     const hostName = party.leader?.name || "Host";
     const hostImg = party.leader?.avatarUrl || party.leader?.user?.avatarUrl;
-    const coverImage = party.restaurant?.images?.find(img => img.isCover)?.url 
-                       || party.restaurant?.images?.[0]?.url;
+    const coverImage = party.restaurant?.images?.find(img => img.isCover)?.url
+        || party.restaurant?.images?.[0]?.url;
 
     const getAvatar = (imgUrl, nameFallback) => {
         if (imgUrl) return imgUrl;
@@ -35,7 +35,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                 ? 'border-primary ring-2 ring-primary/20 scale-[1.02] z-10' 
                 : 'border-base-content/15 '
             }`}>
-            
+
             {/* Status Dot */}
             <div className={`absolute top-4 right-4 w-3 h-3 rounded-full border-2 border-base-200 
                 ${party.status === 'OPEN' ? 'bg-primary' : 'bg-gray-400'}`} 
@@ -53,7 +53,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
             </div>
 
             {/* Right Side: Content Area */}
-            <div className="flex-1 flex flex-col justify-between py-1 min-w-0"> 
+            <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
                 <div className="relative min-w-0">
                     <div className="flex justify-between items-start gap-2">
                         <h3 className="text-[13px] font-black uppercase tracking-tight text-base-content  leading-tight truncate flex-1">
@@ -64,7 +64,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                     <div className="relative group">
                         {/* LEFT SCROLL */}
                         {maxSlots > 3 && (
-                            <button 
+                            <button
                                 onClick={(e) => { e.stopPropagation(); scroll('left'); }}
                                 className="absolute -left-2 bottom-8 z-30 bg-primary/90 text-white p-1 rounded-full shadow-lg pointer-events-auto backdrop-blur-sm active:scale-90 transition-all"
                             >
@@ -72,7 +72,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                             </button>
                         )}
 
-                        <div 
+                        <div
                             ref={scrollRef}
                             className="flex items-end gap-2.5 mt-6 overflow-x-auto no-scrollbar flex-nowrap pb-2 scroll-smooth w-full px-2"
                         >
@@ -114,7 +114,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
 
                         {/* RIGHT SCROLL */}
                         {maxSlots > 3 && (
-                            <button 
+                            <button
                                 onClick={(e) => { e.stopPropagation(); scroll('right'); }}
                                 className="absolute -right-2 bottom-8 z-30 bg-primary/90 text-white p-1 rounded-full shadow-lg pointer-events-auto backdrop-blur-sm active:scale-90 transition-all"
                             >
@@ -130,18 +130,18 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                         <span className="text-[9px] font-black">{currentMemberCount}/{maxSlots}</span>
                     </div>
 
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); isJoined ? onLeave() : onJoin(); }}
-                        disabled={!isJoined && currentMemberCount >= maxSlots}
+                        disabled={!isJoined && currentMemberCount >= maxSlots || party.status !== 'OPEN'}
                         className={`px-6 py-1.5 rounded-full text-[10px] font-black uppercase shadow-sm transition-all active:scale-95
-                            ${isJoined 
-                                ? "bg-secondary text-base-200" 
-                                : currentMemberCount >= maxSlots 
-                                    ? "bg-zinc-400 text-zinc-600 cursor-not-allowed" 
+                            ${isJoined
+                                ? "bg-secondary text-base-200"
+                                : currentMemberCount >= maxSlots || party.status !== 'OPEN'
+                                    ? "bg-zinc-400 text-zinc-600 cursor-not-allowed"
                                     : "bg-primary text-base-200"
                             }`}
                     >
-                        {isJoined ? "Leave" : (currentMemberCount >= maxSlots ? "Full" : "Join")}
+                        {isJoined ? "Leave" : (currentMemberCount >= maxSlots || party.status !== 'OPEN') ? "Close" : "Join"}
                     </button>
                 </div>
             </div>
