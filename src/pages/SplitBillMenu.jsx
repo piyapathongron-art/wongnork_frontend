@@ -174,10 +174,15 @@ const SplitBillMenu = () => {
                         {sortedMembers?.map((member) => (
                             <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
                                 <div className="relative">
-                                    <div className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200"><img src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`} alt={member.user.name} className="w-full h-full object-cover" /></div>
-                                    {member.user.id === user?.id && (<div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white"><UserIcon size={10} className="text-white fill-current" /></div>)}
-                                    {member.user.id === party.leaderId && (<div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white"><Crown size={10} className="text-white fill-current" /></div>)}
-                                    {isLeader && member.user.id !== party.leaderId && !isCompleted && (<button onClick={() => handleKickMember(member.user.id, member.user.name)} className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors"><X size={10} strokeWidth={3} /></button>)}
+                                    <div 
+                                        onClick={() => navigate(member.user.id === user?.id ? '/profile' : `/profile/${member.user.id}`)}
+                                        className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200 cursor-pointer active:scale-95 transition-transform"
+                                    >
+                                        <img src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`} alt={member.user.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    {member.user.id === user?.id && (<div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white pointer-events-none"><UserIcon size={10} className="text-white fill-current" /></div>)}
+                                    {member.user.id === party.leaderId && (<div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white pointer-events-none"><Crown size={10} className="text-white fill-current" /></div>)}
+                                    {isLeader && member.user.id !== party.leaderId && !isCompleted && (<button onClick={() => handleKickMember(member.user.id, member.user.name)} className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors z-10"><X size={10} strokeWidth={3} /></button>)}
                                 </div>
                                 <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-[#2B361B]'}`}>{member.user.id === user?.id ? 'คุณ' : member.user.name}</span>
                             </div>
