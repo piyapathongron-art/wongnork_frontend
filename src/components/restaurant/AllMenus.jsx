@@ -1,8 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
+import { X, Pencil, Trash2 } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
+import useUserStore from "../../stores/userStore";
+import { apiDeleteMenu } from "../../api/menuApi";
+import AddMenuModal from "../Modals/AddMenuModal";
+import { toast } from "react-toastify";
 
-const AllMenus = ({ isOpen, onClose, menus = [] }) => {
+const AllMenus = ({
+  isOpen,
+  onClose,
+  menus = [],
+  restaurant,
+  onMenuUpdate,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState(null);
+
+  const user = useUserStore((state) => state.user);
+
+  const loggedInUserId = user?.id || user?.user?.id;
+  const userRole = user?.role || user?.user?.role;
+  const isRealOwner =
+    userRole === "OWNER" &&
+    restaurant?.ownerId &&
+    String(loggedInUserId) === String(restaurant.ownerId);
+
+  const handleEdit = (menu) => {
+    setSelectedMenu(menu);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (menuId) => {
+    if (window.confirm("Are you sure to delete?")) {
+      try {
+        await apiDeleteMenu(restaurant.id, menuId);
+        if (onMenuUpdate) await onMenuUpdate();
+      } catch (err) {
+        console.log("Delete Function err", err);
+        toast.error("Cannot Delete");
+      }
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -29,11 +68,11 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full h-full bg-[#FFF8F4] flex flex-col pointer-events-auto shadow-2xl"
+            className="relative w-full h-full bg-base-100 flex flex-col pointer-events-auto shadow-2xl"
           >
             {/* --- Header --- */}
-            <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-[#EEE2D1] shrink-0">
-              <h2 className="text-xl font-bold text-[#2D3E25]">
+            <div className="flex items-center justify-between px-6 py-5 bg-base-100 border-b border-base-content/10 shrink-0">
+              <h2 className="text-xl font-bold text-base-content">
                 เมนูทั้งหมด ({menus.length})
               </h2>
               {/* 🌟 ย้ายปุ่มกลับมาขวา */}
@@ -49,9 +88,9 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
                   e.stopPropagation();
                   onClose();
                 }}
-                className="p-2 text-[#2D3E25] bg-[#F4E8DB]/50 rounded-full active:scale-90 transition-transform cursor-pointer"
+                className="p-2 text-base-content bg-base-200/50 rounded-full active:scale-90 transition-transform cursor-pointer"
               >
-                <X size={20} className="text-[#A67045]" />
+                <X size={20} className="text-accent" />
               </button>
             </div>
 
@@ -61,33 +100,52 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
                 menus.map((menu, index) => (
                   <div
                     key={index}
-                    className="flex gap-4 bg-white p-4 rounded-3xl shadow-sm border border-[#EEE2D1]/50"
+                    className="flex gap-4 bg-base-100 p-4 rounded-3xl shadow-sm border border-base-content/10 relative group"
                   >
+                    {isRealOwner && (
+                      <div className="absolute top-3 right-3 flex gap-2 z-10">
+                        <button
+                          onClick={() => handleEdit(menu)}
+                          className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                          title="แก้ไขเมนู"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(menu.id)}
+                          className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
+                          title="ลบเมนู"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                    {/* รูปเมนู */}
                     <img
                       src={
                         menu.imageUrl ||
                         "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&auto=format&fit=crop"
                       }
                       alt={menu.name}
-                      className="w-24 h-24 object-cover rounded-2xl bg-[#EAD9CF] shrink-0"
+                      className="w-24 h-24 object-cover rounded-2xl bg-base-300 shrink-0"
                     />
                     <div className="flex flex-col justify-between flex-1 py-1">
                       <div>
-                        <h4 className="text-[15px] font-bold text-[#2C241E] leading-tight">
+                        <h4 className="text-[15px] font-bold text-base-content leading-tight">
                           {menu.name || "ชื่อเมนู"}
                         </h4>
-                        <p className="text-[12px] text-[#A68F7E] mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-[12px] text-base-content/40 mt-1 line-clamp-2 leading-relaxed">
                           {menu.description || "ไม่มีคำอธิบายสำหรับเมนูนี้"}
                         </p>
                       </div>
-                      <div className="text-[15px] font-bold text-[#A67045] mt-2">
+                      <div className="text-[15px] font-bold text-accent mt-2">
                         ฿{menu.price || "0"}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-10 text-[#A8A29F] font-medium">
+                <div className="text-center py-10 text-base-content/40 font-medium">
                   ยังไม่มีเมนู
                 </div>
               )}
@@ -95,6 +153,13 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
           </motion.div>
         </div>
       )}
+      <AddMenuModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        restaurantId={restaurant?.id}
+        editData={selectedMenu}
+        onSuccess={onMenuUpdate}
+      />
     </AnimatePresence>
   );
 };

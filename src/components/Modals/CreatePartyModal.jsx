@@ -94,7 +94,7 @@ const CreatePartyModal = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#F7EAD7] dark:bg-zinc-900 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl border border-[#BC6C25]/20 flex flex-col max-h-[92vh]">
+      <div className="bg-base-200 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl border border-primary/20 flex flex-col max-h-[92vh]">
         {/* MAP SECTION */}
         <div className="h-48 w-full bg-zinc-800 relative flex-shrink-0">
           <MapBox
@@ -118,7 +118,7 @@ const CreatePartyModal = ({
 
         {/* FORM SECTION - pb-32 prevents overlap with Nav Bar */}
         <div className="p-8 overflow-y-auto no-scrollbar pb-32">
-          <h2 className="text-xl font-black uppercase tracking-widest text-[#2B361B] dark:text-white mb-6">
+          <h2 className="text-xl font-black uppercase tracking-widest text-base-content mb-6">
             Create Party
           </h2>
 
@@ -128,14 +128,14 @@ const CreatePartyModal = ({
           >
             {/* Location Dropdown */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2">
+              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
                 Meeting Point
               </label>
               <select
                 {...register("restaurantId", {
                   required: "กรุณาเลือกสถานที่นัดหมาย",
                 })}
-                className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25] appearance-none cursor-pointer"
+                className="w-full bg-white/50 border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25] appearance-none cursor-pointer"
               >
                 <option value="">Select place or tap marker...</option>
                 {filteredRestaurants.map((res) => (
@@ -153,12 +153,12 @@ const CreatePartyModal = ({
 
             {/* Party Name */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2">
+              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
                 Party Name
               </label>
               <input
                 {...register("name")}
-                className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
+                className="w-full bg-white/50border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
                 placeholder="Chill at the Hideaway"
               />
             </div>
@@ -166,37 +166,37 @@ const CreatePartyModal = ({
             <div className="grid grid-cols-2 gap-4">
               {/* Max Participants */}
               <div>
-                <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2">
+                <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
                   Max Slots
                 </label>
                 <input
                   type="number"
                   {...register("maxParticipants", { valueAsNumber: true })}
-                  className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm"
+                  className="w-full bg-white/50 border-2 border-base-300 rounded-2xl px-4 py-3 text-sm"
                 />
               </div>
 
               {/* Meetup Time */}
               <div>
-                <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2">
+                <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
                   Time
                 </label>
                 <input
                   type="datetime-local"
                   {...register("meetupTime")}
-                  className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm"
+                  className="w-full bg-white/50 border-2 border-base-300  rounded-2xl px-4 py-3 text-sm"
                 />
               </div>
             </div>
 
             {/* Contact Info */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2">
+              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
                 Contact Info
               </label>
               <input
                 {...register("contactInfo")}
-                className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
+                className="w-full bg-white/50  border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
                 placeholder="Line ID or Tel"
               />
             </div>
@@ -205,7 +205,7 @@ const CreatePartyModal = ({
             <button
               disabled={isSubmitting || !selectedRestaurantId}
               type="submit"
-              className="w-full bg-[#BC6C25] text-[#F7EAD7] font-black uppercase py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
+              className="w-full bg-primary text-base-200 font-black uppercase py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
             >
               {isSubmitting ? (
                 <Loader2 className="animate-spin w-5 h-5" />

@@ -2,13 +2,13 @@ import React from 'react';
 
 const InputField = ({ label, register, error, placeholder, isTextArea = false, type = "text" }) => (
     <div className="w-full text-left">
-        <label className="block text-[10px] font-black uppercase text-[#BC6C25] mb-1 ml-2 tracking-widest">
+        <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2 tracking-widest">
             {label}
         </label>
         {isTextArea ? (
             <textarea
                 {...register}
-                className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25] transition-colors resize-none placeholder:opacity-30"
+                className="w-full bg-white/50 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors resize-none placeholder:opacity-30"
                 placeholder={placeholder}
                 rows="3"
             />
@@ -16,7 +16,7 @@ const InputField = ({ label, register, error, placeholder, isTextArea = false, t
             <input
                 type={type}
                 {...register}
-                className="w-full bg-white/50 dark:bg-black/20 border-2 border-[#D9C5B2] dark:border-zinc-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25] transition-colors placeholder:opacity-30"
+                className="w-full bg-white/50 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors placeholder:opacity-30"
                 placeholder={placeholder}
             />
         )}

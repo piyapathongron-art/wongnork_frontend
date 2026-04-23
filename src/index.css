@@ -1,7 +1,9 @@
 @import "tailwindcss";
 @import "mapbox-gl/dist/mapbox-gl.css";
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
 
 @layer utilities {
+
   /* ซ่อน Scrollbar สำหรับ Chrome, Safari และ Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -9,14 +11,45 @@
 
   /* ซ่อน Scrollbar สำหรับ IE, Edge และ Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
+}
+
+@plugin "daisyui" {
+  themes: light --default, dark:
+}
+[data-theme="light"] {
+  --color-primary: #BC6C25;
+  --color-secondary: #2B361B;
+  --color-accent: #A65D2E;
+  --color-neutral: #2B361B;
+  --color-base-100: #FFF8F5;
+  --color-base-200: #F7EAD7;
+  --color-base-300: #EAD9CF;
+  --color-base-content: #2B361B;
+}
+
+[data-theme="dark"] {
+  --color-primary: #D99453;
+  --color-secondary: #8C9D5B;
+  --color-accent: #59AEC5;
+  --color-neutral: #1A1614;
+  --color-base-100: #1A1614;
+  --color-base-200: #252019;
+  --color-base-300: #332C25;
+  --color-base-content: #F7EAD7;
 }
 
 @import "react-toastify/dist/ReactToastify.css";
 
+
+
 @theme {
+
+  --font-primary: 'Prompt', sans-serif;
   --animate-fade-up: fade-up 1s ease-out forwards;
 
   @keyframes fade-up {
@@ -24,6 +57,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -31,34 +65,40 @@
   }
 }
 
+@layer base {
+  body {
+    font-family: var(--font-primary);
+  }
+}
+
 .Toastify__toast-container {
   width: 240px !important;
   left: auto !important;
   right: 20px !important;
-  top:20px !important;
+  top: 20px !important;
   bottom: auto !important;
 }
 
 /* 1. Default for PC/Desktop */
 .mapboxgl-ctrl-bottom-right {
-    bottom: 10px !important;
-    right: 10px !important;
-    transition: bottom 0.3s ease; /* Smoothly moves if you resize the window */
+  bottom: 10px !important;
+  right: 10px !important;
+  transition: bottom 0.3s ease;
+  /* Smoothly moves if you resize the window */
 }
 
 /* 2. Mobile Override (Screens smaller than 768px) */
 @media (max-width: 767px) {
-    .mapboxgl-ctrl-bottom-right {
-        /* Lift it up to clear your mobile NavBar */
-        bottom: 130px !important; 
-        
-        /* Optional: Add safe area for iPhones with notches */
-        bottom: calc(130px + env(safe-area-inset-bottom)) !important;
-    }
+  .mapboxgl-ctrl-bottom-right {
+    /* Lift it up to clear your mobile NavBar */
+    bottom: 130px !important;
 
-    /* Move the Mapbox Logo/Attribution up too so it's not hidden */
-    .mapboxgl-ctrl-bottom-left {
-        bottom: 130px !important;
-    }
+    /* Optional: Add safe area for iPhones with notches */
+    bottom: calc(130px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Move the Mapbox Logo/Attribution up too so it's not hidden */
+  .mapboxgl-ctrl-bottom-left {
+    bottom: 130px !important;
+  }
 }
-

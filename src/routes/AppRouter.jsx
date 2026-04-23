@@ -60,7 +60,10 @@ const router = createBrowserRouter([
       { path: "/ai-recommend", element: <AiRecommend /> },
       {
         element: <ProtectedRoute />,
-        children: [{ path: "/profile", element: <Profile /> }],
+        children: [
+          { path: "/profile", element: <Profile /> },
+          { path: "/profile/:id", element: <Profile /> }
+        ],
       },
     ],
   },

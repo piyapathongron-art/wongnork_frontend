@@ -36,10 +36,10 @@ const Restaurants = () => {
     : restaurants.slice(0, 5);
 
   return (
-    <div className="w-full h-[100dvh] bg-[#FFF8F5] text-[#2B361B] pb-32 font-sans overflow-y-auto">
+    <div className="w-full h-[100dvh] bg-base-100 text-base-content pb-32 font-sans overflow-y-auto">
       {/* --- Sticky Header & Search Section --- */}
-      <div className="sticky top-0 z-40 bg-[#FFF8F5]/90 backdrop-blur-md px-6 pt-6 pb-4 shadow-sm">
-        <h1 className="text-2xl font-extrabold text-[#A65D2E] mb-4">
+      <div className="sticky top-0 z-40 bg-base-100/90 backdrop-blur-md px-6 pt-6 pb-4 shadow-sm">
+        <h1 className="text-2xl font-extrabold text-accent mb-4">
           Restaurants
         </h1>
 
@@ -61,7 +61,7 @@ const Restaurants = () => {
               onChange={(e) => setSearchQuery(e.target.value)} // 🌟 อัปเดตผ่าน Zustand
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-              className="flex-1 bg-transparent border-none outline-none px-3 text-sm text-[#2B361B] placeholder:text-[#A8A29F]"
+              className="flex-1 bg-transparent border-none outline-none px-3 text-sm text-base-content placeholder:text-[#A8A29F]"
             />
             {searchQuery && (
               <button

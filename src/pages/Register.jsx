@@ -27,7 +27,7 @@ const Register = () => {
       <div className="text-center mb-2s sm:mb-4 animate-fade-up shrink-0">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
           <span className="text-[#2D3E25] block">WONG</span>
-          <span className="text-[#A65D2E] block">NORK</span>
+          <span className="text-accent block">NORK</span>
         </h1>
         <p className="text-[#2D3E25] font-medium mt-1 sm:mt-2 text-sm sm:text-base">
           Eat | Share | Connect

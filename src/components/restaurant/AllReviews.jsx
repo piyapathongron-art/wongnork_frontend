@@ -42,12 +42,12 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full h-full bg-[#FFF8F4] flex flex-col pointer-events-auto shadow-2xl"
+            className="relative w-full h-full bg-base-100 flex flex-col pointer-events-auto shadow-2xl"
           >
             {/* --- Header --- */}
-            <div className="bg-white border-b border-[#EEE2D1] shrink-0">
+            <div className="bg-base-100 border-b border-base-content/10 shrink-0">
               <div className="flex items-center justify-between px-6 py-5">
-                <h2 className="text-xl font-bold text-[#2D3E25]">
+                <h2 className="text-xl font-bold text-base-content">
                   รีวิวทั้งหมด
                 </h2>
                 {/* 🌟 ย้ายปุ่มกลับมาขวา */}
@@ -63,9 +63,9 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="p-2 text-[#2D3E25] bg-[#F4E8DB]/50 rounded-full active:scale-90 transition-transform cursor-pointer"
+                  className="p-2 text-base-content bg-base-200/50 rounded-full active:scale-90 transition-transform cursor-pointer"
                 >
-                  <X size={20} className="text-[#A67045]" />
+                  <X size={20} className="text-accent" />
                 </button>
               </div>
 
@@ -107,7 +107,7 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                   return (
                     <div
                       key={review.id || index}
-                      className="bg-white p-5 rounded-[2rem] shadow-sm border border-[#EEE2D1]/40"
+                      className="bg-base-100 p-5 rounded-[2rem] shadow-sm border border-base-content/10"
                     >
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
@@ -116,14 +116,14 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                               review.user?.avatarUrl ||
                               "https://i.pravatar.cc/150"
                             }
-                            className="w-10 h-10 rounded-full object-cover bg-[#F4E8DB]"
+                            className="w-10 h-10 rounded-full object-cover bg-base-200"
                             alt="User"
                           />
                           <div>
-                            <h4 className="text-[14px] font-bold text-[#2C241E]">
+                            <h4 className="text-[14px] font-bold text-base-content">
                               {review.user?.name || "ไม่ระบุชื่อ"}
                             </h4>
-                            <span className="text-[10px] text-[#A68F7E]">
+                            <span className="text-[10px] text-base-content/40">
                               {formattedDate}
                             </span>
                           </div>
@@ -145,7 +145,7 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                           ))}
                         </div>
                       </div>
-                      <p className="text-[14px] text-[#7A6A5E] leading-relaxed font-medium">
+                      <p className="text-[14px] text-base-content/50 leading-relaxed font-medium">
                         {review.comment
                           ? `"${review.comment}"`
                           : "ให้คะแนนโดยไม่มีความคิดเห็น"}
@@ -154,7 +154,7 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                   );
                 })
               ) : (
-                <div className="text-center py-20 text-[#A8A29F] font-medium italic">
+                <div className="text-center py-20 text-base-content/40 font-medium italic">
                   ยังไม่มีรีวิวสำหรับร้านนี้
                 </div>
               )}
@@ -174,8 +174,8 @@ const FilterChip = ({ label, active, onClick, icon }) => (
     }}
     className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap cursor-pointer ${
       active
-        ? "bg-[#A67045] text-white shadow-md shadow-[#A67045]/30"
-        : "bg-white text-[#A67045] border border-[#EAD9CF] hover:bg-[#F4E8DB]/30"
+        ? "bg-accent text-white shadow-md shadow-accent/30"
+        : "bg-base-100 text-accent border border-base-300 hover:bg-base-200/30"
     }`}
   >
     {icon}

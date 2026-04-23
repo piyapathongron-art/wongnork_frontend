@@ -27,8 +27,8 @@ const NavBar = () => {
 
     // Helper for colors to keep the JSX clean
     const getColors = (id) => ({
-        stroke: activeTab === id ? "#BC6C25" : "#2B361B",
-        text: activeTab === id ? "text-[#BC6C25]" : "text-[#2B361B]",
+        stroke: activeTab === id ? "var(--color-primary)" : "var(--color-base-content)",
+        text: activeTab === id ? "text-primary" : "text-base-content",
         opacity:
             activeTab === id
                 ? "opacity-100 scale-110"
@@ -38,7 +38,7 @@ const NavBar = () => {
 
     return (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none">
-            <nav className="w-full max-w-[420px] bg-[#F7EAD7] h-[65px] rounded-[45px] flex items-center justify-between px-5 shadow-xl border border-[#EEE2D1]/30 pointer-events-auto">
+            <nav className="w-full max-w-[420px] bg-base-200 h-[65px] rounded-[45px] flex items-center justify-between px-5 shadow-xl border border-base-content/10 pointer-events-auto">
 
                 {/* 1. Ai Recommend */}
                 <div

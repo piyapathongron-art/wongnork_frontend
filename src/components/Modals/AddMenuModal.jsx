@@ -3,9 +3,9 @@ import { X, Loader2, Plus, Image as ImageIcon, Camera } from 'lucide-react';
 import InputField from '../Form/InputField';
 import { useMenuForm } from '../../hooks/useMenuForm';
 
-const AddMenuModal = ({ isOpen, onClose, restaurantId, onSuccess }) => {
+const AddMenuModal = ({ isOpen, onClose, restaurantId, onSuccess, editData }) => {
     const { form, handleUpload, onSubmit, isUploading, isSubmitting } = 
-        useMenuForm(restaurantId, onSuccess, onClose);
+        useMenuForm(restaurantId, onSuccess, onClose, editData);
 
     const previewUrl = form.watch("imageUrl");
 
@@ -13,7 +13,7 @@ const AddMenuModal = ({ isOpen, onClose, restaurantId, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-            <div className="bg-[#F7EAD7] dark:bg-zinc-900 w-full max-w-lg rounded-[40px] shadow-2xl flex flex-col max-h-[92vh] border border-[#BC6C25]/20 overflow-hidden">
+            <div className="bg-base-200 w-full max-w-lg rounded-[40px] shadow-2xl flex flex-col max-h-[92vh] border border-primary/20 overflow-hidden">
                 
                 <ModalHeader onClose={onClose} />
 
@@ -51,14 +51,14 @@ const AddMenuModal = ({ isOpen, onClose, restaurantId, onSuccess }) => {
 // --- Sub-components for better readability ---
 
 const ModalHeader = ({ onClose }) => (
-    <div className="p-6 border-b border-[#BC6C25]/10 flex items-center justify-between">
-        <h2 className="text-xl font-black uppercase text-[#2B361B] dark:text-white leading-none">Add Menu Item</h2>
+    <div className="p-6 border-b border-primary/10 flex items-center justify-between">
+        <h2 className="text-xl font-black uppercase text-base-content leading-none">Add Menu Item</h2>
         <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors"><X /></button>
     </div>
 );
 
 const ImageUploadField = ({ previewUrl, isUploading, onFileChange }) => (
-    <div className="relative w-full h-48 bg-zinc-100 dark:bg-black/40 rounded-3xl border-2 border-dashed border-[#D9C5B2] dark:border-zinc-800 overflow-hidden group">
+    <div className="relative w-full h-48 bg-zinc-100 rounded-3xl border-2 border-dashed border-base-300 overflow-hidden group">
         {previewUrl ? (
             <>
                 <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -82,7 +82,7 @@ const SubmitButton = ({ isLoading }) => (
     <button
         disabled={isLoading}
         type="submit"
-        className="w-full bg-[#BC6C25] text-[#F7EAD7] font-black uppercase py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-all hover:brightness-110 disabled:opacity-50 mt-4"
+        className="w-full bg-primary text-base-200 font-black uppercase py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-all hover:brightness-110 disabled:opacity-50 mt-4"
     >
         {isLoading ? <Loader2 className="animate-spin" /> : <><Plus size={20} /> Add to Menu</>}
     </button>
