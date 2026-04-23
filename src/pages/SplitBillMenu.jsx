@@ -1,6 +1,21 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Receipt, Check, Utensils, AlertCircle, X, Users, Plus, Crown, User as UserIcon, Star, MessageSquare } from 'lucide-react';
+import {
+    ArrowLeft,
+    Receipt,
+    Check,
+    Utensils,
+    AlertCircle,
+    X,
+    Users,
+    Plus,
+    Crown,
+    User as UserIcon,
+    Star,
+    MessageSquare,
+    Search,
+    ArrowUp
+} from 'lucide-react';
 import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiKickMember } from '../api/party';
 import { apiGetMenuByRestaurantId } from '../api/menuApi';
 import useUserStore from '../stores/userStore';
@@ -14,12 +29,17 @@ const SplitBillMenu = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = useUserStore(state => state.user);
+    const scrollRef = useRef(null);
 
     const [party, setParty] = useState(null);
     const [billSummary, setBillSummary] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+
+    // Search & UI States
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showBackToTop, setShowBackToTop] = useState(false);
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -43,7 +63,6 @@ const SplitBillMenu = () => {
             setParty(partyData);
             setBillSummary(billRes.data.data);
 
-            // เช็คว่า User นี้รีวิวปาร์ตี้นี้ไปหรือยัง
             if (partyData.restaurant?.reviews) {
                 const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
                 if (myReview) setHasHasReviewed(true);
@@ -67,6 +86,19 @@ const SplitBillMenu = () => {
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // Handle Scrolling logic
+    const handleScroll = (e) => {
+        if (e.target.scrollTop > 400) {
+            setShowBackToTop(true);
+        } else {
+            setShowBackToTop(false);
+        }
+    };
+
+    const scrollToTop = () => {
+        scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleAvatarClick = (clickedUserId) => {
         if (clickedUserId === user?.id) {
@@ -106,6 +138,13 @@ const SplitBillMenu = () => {
         }
     };
 
+    const filteredMenuItems = React.useMemo(() => {
+        if (!searchQuery.trim()) return menuItems;
+        return menuItems.filter(item =>
+            item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [menuItems, searchQuery]);
+
     if (loading && !party) {
         return (
             <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
@@ -132,7 +171,11 @@ const SplitBillMenu = () => {
         const tableItem = billSummary?.tableItems?.find(ti => ti.name === item.name && !ti.isCustom);
         const totalOrdered = tableItem ? tableItem.quantity : 0;
         return (
-            <div onClick={() => handleAddMenuToBill(item)} className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}>
+            <motion.div
+                layout
+                onClick={() => handleAddMenuToBill(item)}
+                className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
+            >
                 {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
                 <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
@@ -144,7 +187,7 @@ const SplitBillMenu = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
@@ -157,7 +200,11 @@ const SplitBillMenu = () => {
                 <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
             </header>
 
-            <main className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6">
+            <main
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6 scroll-smooth"
+            >
                 {/* 🌟 Review Prompt for Completed Party */}
                 {isCompleted && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
@@ -208,9 +255,39 @@ const SplitBillMenu = () => {
                     <div><h3 className="font-bold text-[14px] leading-tight">{isCompleted ? 'ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3><p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">{isCompleted ? 'คุณสามารถดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง แต่ไม่สามารถแก้ไขข้อมูลได้แล้ว' : 'เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ'}</p></div>
                 </div>
 
-                <div className="space-y-3 mb-10">
-                    <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><div className="h-px flex-1 bg-[#EAD9CF]" />เมนูทั้งหมดจากร้าน<div className="h-px flex-1 bg-[#EAD9CF]" /></h3>
-                    {menuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)}
+                <div className="space-y-4 mb-10 relative">
+                    <div className="sticky -top-10 z-30 -mx-6 px-6 py-4 bg-[#FFF8F5]/80 backdrop-blur-xl mb-2 flex flex-col gap-4 border-b border-[#BC6C25]/5">
+                        <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] flex items-center gap-2">
+                            <div className="h-px flex-1 bg-[#EAD9CF]" />
+                            เมนูจากร้าน {party.restaurant?.name}
+                            <div className="h-px flex-1 bg-[#EAD9CF]" />
+                        </h3>
+
+                        {/* 🔍 Search Menu Input */}
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
+                                <Search size={16} strokeWidth={2.5} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="ค้นหาเมนูอาหาร..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        {filteredMenuItems.length > 0 ? (
+                            filteredMenuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)
+                        ) : (
+                            <div className="text-center py-10 opacity-40">
+                                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">ไม่พบเมนูที่ค้นหา</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </main>
 
@@ -222,12 +299,27 @@ const SplitBillMenu = () => {
                 </div>
             </div>
 
+            {/* 🚀 To the Top Button */}
+            <AnimatePresence>
+                {showBackToTop && (
+                    <motion.button
+                        initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                        onClick={scrollToTop}
+                        className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                        <ArrowUp size={20} strokeWidth={3} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
             {/* 🌟 Review Modal */}
             <CreateReviewModal
                 isOpen={isReviewModalOpen}
                 onClose={() => setIsReviewModalOpen(false)}
                 restaurantId={party?.restaurantId}
-                partyId={id} // 🌟 ส่ง partyId ไปด้วย
+                partyId={id}
                 onReviewSuccess={() => {
                     setHasHasReviewed(true);
                     loadData();

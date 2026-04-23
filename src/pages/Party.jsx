@@ -38,7 +38,9 @@ const Party = () => {
         const led = user.partiesLed || [];
         const joined = (user.joinedParties || []).map(jp => jp.party).filter(p => !!p);
 
-        const combined = [...led, ...joined];
+        // 🎯 กรองเอาเฉพาะกลุ่มที่ยังไม่จบ (OPEN หรือ FULL)
+        const combined = [...led, ...joined].filter(p => p.status !== 'COMPLETED');
+
         const unique = combined.reduce((acc, curr) => {
             if (!acc.find(p => p.id === curr.id)) acc.push(curr);
             return acc;
@@ -49,7 +51,8 @@ const Party = () => {
     // 🌟 Filtered Parties Logic
     const filteredDiscovery = React.useMemo(() => {
         return parties
-            .filter(p => !myJoinedGroups.some(myP => myP.id === p.id))
+            .filter(p => p.status !== 'COMPLETED') // 🎯 กรองกลุ่มที่จบแล้วออกจากรายการค้นหาด้วย
+            .filter(p => !myJoinedGroups.some(myP => myP.id === p.id)) 
             .filter(p => {
                 const matchesSearch =
                     p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -169,7 +172,7 @@ const Party = () => {
                             <h2 className="px-2 text-[10px] font-black tracking-[0.2em] text-[#BC6C25] uppercase opacity-70">
                                 Your Current Groups
                             </h2>
-                            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
+                            <div className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-1">
                                 {myJoinedGroups.map(party => {
                                     const restaurant = party.restaurant || {};
                                     const imageUrl = restaurant.images?.find(img => img.isCover)?.url ||
@@ -221,7 +224,7 @@ const Party = () => {
                             Discover Nearby
                         </h1>
 
-                        {/* 🔍 SEARCH & FILTER SECTION */}
+                        {/* SEARCH & FILTER SECTION */}
                         <div className="flex flex-col gap-4">
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
@@ -242,8 +245,8 @@ const Party = () => {
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat
-                                                ? 'bg-[#182806] text-white border-[#182806] shadow-md'
-                                                : 'bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800'
+                                            ? 'bg-[#182806] text-white border-[#182806] shadow-md'
+                                            : 'bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800'
                                             }`}
                                     >
                                         {cat}

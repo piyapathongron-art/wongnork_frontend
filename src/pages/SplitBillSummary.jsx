@@ -1,7 +1,27 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Plus, Minus, Trash2, Check, Users, Utensils, Receipt, UserIcon, Star } from 'lucide-react';
-import { apiGetPartyById, apiGetSplitBill, apiUpdateOrderItemQuantity, apiToggleOrderItemSharer, apiRemoveOrderItem, apiAddOrderItem, apiUpdatePartySettings } from '../api/party';
+import { 
+    ArrowLeft, 
+    Plus, 
+    Minus, 
+    Trash2, 
+    Check, 
+    Users, 
+    Utensils, 
+    Receipt, 
+    UserIcon, 
+    Star,
+    ArrowUp 
+} from 'lucide-react';
+import { 
+    apiGetPartyById, 
+    apiGetSplitBill, 
+    apiUpdateOrderItemQuantity, 
+    apiToggleOrderItemSharer, 
+    apiRemoveOrderItem, 
+    apiAddOrderItem, 
+    apiUpdatePartySettings 
+} from '../api/party';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,11 +32,13 @@ const SplitBillSummary = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = useUserStore(state => state.user);
+    const scrollRef = useRef(null);
 
     const [party, setParty] = useState(null);
     const [billSummary, setBillSummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [showBackToTop, setShowBackToTop] = useState(false);
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -46,7 +68,6 @@ const SplitBillSummary = () => {
             setBillSummary(billRes.data.data);
             setSettingsForm({ vat: partyData.vat, serviceCharge: partyData.serviceCharge });
 
-            // 🌟 เช็คว่ารีวิวปาร์ตี้นี้ไปหรือยัง
             if (partyData.restaurant?.reviews) {
                 const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
                 if (myReview) setHasHasReviewed(true);
@@ -65,6 +86,19 @@ const SplitBillSummary = () => {
 
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
+
+    // Handle Scrolling logic
+    const handleScroll = (e) => {
+        if (e.target.scrollTop > 400) {
+            setShowBackToTop(true);
+        } else {
+            setShowBackToTop(false);
+        }
+    };
+
+    const scrollToTop = () => {
+        scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleUpdateSettings = async () => {
         if (!isLeader || isCompleted || actionLoading) return;
@@ -190,7 +224,11 @@ const SplitBillSummary = () => {
                 <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
             </header>
 
-            <main className="flex-1 overflow-y-auto no-scrollbar px-6 pt-6 pb-48">
+            <main 
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto no-scrollbar px-6 pt-6 pb-48 scroll-smooth"
+            >
                 {/* 🌟 Review Prompt for Completed Party */}
                 {isCompleted && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
@@ -262,6 +300,21 @@ const SplitBillSummary = () => {
                     {mySummary.items.length >= 0 && (<div className="text-[9px] text-[#A8A29F] font-medium text-right mt-1 flex flex-col"><span>(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</span><span className="text-[#A65D2E] font-bold uppercase mt-0.5">* หารเท่ากันทั้งโต๊ะ {billSummary?.members?.length} คน</span></div>)}
                 </div>
             </div>
+
+            {/* 🚀 To the Top Button */}
+            <AnimatePresence>
+                {showBackToTop && (
+                    <motion.button
+                        initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                        onClick={scrollToTop}
+                        className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                        <ArrowUp size={20} strokeWidth={3} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
 
             {/* Modal: Delete Confirmation */}
             <AnimatePresence>{itemToDelete && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center px-6"><motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="bg-white w-full max-w-xs rounded-[2rem] p-6 text-center shadow-2xl"><div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={24} /></div><h3 className="text-lg font-bold text-[#2B361B] mb-2">ลบรายการอาหาร?</h3><p className="text-sm text-[#8B837E] mb-6">คุณแน่ใจหรือไม่ว่าต้องการลบ "{itemToDelete.name}" ออกจากบิลโต๊ะ</p><div className="flex gap-3"><button onClick={() => setItemToDelete(null)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] hover:bg-gray-200 transition-colors rounded-xl font-bold text-sm">ยกเลิก</button><button onClick={handleDeleteItem} className="flex-1 py-3 bg-red-500 hover:bg-red-600 transition-colors text-white rounded-xl font-bold text-sm shadow-md">ลบรายการ</button></div></motion.div></motion.div>)}</AnimatePresence>
