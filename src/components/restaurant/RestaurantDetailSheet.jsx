@@ -288,8 +288,6 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
         isOpen={showAllMenus}
         onClose={() => navigate(-1)}
         menus={menuItems}
-        restaurant={restaurant}
-        onMenuUpdate={handleRefresh}
       />
       <ShareModal
         isOpen={isShareModalOpen}
