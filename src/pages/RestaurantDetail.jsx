@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiGetAllReview } from "../api/reviewApi";
 import { apiGetRestaurantById } from "../api/restaurant";
 
-import { apiToggleSaveRestaurant, apiGetme } from "../api/mainApi"; //  เติม apiGetme 
-
+import { apiToggleSaveRestaurant, apiGetme } from "../api/mainApi";
 
 import { toast } from "react-toastify";
 
@@ -19,7 +18,12 @@ import {
 
 import MenuSection from "../components/restaurant/MenuSection";
 import ReviewSection from "../components/restaurant/ReviewSection";
-import { useNavigate, useOutletContext, useParams } from "react-router";
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router";
 import ShareModal from "../components/restaurant/ShareModal";
 import AllReviews from "../components/restaurant/AllReviews";
 import AllMenus from "../components/restaurant/AllMenus";
@@ -29,6 +33,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const context = useOutletContext();
+  const location = useLocation();
 
   // ถ้าได้ restaurant มาจาก prop โดยตรง (render inline จาก HomeMap) ให้ใช้เลย
   // ถ้าไม่ได้ ค่อยไปเช็คจาก context (render ผ่าน router)
@@ -38,10 +43,10 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
   const [reviewItems, setReviewItems] = useState([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [showAllMenus, setShowAllMenus] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
-  const [isSaved, setIsSaved] = useState(false); // สถานะว่าเซฟร้านนี้หรือยัง
+  const showAllMenus = location.hash === "#menus";
+  const showAllReviews = location.hash === "#reviews";
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -94,18 +99,19 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     fetchSelfData();
   }, [id, context?.restaurant, propRestaurant]);
 
-
-// 🌟 จุดที่ต้องแก้: เช็คสถานะจากข้อมูลโปรไฟล์จริง เพื่อให้สีกดแล้วไม่หายตอนกดย้อนกลับ
+  // 🌟 จุดที่ต้องแก้: เช็คสถานะจากข้อมูลโปรไฟล์จริง เพื่อให้สีกดแล้วไม่หายตอนกดย้อนกลับ
   useEffect(() => {
     const checkSavedStatus = async () => {
       try {
         const res = await apiGetme();
         // ดึงรายการที่เซฟไว้ทั้งหมดมาเช็ค
         const savedList = res.data?.data?.savedRestaurants || [];
-        
+
         // ตรวจสอบว่า ID ร้านในหน้านี้ (id) มีอยู่ในรายการที่เซฟไว้ไหม
-        const isAlreadySaved = savedList.some(item => item.restaurantId === id);
-        
+        const isAlreadySaved = savedList.some(
+          (item) => item.restaurantId === id,
+        );
+
         setIsSaved(isAlreadySaved);
       } catch (error) {
         console.error("Error checking saved status:", error);
@@ -116,11 +122,6 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
       checkSavedStatus();
     }
   }, [id]);
-
-
-
-
-
 
   // 3. ดึงรีวิว
   useEffect(() => {
@@ -144,8 +145,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     }
   };
 
-
-// 🌟 4. ฟังก์ชันจัดการปุ่ม Save (Optimistic UI)
+  // 🌟 4. ฟังก์ชันจัดการปุ่ม Save (Optimistic UI)
   const handleToggleSave = async () => {
     if (!restaurant?.id) return;
 
@@ -155,7 +155,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     try {
       // ยิง API ไปจัดการหลังบ้าน
       await apiToggleSaveRestaurant(restaurant.id);
-      
+
       if (!isSaved) {
         toast.success("บันทึกร้านอาหารลงโปรไฟล์แล้ว");
       }
@@ -167,24 +167,21 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
     }
   };
 
-  const handleRefreshMenu = async() => {
-    const targetId = id || restaurant?.id
-    if(!targetId) return
+  const handleRefreshMenu = async () => {
+    const targetId = id || restaurant?.id;
+    if (!targetId) return;
     try {
-      const res = await apiGetMenuByRestaurantId(restaurant.id)
-      const updatedMenu = res.data?.data || []
+      const res = await apiGetMenuByRestaurantId(restaurant.id);
+      const updatedMenu = res.data?.data || [];
 
-      setRestaurant(prev => ({
-        ...prev, menu: updatedMenu
-      }))
-    } catch(err) {
-      console.error("Handle Ref4resh err", err)
+      setRestaurant((prev) => ({
+        ...prev,
+        menu: updatedMenu,
+      }));
+    } catch (err) {
+      console.error("Handle Ref4resh err", err);
     }
-  }
-
-
-
-
+  };
 
   if (isLoadingRest) {
     return (
@@ -222,7 +219,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
           {restaurant?.name}
         </h1>
 
-<div className="flex gap-2">
+        <div className="flex gap-2">
           <button
             onClick={() => setIsShareModalOpen(true)}
             className="p-2 cursor-pointer"
@@ -231,17 +228,16 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
           </button>
 
           {/* 🌟 5. วางทับปุ่ม Bookmark เดิมตรงนี้เลยครับ! */}
-          <button 
-            onClick={handleToggleSave} 
+          <button
+            onClick={handleToggleSave}
             className="p-2 active:scale-75 transition-transform duration-200 cursor-pointer"
           >
-            <Bookmark 
-              size={22} 
-              className={isSaved ? "text-[#A67045]" : "text-[#594A3D]"} 
-              fill={isSaved ? "currentColor" : "none"} 
+            <Bookmark
+              size={22}
+              className={isSaved ? "text-[#A67045]" : "text-[#594A3D]"}
+              fill={isSaved ? "currentColor" : "none"}
             />
           </button>
-          
         </div>
       </header>
 
@@ -268,9 +264,14 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
           </div>
 
           <div className="flex gap-4">
-            <button className="flex-1 flex items-center justify-center gap-2 bg-[#F4E8DB] py-3.5 rounded-2xl font-bold text-[#A67045] active:scale-95 transition-all shadow-sm cursor-pointer">
+            <a
+              href="https://www.google.com/maps"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 bg-[#F4E8DB] py-3.5 rounded-2xl font-bold text-[#A67045] active:scale-95 transition-all shadow-sm cursor-pointer"
+            >
               <Navigation size={18} /> เส้นทาง
-            </button>
+            </a>
             {/* <button className="flex-1 flex items-center justify-center gap-2 bg-[#F4E8DB] py-3.5 rounded-2xl font-bold text-[#A67045] active:scale-95 transition-all shadow-sm cursor-pointer">
               <Phone size={18} /> โทร
             </button> */}
@@ -290,8 +291,8 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
       <div className="mt-12">
         <MenuSection
           menuItems={menuItems}
-          restaurant = {restaurant}
-          onViewAllClick={() => setShowAllMenus(true)}
+          restaurant={restaurant}
+          onViewAllClick={() => navigate("#menus")}
           onMenuUpdate={handleRefreshMenu}
         />
       </div>
@@ -300,31 +301,41 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
         <ReviewSection
           reviewItems={reviewItems}
           isLoading={isLoadingReviews}
-          onViewAllClick={() => setShowAllReviews(true)}
+          onViewAllClick={() => navigate("#reviews")}
         />
       </div>
 
       <div className="fixed bottom-0 inset-x-0 px-6 py-5 bg-[#FFF8F2]/95 backdrop-blur-md border-t border-[#EEDCcc] z-50">
         <div className="flex">
-          <button className="flex-[1.2] bg-[#A67045] text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-[#A67045]/30 active:scale-95 transition-all cursor-pointer">
+          <button
+            onClick={() => {
+              navigate("/party", {
+                state: {
+                  openCreateModal: true, // 🌟 ตัวนี้จะไปสั่งให้ useEffect ในหน้า Party ของเพื่อนเปลี่ยน isModalOpen เป็น true ทันที
+                  restaurantData: restaurant, // 🌟 แถมข้อมูลร้านไปให้ด้วย เผื่อเพื่อนจะเอาไปใช้ใน Modal
+                },
+              });
+            }}
+            className="flex-[1.2] bg-[#A67045] text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-[#A67045]/30 active:scale-95 transition-all cursor-pointer"
+          >
             <Users size={18} /> Create Group
           </button>
         </div>
       </div>
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        restaurant={restaurant}
-      />
       <AllReviews
         isOpen={showAllReviews}
-        onClose={() => setShowAllReviews(false)}
+        onClose={() => navigate(-1)}
         reviews={reviewItems}
       />
       <AllMenus
         isOpen={showAllMenus}
-        onClose={() => setShowAllMenus(false)}
+        onClose={() => navigate(-1)}
         menus={menuItems}
+      />
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        restaurant={restaurant}
       />
     </div>
   );

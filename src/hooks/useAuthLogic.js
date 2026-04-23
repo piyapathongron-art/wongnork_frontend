@@ -9,6 +9,7 @@ import axios from "axios";
 
 export const useAuthLogic = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const login = useUserStore((state) => state.login);
   const googleLogin = useUserStore((state) => state.googleLogin);
   const navigate = useNavigate();
@@ -24,8 +25,17 @@ export const useAuthLogic = () => {
       toast.success("Login สำเร็จ");
       navigate("/");
     } catch (err) {
-      const errMessage = err.response?.data?.error || "เกิดข้อผิดพลาด";
-      toast.error(errMessage);
+      console.log("API Error Response:", err.response);
+      const status = err.response?.status;
+      const errMessage =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Login ล้มเหลว";
+      if (status === 403 || errMessage.toLowerCase().includes("verify")) {
+        setShowVerifyModal(true);
+      } else {
+        toast.error(errMessage);
+      }
     }
   };
 
@@ -58,6 +68,8 @@ export const useAuthLogic = () => {
     form,
     showPassword,
     setShowPassword,
+    showVerifyModal,
+    setShowVerifyModal,
     submitLogin,
     handleGoogleSuccess,
     navigate,

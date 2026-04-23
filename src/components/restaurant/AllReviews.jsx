@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, X, SortDesc, SortAsc, Clock } from "lucide-react";
+import { Star, X, SortDesc, SortAsc, Clock } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
 
 const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
-  // 🌟 1. State สำหรับเก็บสถานะการเรียงลำดับ
-  const [sortBy, setSortBy] = useState("latest"); // ตัวเลือก: latest, highRate, lowRate
+  const [sortBy, setSortBy] = useState("latest");
 
-  // 🌟 2. คำนวณการเรียงลำดับข้อมูลใหม่ทุกครั้งที่ sortBy เปลี่ยน
   const filteredReviews = useMemo(() => {
     let result = [...reviews];
     if (sortBy === "latest") {
@@ -22,8 +20,7 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-end pointer-events-none">
-          {/* 🛡️ แผ่นกระจกใสกันคลิกทะลุ (ยันต์กันผี) */}
+        <div className="fixed inset-0 z-[300] flex justify-end pointer-events-none">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0 }}
@@ -40,7 +37,6 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
             onTouchEnd={(e) => e.stopPropagation()}
           />
 
-          {/* 🌟 แผ่นรีวิว (สไลด์ขึ้นมาจากข้างล่างแกน Y) */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -54,20 +50,26 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
                 <h2 className="text-xl font-bold text-[#2D3E25]">
                   รีวิวทั้งหมด
                 </h2>
+                {/* 🌟 ย้ายปุ่มกลับมาขวา */}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onClose();
                   }}
-                  onTouchEnd={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose();
+                  }}
                   className="p-2 text-[#2D3E25] bg-[#F4E8DB]/50 rounded-full active:scale-90 transition-transform cursor-pointer"
                 >
                   <X size={20} className="text-[#A67045]" />
                 </button>
               </div>
 
-              {/* 🌟 แถบ Filter Chips (กดเปลี่ยนการเรียงลำดับ) */}
+              {/* 🌟 แถบ Filter Chips */}
               <div className="flex gap-2 px-6 pb-4 overflow-x-auto no-scrollbar">
                 <FilterChip
                   label="ล่าสุด"
@@ -90,7 +92,7 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
               </div>
             </div>
 
-            {/* --- Content (แสดงรายการรีวิวที่เรียงแล้ว) --- */}
+            {/* --- Content --- */}
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar pb-32">
               {filteredReviews.length > 0 ? (
                 filteredReviews.map((review, index) => {
@@ -164,7 +166,6 @@ const AllReviews = ({ isOpen, onClose, reviews = [] }) => {
   );
 };
 
-// 🌟 Sub-component สำหรับปุ่ม Filter
 const FilterChip = ({ label, active, onClick, icon }) => (
   <button
     onClick={(e) => {

@@ -1,12 +1,12 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
 
 const AllMenus = ({ isOpen, onClose, menus = [] }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex justify-end pointer-events-none">
+        <div className="fixed inset-0 z-[300] flex justify-end pointer-events-none">
           {/* 🛡️ แผ่นกระจกใสกันผี */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -23,7 +23,7 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
             onTouchEnd={(e) => e.stopPropagation()}
           />
 
-          {/* 🌟 แผ่นเมนู (เด้งขึ้นมาจากข้างล่าง) */}
+          {/* 🌟 แผ่นเมนู */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -36,13 +36,19 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
               <h2 className="text-xl font-bold text-[#2D3E25]">
                 เมนูทั้งหมด ({menus.length})
               </h2>
+              {/* 🌟 ย้ายปุ่มกลับมาขวา */}
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   onClose();
                 }}
-                onTouchEnd={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
                 className="p-2 text-[#2D3E25] bg-[#F4E8DB]/50 rounded-full active:scale-90 transition-transform cursor-pointer"
               >
                 <X size={20} className="text-[#A67045]" />
@@ -50,14 +56,13 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
             </div>
 
             {/* --- Content --- */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar pb-32">
               {menus.length > 0 ? (
                 menus.map((menu, index) => (
                   <div
                     key={index}
                     className="flex gap-4 bg-white p-4 rounded-3xl shadow-sm border border-[#EEE2D1]/50"
                   >
-                    {/* รูปเมนู */}
                     <img
                       src={
                         menu.imageUrl ||
@@ -66,8 +71,6 @@ const AllMenus = ({ isOpen, onClose, menus = [] }) => {
                       alt={menu.name}
                       className="w-24 h-24 object-cover rounded-2xl bg-[#EAD9CF] shrink-0"
                     />
-
-                    {/* รายละเอียดเมนู */}
                     <div className="flex flex-col justify-between flex-1 py-1">
                       <div>
                         <h4 className="text-[15px] font-bold text-[#2C241E] leading-tight">
