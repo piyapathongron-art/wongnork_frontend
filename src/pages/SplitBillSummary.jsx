@@ -126,6 +126,7 @@ const SplitBillSummary = () => {
 
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
+    const isPendingSettlement = party?.status === 'PENDING_SETTLEMENT';
 
     // Handle Scrolling logic
     const handleScroll = (e) => {
@@ -293,7 +294,11 @@ const SplitBillSummary = () => {
             <header className="bg-[#FFF8F5]/90 backdrop-blur-xl px-6 pt-12 pb-4 flex items-center gap-4 shadow-sm z-40 shrink-0">
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
                 <div className="flex-1 overflow-hidden">
-                    <div className="flex items-center gap-2"><h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none">สรุปบิลรวม</h1>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-extrabold text-[#2B361B] tracking-tight leading-none">สรุปบิลรวม</h1>
+                        {isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}
+                        {isPendingSettlement && <span className="bg-orange-100 text-orange-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">รอสรุปยอด</span>}
+                    </div>
                     <p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party?.name}</p>
                 </div>
 
@@ -316,6 +321,29 @@ const SplitBillSummary = () => {
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto no-scrollbar px-6 pt-6 pb-48 scroll-smooth"
             >
+                {/* 🌟 Settlement Reminder Notice for Leader */}
+                {isPendingSettlement && isLeader && (
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-6 rounded-[2rem] bg-orange-500 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                        <div className="flex flex-col gap-4 relative z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+                                    <Clock size={24} className="text-white animate-pulse" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-[14px]">ถึงเวลาสรุปยอดแล้ว! ⏰</h3>
+                                    <p className="text-[10px] text-white/80 mt-0.5 leading-relaxed">มื้ออาหารนี้ผ่านเวลาเริ่มมา 5 ชม. แล้วครับ รบกวนหัวหน้าช่วยตรวจสอบรายการอาหารและกด "ปิดจ็อบ" เพื่อให้สมาชิกทุกคนรีวิวร้านอาหารได้ครับ</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsCompleteModalOpen(true)}
+                                className="w-full py-3 bg-white text-orange-600 rounded-2xl text-[12px] font-black shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Check size={16} strokeWidth={3} /> สรุปยอดและปิดปาร์ตี้ตอนนี้
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
                 {/* 🌟 Review Prompt for Completed Party */}
                 {isCompleted && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">

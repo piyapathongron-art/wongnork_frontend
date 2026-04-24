@@ -55,6 +55,8 @@ export const updateRestaurantSchema = restaurantSchema.partial();
 
 // สร้างparty
 export const createPartySchema = z.object({
+  restaurantId: z.string().min(1, "กรุณาเลือกร้านอาหาร"),
+
   name: z.string()
     .min(1, "กรุณากรอกชื่อปาร์ตี้")
     .max(255, "ชื่อปาร์ตี้ต้องไม่เกิน 255 ตัวอักษร")
@@ -76,8 +78,8 @@ export const createPartySchema = z.object({
   }).min(2, "จำนวนคนต้องมีอย่างน้อย 2 คน"),
 
   contactInfo: z.string()
-    .min(1, "กรุณากรอกช่องทางติดต่อ")
-    .max(255, "ช่องทางติดต่อต้องไม่เกิน 255 ตัวอักษร"),
+    .optional()
+    .nullable(),
 
   serviceCharge: z.number().min(0).optional().default(0),
   vat: z.number().min(0).optional().default(0),

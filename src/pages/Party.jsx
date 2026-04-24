@@ -76,9 +76,9 @@ const Party = () => {
       .map((jp) => jp.party)
       .filter((p) => !!p);
 
-    // 🎯 กรองเอาเฉพาะกลุ่มที่ยังไม่จบ (OPEN หรือ FULL)
+    // 🎯 กรองเอาเฉพาะกลุ่มที่ยังไม่จบ (OPEN, FULL หรือ PENDING_SETTLEMENT)
     const combined = [...led, ...joined].filter(
-      (p) => p.status !== "COMPLETED",
+      (p) => p.status !== "COMPLETED" && p.status !== "CANCELLED",
     );
 
     const unique = combined.reduce((acc, curr) => {
@@ -91,7 +91,7 @@ const Party = () => {
   // 🌟 Filtered Parties Logic
   const filteredDiscovery = React.useMemo(() => {
     return parties
-      .filter((p) => p.status !== "COMPLETED") // กรองกลุ่มที่จบแล้วออกจากรายการค้นหาด้วย
+      .filter((p) => p.status === "OPEN" || p.status === "FULL") // กรองเอาเฉพาะกลุ่มที่เปิดรับคนอยู่จริงๆ
       .filter((p) => !myJoinedGroups.some((myP) => myP.id === p.id))
       .filter((p) => {
         const matchesSearch =
@@ -105,6 +105,13 @@ const Party = () => {
         return matchesSearch && matchesCategory;
       });
   }, [parties, myJoinedGroups, searchQuery, selectedCategory]);
+
+  // 🌟 ปาร์ตี้ที่รอการปิดกลุ่ม (Leader Action Needed)
+  const pendingSettlementParties = React.useMemo(() => {
+    return myJoinedGroups.filter(
+      (p) => p.status === "PENDING_SETTLEMENT" && p.leaderId === user?.id,
+    );
+  }, [myJoinedGroups, user?.id]);
 
   // 🌟 Auto open modal if navigated from Profile with state
   useEffect(() => {
@@ -233,6 +240,38 @@ const Party = () => {
         className="flex-1 overflow-y-auto px-4 pb-48 no-scrollbar scroll-smooth"
       >
         <div className="flex flex-col gap-2 max-w-md mx-auto pt-4">
+          
+          {/* 🌟 SECTION: ACTION REQUIRED (Leaders only) */}
+          {pendingSettlementParties.length > 0 && (
+            <div className="flex flex-col gap-3 pt-2 mb-2">
+              <h2 className="px-2 text-[10px] font-black tracking-[0.2em] text-orange-600 uppercase">
+                Action Required ⚠️
+              </h2>
+              <div className="flex flex-col gap-2">
+                {pendingSettlementParties.map(p => (
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    key={`pending-${p.id}`}
+                    onClick={() => navigate(`/party/${p.id}/split-bill`)}
+                    className="bg-orange-50 border border-orange-200 p-4 rounded-3xl flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-all shadow-sm"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-orange-200">
+                      <Clock size={24} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="bg-orange-200 text-orange-700 text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Settlement Required</span>
+                      </div>
+                      <h4 className="text-sm font-black text-orange-900 truncate">{p.name || "มื้ออาหารที่ผ่านมา"}</h4>
+                      <p className="text-[10px] font-bold text-orange-700/60 uppercase">กดเพื่อสรุปยอดและรีวิวร้านอาหาร</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 📸 SECTION: YOUR CURRENT GROUPS (IG Stories Style) */}
           {myJoinedGroups.length > 0 && (
             <div className="flex flex-col gap-3 pt-2 mb-4">
