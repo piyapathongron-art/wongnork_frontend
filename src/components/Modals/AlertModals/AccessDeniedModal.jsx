@@ -1,8 +1,9 @@
 
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion"
 import { AlertCircle } from "lucide-react"
 
-function AccessDeniedModal({ isAccessDeniedModalOpen, setIsAccessDeniedModalOpen }) {
+function AccessDeniedModal({ setIsAccessDeniedModalOpen }) {
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center px-6">
             <motion.div

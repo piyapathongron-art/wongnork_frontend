@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router";
 import useUserStore from "../stores/userStore";
 import useChatStore from "../stores/chatStore";
@@ -6,30 +6,28 @@ import useChatStore from "../stores/chatStore";
 const NavBar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [activeTab, setActiveTab] = useState("");
+
+    // Derive activeTab from current URL path directly during render
+    let activeTab = "";
+    const path = location.pathname;
+    if (path === "/ai-recommend") {
+        activeTab = "ai-recommend";
+    } else if (path === "/restaurants") {
+        activeTab = "restaurants";
+    } else if (path === "/profile") {
+        activeTab = "profile";
+    } else if (path === "/party") {
+        activeTab = "party";
+    } else if (path === "/") {
+        activeTab = "location";
+    }
+
     const isLogin = useUserStore(state => state.isLogin);
     const unreadCounts = useChatStore(state => state.unreadCounts);
-    
+
     // Check if there are ANY unread messages in any party
     const hasAnyUnread = Object.values(unreadCounts).some(count => count > 0);
     const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
-
-
-    // Sync activeTab with current URL path
-    useEffect(() => {
-        const path = location.pathname;
-        if (path === "/ai-recommend") {
-            setActiveTab("ai-recommend");
-        } else if (path === "/restaurants") {
-            setActiveTab("restaurants");
-        } else if (path === "/profile") {
-            setActiveTab("profile");
-        } else if (path === "/party") {
-            setActiveTab("party");
-        } else if (path === "/") {
-            setActiveTab("location");
-        }
-    }, [location.pathname]);
 
     // Helper for colors to keep the JSX clean
     const getColors = (id) => ({

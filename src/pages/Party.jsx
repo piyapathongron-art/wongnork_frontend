@@ -3,11 +3,12 @@ import NavBar from "../components/NavBar";
 import PartyCard from "../components/PartyCard";
 import { UserPlus, Search, Users, AlertCircle, ArrowUp, MapPin, Clock, CheckCircle2, X as CloseIcon } from "lucide-react";
 import { toast } from "react-toastify";
-import { apiGetParties, apiJoinParty, apiLeaveParty } from "../api/party";
+import { apiGetParties, apiJoinParty } from "../api/party";
 import useUserStore from "../stores/userStore";
 import useChatStore from "../stores/chatStore";
 import calculateDistance from "../utils/distance.ustils";
 import CreatePartyModal from "../components/Modals/CreatePartyModal";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useNavigate, useLocation } from "react-router";
@@ -105,7 +106,7 @@ const Party = () => {
 
         return matchesSearch && matchesCategory;
       });
-      // Note: parties is already sorted by dist in loadData
+    // Note: parties is already sorted by dist in loadData
   }, [parties, myJoinedGroups, searchQuery, selectedCategory]);
 
   // 🌟 ปาร์ตี้ที่รอการปิดกลุ่ม (Leader Action Needed)
@@ -223,16 +224,6 @@ const Party = () => {
     }
   };
 
-  const handleLeave = async (partyId) => {
-    try {
-      await apiLeaveParty(partyId);
-      toast.success("ออกจากปาร์ตี้แล้ว");
-      await loadData();
-    } catch (err) {
-      toast.error("Leave failed");
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-[#FDF2ED] dark:bg-black overflow-hidden flex flex-col font-sans">
       {/* 1. MAIN SCROLL CONTAINER */}
@@ -242,7 +233,7 @@ const Party = () => {
         className="flex-1 overflow-y-auto px-4 pb-48 no-scrollbar scroll-smooth"
       >
         <div className="flex flex-col gap-2 max-w-md mx-auto pt-4">
-          
+
           {/* 🌟 SECTION: ACTION REQUIRED (Leaders only) */}
           {pendingSettlementParties.length > 0 && (
             <div className="flex flex-col gap-3 pt-2 mb-2">
@@ -493,14 +484,14 @@ const Party = () => {
                   className="absolute inset-0 w-full h-full object-cover opacity-80"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                
+
                 <button
                   onClick={() => setIsJoinConfirmOpen(false)}
                   className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors"
                 >
                   <CloseIcon size={20} />
                 </button>
-                
+
                 <div className="absolute bottom-5 left-6 right-6">
                   <span className="bg-[#A65D2E] text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 inline-block shadow-sm">
                     {partyToJoin.restaurant?.category || "Restaurant"}
@@ -541,7 +532,7 @@ const Party = () => {
                         </p>
                       </div>
                       <div className="flex -space-x-2 overflow-hidden">
-                        {partyToJoin.members?.slice(0, 5).map((member, idx) => (
+                        {partyToJoin.members?.slice(0, 5).map((member) => (
                           <div
                             key={member.id}
                             className="inline-block h-8 w-8 rounded-full ring-2 ring-white overflow-hidden bg-gray-200"
