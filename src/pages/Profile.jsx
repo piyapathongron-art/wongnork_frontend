@@ -4,7 +4,7 @@ import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant, apiGetPublicProfil
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
-import { LucideChefHat, AlertCircle, ArrowLeft, Settings, LogOut } from 'lucide-react';
+import { LucideChefHat, AlertCircle, ArrowLeft, Settings, LogOut, Landmark } from 'lucide-react';
 import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import ReviewSection from '../components/profile/ReviewSection';
 import MyRestaurantsSection from '../components/profile/MyRestaurantsSection';
@@ -43,7 +43,12 @@ const Profile = () => {
     // 🌟 State สำหรับโหมดแก้ไข
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', avatarUrl: '' });
+    const [editForm, setEditForm] = useState({
+        name: '',
+        avatarUrl: '',
+        promptPayNumber: '',
+        promptPayName: ''
+    });
 
     // 🌟 State สำหรับ Modal ประวัติ
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -67,7 +72,12 @@ const Profile = () => {
                 const userObj = response.data.data;
                 setUserData(userObj);
 
-                setEditForm({ name: userObj.name || '', avatarUrl: userObj.avatarUrl || '' });
+                setEditForm({
+                    name: userObj.name || '',
+                    avatarUrl: userObj.avatarUrl || '',
+                    promptPayNumber: userObj.promptPayNumber || '',
+                    promptPayName: userObj.promptPayName || ''
+                });
             } catch (err) {
                 console.error("Error fetching profile:", err);
                 setError('ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
@@ -121,12 +131,20 @@ const Profile = () => {
 
             const updateData = {
                 name: editForm.name,
-                avatarUrl: finalAvatarUrl
+                avatarUrl: finalAvatarUrl,
+                promptPayNumber: editForm.promptPayNumber,
+                promptPayName: editForm.promptPayName
             };
 
             await apiUpdateProfile(updateData);
 
-            setUserData(prev => ({ ...prev, name: updateData.name, avatarUrl: updateData.avatarUrl }));
+            setUserData(prev => ({
+                ...prev,
+                name: updateData.name,
+                avatarUrl: updateData.avatarUrl,
+                promptPayNumber: updateData.promptPayNumber,
+                promptPayName: updateData.promptPayName
+            }));
             setIsEditing(false);
             setSelectedFile(null);
             toast.success("อัปเดตโปรไฟล์เรียบร้อย!");
@@ -159,7 +177,12 @@ const Profile = () => {
     };
 
     const handleCancelEdit = () => {
-        setEditForm({ name: userData.name, avatarUrl: userData.avatarUrl || '' });
+        setEditForm({
+            name: userData.name,
+            avatarUrl: userData.avatarUrl || '',
+            promptPayNumber: userData.promptPayNumber || '',
+            promptPayName: userData.promptPayName || ''
+        });
         setPreviewUrl('');
         setSelectedFile(null);
         setIsEditing(false);
@@ -218,7 +241,7 @@ const Profile = () => {
     const mainTitle = isOwner ? 'Restaurant Owner' : userData.name;
 
     return (
-        <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-base-100 text-base-content pb-32 font-sans">
+        <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-base-100 text-base-content pb-32 font-sans no-scrollbar">
 
             <header className="sticky top-0 w-full z-40 flex items-center px-6 py-4 bg-[#FFF8F5]/90 backdrop-blur-md">
                 {!isMe && (
@@ -294,15 +317,40 @@ const Profile = () => {
                             onChange={handleFileChange}
                         />
                     </div>
-                    <div className="text-center mt-2 w-full">
+                    <div className="text-center mt-2 w-full space-y-4">
                         {isMe && isEditing ? (
-                            <input
-                                type="text"
-                                value={editForm.name}
-                                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                placeholder="ใส่ชื่อของคุณ"
-                                className="text-xl font-extrabold text-base-content bg-base-100 border-b-2 border-accent focus:outline-none text-center px-2 py-1 w-full max-w-[250px] rounded-lg shadow-sm"
-                            />
+                            <div className="flex flex-col items-center gap-3 w-full max-w-[300px] mx-auto bg-[#F7EAD7]/30 p-6 rounded-[2rem] border border-[#EEE2D1]">
+                                <div className="w-full text-left">
+                                    <label className="text-[10px] font-black text-[#A65D2E] uppercase ml-1 mb-1 block">ชื่อที่แสดง</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        placeholder="ใส่ชื่อของคุณ"
+                                        className="text-lg font-extrabold text-[#2B361B] bg-white border border-[#EEE2D1] focus:outline-none focus:border-[#A65D2E] px-4 py-2 w-full rounded-xl shadow-sm"
+                                    />
+                                </div>
+                                <div className="w-full text-left">
+                                    <label className="text-[10px] font-black text-[#182806] uppercase ml-1 mb-1 block flex items-center gap-1"><Landmark size={10} /> เบอร์ PromptPay รับเงิน</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.promptPayNumber}
+                                        onChange={(e) => setEditForm({ ...editForm, promptPayNumber: e.target.value })}
+                                        placeholder="08x-xxx-xxxx"
+                                        className="text-sm font-bold text-[#182806] bg-white border border-[#182806]/10 focus:outline-none focus:border-[#182806] px-4 py-3 w-full rounded-xl shadow-sm"
+                                    />
+                                </div>
+                                <div className="w-full text-left">
+                                    <label className="text-[10px] font-black text-[#8B837E] uppercase ml-1 mb-1 block">ชื่อเจ้าของบัญชี (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.promptPayName}
+                                        onChange={(e) => setEditForm({ ...editForm, promptPayName: e.target.value })}
+                                        placeholder="ชื่อ-นามสกุล"
+                                        className="text-sm font-bold text-[#2B361B] bg-white border border-[#EEE2D1] focus:outline-none px-4 py-3 w-full rounded-xl shadow-sm"
+                                    />
+                                </div>
+                            </div>
                         ) : (
                             <>
                                 {isOwner && (

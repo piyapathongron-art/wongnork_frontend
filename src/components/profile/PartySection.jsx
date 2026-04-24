@@ -1,21 +1,21 @@
 import React from 'react';
 import { History, Clock } from 'lucide-react';
 
-const PartySection = ({ 
-    activeParties, 
-    hasPastParties, 
-    setIsHistoryOpen, 
-    onPartyClick, 
-    navigate, 
-    formatDate, 
-    formatTime 
+const PartySection = ({
+    activeParties,
+    hasPastParties,
+    setIsHistoryOpen,
+    onPartyClick,
+    navigate,
+    formatDate,
+    formatTime
 }) => {
     return (
         <section className="space-y-4 pt-4">
             <div className="flex justify-between items-center">
                 <h3 className="font-extrabold text-xl text-base-content">My Parties</h3>
                 {hasPastParties && (
-                    <button 
+                    <button
                         onClick={() => setIsHistoryOpen(true)}
                         className="flex items-center gap-1.5 text-[11px] font-bold text-accent bg-base-200 px-3 py-1.5 rounded-full active:scale-95 transition-transform cursor-pointer shadow-sm hover:bg-base-300"
                     >
@@ -24,7 +24,7 @@ const PartySection = ({
                     </button>
                 )}
             </div>
-            
+
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                 {activeParties.length === 0 ? (
                     <div className="flex-none w-64 py-8 flex flex-col items-center justify-center bg-base-100/40 rounded-3xl border border-dashed border-base-content/10 text-center">
@@ -35,9 +35,9 @@ const PartySection = ({
                     activeParties.map((party, index) => {
                         const restaurant = party.restaurant || {};
                         const imageUrl =
-                        restaurant.images?.find((img) => img.isCover)?.url ||
-                        restaurant.images?.[0]?.url ||
-                        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
+                            restaurant.images?.find((img) => img.isCover)?.url ||
+                            restaurant.images?.[0]?.url ||
+                            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80';
                         const memberCount = party.members?.length || 1;
 
                         return (
@@ -69,9 +69,11 @@ const PartySection = ({
                                                 />
                                             </div>
                                         ))}
-                                        <div className="w-6 h-6 rounded-full border-2 border-white bg-base-200 flex items-center justify-center text-[10px] font-bold text-accent shadow-sm z-20">
-                                            +{Math.max(memberCount - 3, 0)}
-                                        </div>
+                                        {memberCount > 3 && (
+                                            <div className="w-6 h-6 rounded-full border-2 border-white bg-base-200 flex items-center justify-center text-[10px] font-bold text-accent shadow-sm z-20">
+                                                +{Math.max(memberCount - 3, 0)}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -31,23 +31,23 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
 
     return (
         <div className={`transition-all duration-500 relative bg-base-200  rounded-[32px] p-5 flex gap-4 shadow-md border 
-            ${isJoined 
-                ? 'border-primary ring-2 ring-primary/20 scale-[1.02] z-10' 
+            ${isJoined
+                ? 'border-primary ring-2 ring-primary/20 scale-[1.02] z-10'
                 : 'border-base-content/15 '
             }`}>
 
             {/* Status Dot */}
-            <div className={`absolute top-4 right-4 w-3 h-3 rounded-full border-2 border-base-200 
-                ${party.status === 'OPEN' ? 'bg-primary' : 'bg-gray-400'}`} 
+            <div className={`absolute top-4 right-4 w-3 h-3 rounded-full border-2 border-base-200 animate-pulse
+                ${party.status === 'OPEN' ? 'bg-[#4cb944]' : 'bg-[#de3636]'}`}
             />
 
             {/* Left Side: Restaurant Image */}
-            <div className="w-28 h-28 bg-base-300  rounded-[24px] flex items-center justify-center text-center p-3 flex-shrink-0 overflow-hidden border border-base-content/10">
+            <div className="w-28 h-28 bg-base-300  rounded-[24px] flex items-center justify-center text-center flex-shrink-0 overflow-hidden border border-base-content/10">
                 {coverImage ? (
                     <img src={coverImage} className="w-full h-full object-cover" alt="restaurant" />
                 ) : (
                     <span className="text-[9px] font-black uppercase text-primary leading-tight tracking-tighter">
-                        {party.restaurant?.name || "RESTAURANT"}
+                        {party.restaurant?.name || "Restaurant"}
                     </span>
                 )}
             </div>
@@ -78,7 +78,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                         >
                             {/* Leader Slot */}
                             <div className="flex flex-col items-center gap-1.5 shrink-0">
-                                <div className="relative pt-3"> 
+                                <div className="relative pt-3">
                                     <Crown className="absolute top-0 left-1/2 -translate-x-1/2 text-primary w-4 h-4 z-20" fill="currentColor" />
                                     <div className="w-11 h-11 bg-primary rounded-full border-2 border-base-200 overflow-hidden flex items-center justify-center shadow-sm relative z-10">
                                         <img src={getAvatar(hostImg, hostName)} className="w-full h-full object-cover" alt="host" />
