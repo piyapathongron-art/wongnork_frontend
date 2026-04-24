@@ -34,7 +34,7 @@ const HomeMap = () => {
   // Role Debugging
   useEffect(() => {
     if (filteredRestaurants.length > 0) {
-      console.log("Current Auth Role:", user?.role);
+      // console.log("Current Auth Role:", user?.role);
     }
   }, [filteredRestaurants, user]);
 
