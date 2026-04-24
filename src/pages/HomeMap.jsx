@@ -10,7 +10,6 @@ import { Store, Plus } from "lucide-react";
 
 const SearchBar = lazy(() => import("../components/SearchBar"));
 const MapBox = lazy(() => import("../components/MapBox"));
-const ThemeToggleButton = lazy(() => import("../components/ThemeToggleButton"));
 const CreateRestaurantModal = lazy(
   () => import("../components/Modals/CreateRestaurant"),
 );
@@ -97,7 +96,6 @@ const HomeMap = () => {
                 mapBoxRef.current?.zoomOutToOverview();
               }}
             />
-            <ThemeToggleButton />
           </Suspense>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Eye, EyeOff, Loader2, User, Mail, Lock } from "lucide-react";
 import { useRegisterLogic } from "../hooks/useRegisterLogic";
+import ThemeToggleButton from '../components/ThemeToggleButton'
 
 const Register = () => {
   const {
