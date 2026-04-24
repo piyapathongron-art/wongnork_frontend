@@ -19,6 +19,7 @@ const Party = () => {
   const [userLoc, setUserLoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [incomingRestaurant, setIncomingRestaurant] = useState(null);
 
   // 🌟 Search & Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,8 +86,13 @@ const Party = () => {
   // 🌟 Auto open modal if navigated from Profile with state
   useEffect(() => {
     if (location.state?.openCreateModal) {
+      // 🌟 2. เซฟข้อมูลร้านลง State ของเราก่อน!
+      if (location.state?.restaurantData) {
+        setIncomingRestaurant(location.state.restaurantData);
+      }
+
       setIsModalOpen(true);
-      // Clear state so it doesn't reopen on refresh
+      // พอเซฟเสร็จ ค่อยปล่อยให้มันล้าง state ตามที่เพื่อนเขียนไว้
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -342,8 +348,12 @@ const Party = () => {
 
       <CreatePartyModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIncomingRestaurant(null); // 🌟 เคลียร์ค่าทิ้งด้วยตอนปิด Modal จะได้ไม่ค้าง
+        }}
         onSuccess={loadData}
+        initialRestaurant={incomingRestaurant} // 🌟 3. ส่งข้อมูลร้านที่เราล็อคไว้ให้ Modal
       />
 
       {/* 🌟 Dynamic Error Warning Modal */}
