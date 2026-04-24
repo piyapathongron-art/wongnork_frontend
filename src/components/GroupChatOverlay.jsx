@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Send, Smile, User as UserIcon, Image, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, Smile, User as UserIcon, Image, Loader2, X as CloseIcon } from 'lucide-react';
 import useUserStore from '../stores/userStore';
 import useChatStore from '../stores/chatStore';
 import { getSocket } from '../services/socket';
@@ -13,6 +13,10 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const [chatInput, setChatInput] = useState('');
     const [typingUser, setTypingUser] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    
+    // 🌟 New states for staged image
+    const [selectedImageFile, setSelectedImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     
     const chatEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -77,22 +81,46 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
         }, 2000);
     };
 
-    // 🌟 4. ส่งข้อความ
-    const handleSendMessage = (e) => {
+    // 🌟 4. ส่งข้อความ (Combined Image + Text)
+    const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
-        if (!chatInput.trim() || !party?.id || isPartyClosed) return;
+        
+        if ((!chatInput.trim() && !selectedImageFile) || isUploading || !party?.id || isPartyClosed) return;
 
-        socket.emit('send_message', {
-            text: chatInput,
-            partyId: party.id
-        });
+        setIsUploading(true);
+        try {
+            let finalImageUrl = null;
 
-        socket.emit('stop_typing', party.id);
-        setChatInput('');
+            // 1. If there's a staged image, upload it first
+            if (selectedImageFile) {
+                finalImageUrl = await uploadCloudinary(selectedImageFile);
+            }
+
+            // 2. Emit the combined message
+            socket.emit('send_message', {
+                text: chatInput.trim() || null,
+                imageUrl: finalImageUrl,
+                partyId: party.id,
+                type: "MESSAGE"
+            });
+
+            // 3. Clear all states
+            socket.emit('stop_typing', party.id);
+            setChatInput('');
+            setSelectedImageFile(null);
+            setImagePreview(null);
+            if (imageInputRef.current) imageInputRef.current.value = "";
+
+        } catch (error) {
+            console.error("Failed to send message:", error);
+            toast.error("เกิดข้อผิดพลาดในการส่งข้อความ");
+        } finally {
+            setIsUploading(false);
+        }
     };
 
-    // 🌟 5. จัดการการอัปโหลดรูป
-    const handleImageUpload = async (e) => {
+    // 🌟 5. เลือกรูป (Just preview, don't upload yet)
+    const handleImageSelect = (e) => {
         const file = e.target.files[0];
         if (!file || !party?.id || isPartyClosed) return;
 
@@ -100,24 +128,14 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
             return toast.error("ขนาดไฟล์ต้องไม่เกิน 5MB");
         }
 
-        setIsUploading(true);
-        try {
-            const imageUrl = await uploadCloudinary(file);
-            
-            socket.emit('send_message', {
-                imageUrl: imageUrl,
-                partyId: party.id,
-                type: "MESSAGE"
-            });
+        setSelectedImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    };
 
-            toast.success("ส่งรูปภาพแล้ว");
-        } catch (error) {
-            console.error("Upload failed:", error);
-            toast.error("อัปโหลดรูปภาพไม่สำเร็จ");
-        } finally {
-            setIsUploading(false);
-            if (imageInputRef.current) imageInputRef.current.value = "";
-        }
+    const removeSelectedImage = () => {
+        setSelectedImageFile(null);
+        setImagePreview(null);
+        if (imageInputRef.current) imageInputRef.current.value = "";
     };
 
     if (!party) return null;
@@ -168,7 +186,7 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                                 </div>
                                             )}
 
-                                            {/* 💬 Message Bubble */}
+                                            {/* 💬 Message Bubble Area */}
                                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                                                 {!isMe && (
                                                     <span className="text-[10px] text-primary uppercase mb-1 ml-1 font-bold">
@@ -228,7 +246,32 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                 </span>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-3">
+                                {/* 🖼️ Image Preview Area */}
+                                <AnimatePresence>
+                                    {imagePreview && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary shadow-lg group ml-2"
+                                        >
+                                            <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                                            <button 
+                                                onClick={removeSelectedImage}
+                                                className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full backdrop-blur-sm hover:bg-red-500 transition-colors"
+                                            >
+                                                <CloseIcon size={14} />
+                                            </button>
+                                            {isUploading && (
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                    <Loader2 size={20} className="animate-spin text-white" />
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 <form
                                     onSubmit={handleSendMessage}
                                     className="flex items-center gap-3 bg-base-200 border border-base-content/10 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner"
@@ -238,30 +281,30 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                         ref={imageInputRef}
                                         className="hidden" 
                                         accept="image/*"
-                                        onChange={handleImageUpload}
+                                        onChange={handleImageSelect}
                                     />
                                     <button 
                                         type="button" 
                                         disabled={isUploading}
                                         onClick={() => imageInputRef.current?.click()}
-                                        className="p-2 text-base-content/40 hover:text-primary transition-colors disabled:opacity-50"
+                                        className={`p-2 transition-colors ${imagePreview ? 'text-primary' : 'text-base-content/40 hover:text-primary'} disabled:opacity-50`}
                                     >
-                                        {isUploading ? <Loader2 size={20} className="animate-spin text-primary" /> : <Image size={20} />}
+                                        <Image size={20} />
                                     </button>
                                     
                                     <input
                                         type="text"
                                         value={chatInput}
                                         onChange={handleInputChange}
-                                        placeholder="พิมพ์ข้อความคุยกับเพื่อน..."
+                                        placeholder={imagePreview ? "พิมพ์ข้อความกำกับรูป..." : "พิมพ์ข้อความคุยกับเพื่อน..."}
                                         className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-base-content"
                                     />
                                     <button
                                         type="submit"
-                                        disabled={!chatInput.trim() || isUploading}
+                                        disabled={(!chatInput.trim() && !selectedImageFile) || isUploading}
                                         className="w-10 h-10 bg-primary text-primary-content rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
                                     >
-                                        <Send size={18} />
+                                        {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                                     </button>
                                 </form>
                             </div>
