@@ -4,13 +4,15 @@ import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant, apiGetPublicProfil
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
 import { toast } from 'react-toastify';
-import { LucideChefHat, AlertCircle, ArrowLeft, Landmark } from 'lucide-react';
+import { LucideChefHat, AlertCircle, ArrowLeft, Settings, LogOut, Landmark } from 'lucide-react';
 import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import ReviewSection from '../components/profile/ReviewSection';
 import MyRestaurantsSection from '../components/profile/MyRestaurantsSection';
 import PartySection from '../components/profile/PartySection';
 import HistoryModal from '../components/profile/HistoryModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import ThemeToggleButton from '../components/ThemeToggleButton';
+import { useThemeStore } from '../stores/themeStore';
 
 // Helper functions for dates
 const formatDate = (isoString) => {
@@ -58,6 +60,8 @@ const Profile = () => {
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
+
+    const toggleTheme = useThemeStore((state) => state.toggleTheme)
 
     //  ดึงข้อมูลโปรไฟล์เมื่อเข้ามาที่หน้า
     useEffect(() => {
@@ -250,11 +254,37 @@ const Profile = () => {
                 )}
                 <h1 className="text-xl font-extrabold text-[#A65D2E] flex-1">{isMe ? 'My Profile' : 'Profile'}</h1>
                 {isMe && (
-                    <button onClick={handleLogout} className="text-[#A65D2E] hover:bg-[#F7EAD7] p-2 rounded-full transition-colors cursor-pointer" title="Logout">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                        </svg>
-                    </button>
+                    <div className='dropdown dropdown-end'>
+                        <div tabIndex={0} role='button' className='p-2 rounded-full hover:bg-base-200 text-accent transition-colors'>
+                            <Settings size={24} />
+                        </div>
+                        <ul tabIndex={0} className='dropdown-content menu bg-base-100 rounded-2xl z-50 shadow-2xl
+      w-56 p-2 mt-2 border border-base-content/10'>
+                            {/* Item 1: Theme */}
+                            <li onClick={toggleTheme}>
+                                <div className='flex justify-between items-center active:bg-transparent'>
+                                    <span className='font-bold text-sm'>Dark Mode</span>
+                                    <ThemeToggleButton size={20}/>
+                                </div>
+                            </li>
+
+                            {/* 🌟 1. Proper Divider (No div wrapper!) */}
+                            <div className='h-px bg-base-content/10 my-1 mx-2' />
+
+                            {/* Item 2: Logout */}
+                            <li>
+                                <button
+                                    onClick={handleLogout}
+                                    className='text-red-500 font-bold flex items-center gap-3 p-3 w-full
+      hover:bg-red-50 active:bg-red-100'
+                                >
+                                    <LogOut size={20} /> {/* 🌟 2. Fixed casing */}
+                                    <span>Sign Out</span>
+                                </button>
+                            </li>
+                        </ul>
+
+                    </div>
                 )}
             </header>
 
