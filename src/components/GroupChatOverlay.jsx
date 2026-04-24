@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Send, Smile, User as UserIcon } from 'lucide-react';
 import useUserStore from '../stores/userStore';
+import useChatStore from '../stores/chatStore';
 import { getSocket } from '../services/socket';
 import { apiGetMessage } from '../api/socketApi';
 import { useSocket } from '../hooks/useSocket';
@@ -13,8 +14,19 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const typingTimeoutRef = useRef(null);
 
     const { token } = useUserStore();
+    const setChatOpen = useChatStore((state) => state.setChatOpen);
     const { messages, setMessages } = useSocket(party?.id);
     const socket = getSocket(token);
+
+    // Sync chatStore open state
+    useEffect(() => {
+        if (isOpen && party?.id) {
+            setChatOpen(party.id);
+        } else {
+            setChatOpen(false);
+        }
+        return () => setChatOpen(false);
+    }, [isOpen, party?.id, setChatOpen]);
 
     // 🌟 1. ดึงประวัติแชท (ไม่ต้องจัดการ Room เพราะ Parent ทำแล้ว)
     useEffect(() => {

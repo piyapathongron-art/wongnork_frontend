@@ -26,6 +26,7 @@ import CreateReviewModal from '../components/Modals/CreateReviewModal';
 import ProfileQuickViewSheet from '../components/profile/ProfileQuickViewSheet';
 import GroupChatOverlay from '../components/GroupChatOverlay';
 import { getSocket } from '../services/socket';
+import useChatStore from '../stores/chatStore';
 
 const SplitBillMenu = () => {
     const { id } = useParams();
@@ -43,7 +44,8 @@ const SplitBillMenu = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+    const unreadCounts = useChatStore(state => state.unreadCounts);
+    const hasUnreadMessages = (unreadCounts[id] || 0) > 0;
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -91,36 +93,13 @@ const SplitBillMenu = () => {
         loadData();
     }, [loadData]);
 
-    // 🌟 Socket Listener for Unread Messages & Room Management
+    // 🌟 Ensure we are in the socket room for this party
     useEffect(() => {
         const token = useUserStore.getState().token;
         if (!token || !id) return;
-
         const socket = getSocket(token);
-
-        // 1. เข้าห้องแชททันทีที่เข้าหน้าจอ เพื่อรอรับ Notification
         socket.emit("join_room", id);
-
-        const handleNewMessage = (msg) => {
-            // ถ้าแชทปิดอยู่ และคนส่งไม่ใช่ตัวเรา -> ให้ขึ้นจุดแดง
-            if (!isChatOpen && msg.userId !== user?.id) {
-                setHasUnreadMessages(true);
-            }
-        };
-
-        socket.on('receive_message', handleNewMessage);
-
-        return () => {
-            socket.off('receive_message', handleNewMessage);
-            // ออกจากห้องเมื่อออกจากหน้าจอ
-            socket.emit("leave_room", id);
-        };
-    }, [id, isChatOpen, user?.id]);
-
-    // เคลียร์จุดแดงเมื่อเปิดแชท
-    useEffect(() => {
-        if (isChatOpen) setHasUnreadMessages(false);
-    }, [isChatOpen]);
+    }, [id]);
 
     const handleScroll = (e) => {
         if (e.target.scrollTop > 400) setShowBackToTop(true);

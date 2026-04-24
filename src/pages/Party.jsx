@@ -5,6 +5,7 @@ import { UserPlus, Search, Users, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { apiGetParties, apiJoinParty, apiLeaveParty } from "../api/party";
 import useUserStore from "../stores/userStore";
+import useChatStore from "../stores/chatStore";
 import calculateDistance from "../utils/distance.ustils";
 import CreatePartyModal from "../components/Modals/CreatePartyModal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +16,7 @@ const Party = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLogin, fetchMe } = useUserStore();
+  const unreadCounts = useChatStore((state) => state.unreadCounts);
   const [parties, setParties] = useState([]);
   const [userLoc, setUserLoc] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -211,14 +213,23 @@ const Party = () => {
                     restaurant.images?.find((img) => img.isCover)?.url ||
                     restaurant.images?.[0]?.url ||
                     "https://picsum.photos/seed/restaurant/400/300";
+                  
+                  const unreadCount = unreadCounts[party.id] || 0;
 
                   return (
                     <div
                       key={`story-${party.id}`}
                       onClick={() => navigate(`/party/${party.id}/split-bill`)}
-                      className="flex-none flex flex-col items-center gap-1.5 w-20 cursor-pointer active:scale-95 transition-transform"
+                      className="flex-none flex flex-col items-center gap-1.5 w-20 cursor-pointer active:scale-95 transition-transform relative"
                     >
-                      <div className="relative p-[2.5px] rounded-full bg-gradient-to-tr from-[#BC6C25] via-[#F7EAD7] to-[#A65D2E] shadow-sm">
+                      {/* Unread Badge */}
+                      {unreadCount > 0 && (
+                        <div className="absolute top-0 right-1 z-10 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-[#FDF2ED] animate-bounce shadow-md">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </div>
+                      )}
+                      
+                      <div className={`relative p-[2.5px] rounded-full shadow-sm ${unreadCount > 0 ? "bg-red-500 animate-pulse" : "bg-gradient-to-tr from-[#BC6C25] via-[#F7EAD7] to-[#A65D2E]"}`}>
                         <div className="w-[60px] h-[60px] rounded-full border-2 border-[#FDF2ED] overflow-hidden bg-white">
                           <img
                             src={imageUrl}

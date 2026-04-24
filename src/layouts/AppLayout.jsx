@@ -6,12 +6,12 @@ import useRestaurantStore from "../stores/restaurantStore";
 const NavBar = lazy(() => import("../components/NavBar"));
 
 const AppLayout = () => {
-  const fetchRestaurants = useRestaurantStore(
-    (state) => state.fetchRestaurants,
-  );
+  const fetchRestaurants = useRestaurantStore((state) => state.fetchRestaurants);
+
   useEffect(() => {
     fetchRestaurants();
-  }, []);
+  }, [fetchRestaurants]);
+
   return (
     <div className="fixed inset-0 w-full h-screen overflow-hidden bg-base-100 flex flex-col font-primary">
       <main className="flex-grow relative h-full">
