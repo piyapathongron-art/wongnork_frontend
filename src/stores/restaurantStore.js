@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiGetRestaurants } from "../api/restaurant";
+import calculateDistance from "../utils/distance.ustils";
 
 const useRestaurantStore = create((set, get) => ({
   restaurants: [],
@@ -9,6 +10,8 @@ const useRestaurantStore = create((set, get) => ({
   selectedCategory: "ทั้งหมด",
   searchQuery: "",
   isLoading: false,
+  userLocation: null,
+  isLoading:false,
 
   setRestaurant: (data) => set({restaurant : data}),
   setRestaurants: (data) => {
@@ -56,8 +59,23 @@ const useRestaurantStore = create((set, get) => ({
     }
   },
 
+  setSortBy: (sort) => {
+    if(get().sortBy === sort) reeturn
+
+    set({sortBy: sort})
+    get().applyFilter()
+  },
+
+  setUserLocation: (loc) => {
+    const currentLoc = get().userLocation
+    if(currentLoc?.lat === loc.lat && currentLoc.lng === loc.lng) return
+
+    set({userLocation : loc})
+    get().applyFilter()
+  },
+
   applyFilter: () => {
-    const { restaurants, selectedCategory, searchQuery } = get();
+    const { restaurants, selectedCategory, searchQuery, sortBy, userLocation } = get();
 
     const filtered = restaurants.filter((rest) => {
       // 1. เช็คคำค้นหา
@@ -70,6 +88,22 @@ const useRestaurantStore = create((set, get) => ({
 
       return matchesSearch && matchesCategory;
     });
+
+    // Sort
+    if(sortBy === "distance" && userLocation) {
+      filtered.sort((a,b) => {
+        const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng)
+        const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng)
+        
+        return distA-distB
+      })
+    } else if(sortBy === "reviews") {
+      filtered.sort((a,b) => {
+        const getAvg = (revs) => revs?.length > 0
+        ? revs.reduce((sum, r) => sum + r.rating, 0)/revs.length : 0
+        return getAvg(b.reviews) - getAvg(a.reviews)
+      })
+    }
 
     set({ filteredRestaurants: filtered });
   },
