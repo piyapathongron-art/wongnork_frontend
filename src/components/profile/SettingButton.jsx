@@ -3,6 +3,7 @@ import { Settings, User, LogOut, SunIcon, MoonIcon } from "lucide-react"
 import useUserStore from '../../stores/userStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 
 

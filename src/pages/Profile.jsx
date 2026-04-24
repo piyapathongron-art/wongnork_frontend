@@ -35,7 +35,7 @@ const Profile = () => {
         error,
         setError,
         editForm,
-        setEditForm
+        setEditForm,
     } = useFetchProfile(id, isMe);
 
     const {
@@ -53,6 +53,16 @@ const Profile = () => {
 
     // สำหรับแจ้งเตือนเข้าปาร์ตี้คนอื่นไม่ได้
     const [isAccessDeniedModalOpen, setIsAccessDeniedModalOpen] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast.success("ออกจากระบบสำเร็จ");
+            navigate("/");
+        } catch (err) {
+            toast.error("เกิดข้อผิดพลาด");
+        }
+    }
 
     // สำหรับจัดการเมื่อคลิกที่ปาร์ตี้
     const handlePartyClick = (party) => {
