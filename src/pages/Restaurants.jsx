@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Loader2, X } from "lucide-react";
 import { Outlet } from "react-router";
 import RestaurantCard from "../components/restaurant/RestaurantCard";
@@ -7,13 +7,16 @@ import useRestaurantStore from "../stores/restaurantStore"; // 🌟 ดึง St
 const Restaurants = () => {
   const {
     restaurants,
-    filteredRestaurants,
     selectedCategory,
     searchQuery,
     isLoading,
     setSelectedCategory,
     setSearchQuery,
   } = useRestaurantStore();
+  const filteredRestaurants = useRestaurantStore((state) => state.filteredRestaurants)
+  const sortBy = useRestaurantStore((state) => state.sortBy)
+  const setSortBy = useRestaurantStore((state) => state.setSortBy)
+  const setUserLocation = useRestaurantStore((state) => state.setUserLocation)
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -34,6 +37,18 @@ const Restaurants = () => {
         .filter((r) => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
         .slice(0, 5)
     : restaurants.slice(0, 5);
+
+    useEffect(() => {
+      if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          setUserLocation({lat: pos.coords.latitude, lng: pos.coords.longitude})
+        })
+      }
+    },[])
+
+    useEffect(() => {
+      setSortBy("default")
+    },[])
 
   return (
     <div className="w-full h-[100dvh] bg-base-100 text-base-content pb-32 font-sans overflow-y-auto">
@@ -127,6 +142,26 @@ const Restaurants = () => {
               {cat}
             </button>
           ))}
+        </div>
+        <div className="flex items-center gap-3 mt-4 mb-2">
+          <div className="flex bg-base-200/50 p-1 rounded-2xl flex-1 border border-base-content/5">
+            <button onClick={() => setSortBy("default")}
+            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all
+            ${sortBy === 'default' ? 'bg-base-100 text-accent shadow-sm' : 'text-base-conten/40'}`}>
+              Default
+            </button>
+            <button onClick={() => setSortBy("distance")}
+            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all
+            ${sortBy === 'distance' ? 'bg-base-100 text-accent shadow-sm' : 'text-base-conten/40'}`}>
+              Nearby
+            </button>
+            <button onClick={() => setSortBy("reviews")}
+            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all
+            ${sortBy === 'reviews' ? 'bg-base-100 text-accent shadow-sm' : 'text-base-conten/40'}`}>
+              Reviews
+            </button>
+          </div>
+
         </div>
       </div>
 
