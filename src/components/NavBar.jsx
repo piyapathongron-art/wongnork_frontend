@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import useUserStore from "../stores/userStore";
+import useChatStore from "../stores/chatStore";
 
 const NavBar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState("");
     const isLogin = useUserStore(state => state.isLogin);
+    const unreadCounts = useChatStore(state => state.unreadCounts);
+    
+    // Check if there are ANY unread messages in any party
+    const hasAnyUnread = Object.values(unreadCounts).some(count => count > 0);
+    const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
 
     // Sync activeTab with current URL path
@@ -108,6 +114,11 @@ const NavBar = () => {
                     className={`w-15 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 h-full px-2 ${getColors("party").opacity}`}
                 >
                     <div className="relative flex flex-col items-center">
+                        {hasAnyUnread && (
+                            <span className="absolute -top-1 -right-2 bg-error text-error-content text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full animate-pulse shadow-sm z-10 border border-base-100">
+                                {totalUnread > 9 ? "9+" : totalUnread}
+                            </span>
+                        )}
                         <svg
                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             strokeWidth={getColors("party").strokeWidth}

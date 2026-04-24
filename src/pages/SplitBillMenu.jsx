@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import {
-  ArrowLeft,
-  Receipt,
-  Check,
-  Utensils,
-  AlertCircle,
-  X,
-  Users,
-  Plus,
-  Crown,
-  User as UserIcon,
-  Star,
-  MessageSquare,
-  Search,
-  ArrowUp
+    ArrowLeft,
+    Receipt,
+    Check,
+    Utensils,
+    AlertCircle,
+    X,
+    Users,
+    Plus,
+    Crown,
+    User as UserIcon,
+    Star,
+    MessageSquare,
+    Search,
+    ArrowUp
 } from 'lucide-react';
 import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiKickMember } from '../api/party';
 import { apiGetMenuByRestaurantId } from '../api/menuApi';
@@ -24,352 +24,356 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
 import ProfileQuickViewSheet from '../components/profile/ProfileQuickViewSheet';
+import GroupChatOverlay from '../components/GroupChatOverlay';
+import { getSocket } from '../services/socket';
+import useChatStore from '../stores/chatStore';
 
 const SplitBillMenu = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const user = useUserStore(state => state.user);
-  const scrollRef = useRef(null);
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const user = useUserStore(state => state.user);
+    const scrollRef = useRef(null);
 
-  const [party, setParty] = useState(null);
-  const [billSummary, setBillSummary] = useState(null);
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+    const [party, setParty] = useState(null);
+    const [billSummary, setBillSummary] = useState(null);
+    const [menuItems, setMenuItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
 
-  // Search & UI States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showBackToTop, setShowBackToTop] = useState(false);
+    // UI States
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showBackToTop, setShowBackToTop] = useState(false);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const unreadCounts = useChatStore(state => state.unreadCounts);
+    const hasUnreadMessages = (unreadCounts[id] || 0) > 0;
 
-  // Review System State
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [hasReviewed, setHasHasReviewed] = useState(false);
+    // Review System State
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [hasReviewed, setHasHasReviewed] = useState(false);
 
-  // Profile Quick View State
-  const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+    // Profile Quick View State
+    const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState(null);
 
-  const isLeader = party?.leaderId === user?.id;
-  const isCompleted = party?.status === "COMPLETED";
+    const isLeader = party?.leaderId === user?.id;
+    const isCompleted = party?.status === 'COMPLETED';
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [partyRes, billRes] = await Promise.all([
-        apiGetPartyById(id),
-        apiGetSplitBill(id),
-      ]);
-      const partyData = partyRes.data.data;
-      setParty(partyData);
-      setBillSummary(billRes.data.data);
-
-      if (partyData.restaurant?.reviews) {
-        const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
-        if (myReview) setHasHasReviewed(true);
-      }
-      if (partyData.restaurant?.id) {
+    const loadData = useCallback(async () => {
         try {
-          const menuRes = await apiGetMenuByRestaurantId(partyData.restaurant.id);
-          setMenuItems(menuRes.data.data || []);
-        } catch (err) {
-          console.error("Error fetching menu:", err);
+            setLoading(true);
+            const [partyRes, billRes] = await Promise.all([
+                apiGetPartyById(id),
+                apiGetSplitBill(id)
+            ]);
+            const partyData = partyRes.data.data;
+            setParty(partyData);
+            setBillSummary(billRes.data.data);
+
+            if (partyData.restaurant?.reviews) {
+                const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
+                if (myReview) setHasHasReviewed(true);
+            }
+            if (partyData.restaurant?.id) {
+                try {
+                    const menuRes = await apiGetMenuByRestaurantId(partyData.restaurant.id);
+                    setMenuItems(menuRes.data.data || []);
+                } catch (err) {
+                    console.error("Error fetching menu:", err);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("ไม่สามารถดึงข้อมูลบิลได้");
+        } finally {
+            setLoading(false);
         }
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("ไม่สามารถดึงข้อมูลบิลได้");
-    } finally {
-      setLoading(false);
-    }
-  }, [id, user?.id]);
+    }, [id, user?.id]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
-  // Handle Scrolling logic
-  const handleScroll = (e) => {
-    if (e.target.scrollTop > 400) {
-      setShowBackToTop(true);
-    } else {
-      setShowBackToTop(false);
-    }
-  };
+    // 🌟 Ensure we are in the socket room for this party
+    useEffect(() => {
+        const token = useUserStore.getState().token;
+        if (!token || !id) return;
+        const socket = getSocket(token);
+        socket.emit("join_room", id);
+    }, [id]);
 
-  const scrollToTop = () => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const handleScroll = (e) => {
+        if (e.target.scrollTop > 400) setShowBackToTop(true);
+        else setShowBackToTop(false);
+    };
 
-  const handleAvatarClick = (clickedUserId) => {
-    if (clickedUserId === user?.id) {
-      navigate('/profile');
-    } else {
-      setSelectedUserId(clickedUserId);
-      setIsProfileSheetOpen(true);
-    }
-  };
+    const scrollToTop = () => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const handleAddMenuToBill = async (menu) => {
-    if (actionLoading || isCompleted) return;
-    setActionLoading(true);
-    try {
-      await apiAddOrderItem(id, {
-        menuId: menu.id,
-        quantity: 1,
-        isCustom: false,
-      });
-      toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`, {
-        autoClose: 1000,
-        position: "top-center",
-        theme: "dark",
-      });
-      const billRes = await apiGetSplitBill(id);
-      setBillSummary(billRes.data.data);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "เกิดข้อผิดพลาด");
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    const handleAvatarClick = (clickedUserId) => {
+        if (clickedUserId === user?.id) navigate('/profile');
+        else {
+            setSelectedUserId(clickedUserId);
+            setIsProfileSheetOpen(true);
+        }
+    };
 
-  const handleKickMember = async (userId, userName) => {
-    if (isCompleted || !window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะ ${userName} ออกจากปาร์ตี้?`)) return;
-    try {
-      setActionLoading(true);
-      await apiKickMember(id, userId);
-      toast.success(`เตะ ${userName} ออกเรียบร้อย`);
-      await loadData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "ไม่สามารถเตะสมาชิกได้");
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    const handleAddMenuToBill = async (menu) => {
+        if (actionLoading || isCompleted) return;
+        setActionLoading(true);
+        try {
+            await apiAddOrderItem(id, { menuId: menu.id, quantity: 1, isCustom: false });
 
-  const filteredMenuItems = React.useMemo(() => {
-    if (!searchQuery.trim()) return menuItems;
-    return menuItems.filter(item =>
-      item.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [menuItems, searchQuery]);
+            // 🌟 ส่ง System Message แจ้งเตือนในแบท
+            const { token } = useUserStore.getState();
+            const socket = getSocket(token);
+            socket.emit('send_message', {
+                text: `${user.name} ได้เพิ่ม ${menu.name} ลงในบิลแล้ว`,
+                partyId: id,
+                type: 'SYSTEM'
+            });
 
-  if (loading && !party) {
-    return (
-      <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
-        <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">
-          LOADING...
-        </span>
-      </div>
-    );
-  }
+            toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`, { autoClose: 1000, position: "top-center", theme: "dark" });
+            const billRes = await apiGetSplitBill(id);
+            setBillSummary(billRes.data.data);
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response?.data?.message || "เกิดข้อผิดพลาด");
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
-  if (!party) return null;
+    const handleKickMember = async (userId, userName) => {
+        if (isCompleted || !window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการเตะ ${userName} ออกจากปาร์ตี้?`)) return;
+        try {
+            setActionLoading(true);
+            await apiKickMember(id, userId);
+            toast.success(`เตะ ${userName} ออกเรียบร้อย`);
+            await loadData();
+        } catch (error) {
+            toast.error(error.response?.data?.message || "ไม่สามารถเตะสมาชิกได้");
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
-  const mySummary = billSummary?.members?.find(
-    (m) => m.user.id === user?.id,
-  ) || {
-    items: [],
-    summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 },
-  };
+    const filteredMenuItems = React.useMemo(() => {
+        if (!searchQuery.trim()) return menuItems;
+        return menuItems.filter(item =>
+            item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [menuItems, searchQuery]);
 
-  const sortedMembers = [...(party.members || [])].sort((a, b) => {
-    const isAMe = a.user.id === user?.id;
-    const isBMe = b.user.id === user?.id;
-    const getWeight = (me, leader) => (me ? 2 : leader ? 1 : 0);
-    return (
-      getWeight(isBMe, b.user.id === party.leaderId) -
-      getWeight(isAMe, a.user.id === party.leaderId)
-    );
-  });
-
-  const MenuItemCard = ({ item }) => {
-    const tableItem = billSummary?.tableItems?.find(ti => ti.name === item.name && !ti.isCustom);
-    const totalOrdered = tableItem ? tableItem.quantity : 0;
-    return (
-      <motion.div
-        layout
-        onClick={() => handleAddMenuToBill(item)}
-        className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
-      >
-        {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-[13px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()}</p>
-            <div className="flex items-center gap-2">
-              {totalOrdered > 0 && (<span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-0.5 rounded-md">โต๊ะสั่งแล้ว {totalOrdered}</span>)}
-              {!isCompleted && (<button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-95"><Plus size={16} /></button>)}
+    if (loading && !party) {
+        return (
+            <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
+                <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
             </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
+        );
+    }
 
-  return (
-    <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] overflow-hidden">
-      <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
-        <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
-        <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
-        <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
-      </header>
+    if (!party) return null;
 
-      <main
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6 scroll-smooth"
-      >
-        {/* 🌟 Review Prompt for Completed Party */}
-        {isCompleted && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
-                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-yellow-400 fill-current animate-bounce'}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-[14px]">{hasReviewed ? 'ได้รับรีวิวของคุณแล้ว' : 'ประทับใจมื้อนี้แค่ไหน?'}</h3>
-                <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหาร'}</p>
-              </div>
-              <button
-                onClick={() => !hasReviewed && setIsReviewModalOpen(true)}
-                disabled={hasReviewed}
-                className={`px-5 py-2.5 rounded-full text-[11px] font-black transition-all ${hasReviewed ? 'bg-white/10 text-white/40' : 'bg-[#A65D2E] text-white shadow-lg active:scale-95'}`}
-              >
-                {hasReviewed ? 'รีวิวแล้ว' : 'เขียนรีวิว'}
-              </button>
-            </div>
-          </motion.div>
-        )}
+    const mySummary = billSummary?.members?.find(m => m.user.id === user?.id) || {
+        items: [],
+        summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 }
+    };
 
-        <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4">สมาชิกในปาร์ตี้ ({party.members?.length || 0} คน)</h3>
-        <div className="mb-6" style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)' }}>
-          <div className="pl-5 flex gap-4 overflow-x-auto no-scrollbar pt-2 pb-2">
-            {sortedMembers?.map((member) => (
-              <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
-                <div className="relative">
-                  <div
-                    onClick={() => handleAvatarClick(member.user.id)}
-                    className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200 cursor-pointer active:scale-95 transition-transform"
-                  >
-                    <img src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`} alt={member.user.name} className="w-full h-full object-cover" />
-                  </div>
-                  {member.user.id === user?.id && (<div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white pointer-events-none"><UserIcon size={10} className="text-white fill-current" /></div>)}
-                  {member.user.id === party.leaderId && (<div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white pointer-events-none"><Crown size={10} className="text-white fill-current" /></div>)}
-                  {isLeader && member.user.id !== party.leaderId && !isCompleted && (<button onClick={() => handleKickMember(member.user.id, member.user.name)} className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors z-10"><X size={10} strokeWidth={3} /></button>)}
+    const sortedMembers = [...(party.members || [])].sort((a, b) => {
+        const isAMe = a.user.id === user?.id;
+        const isBMe = b.user.id === user?.id;
+        const getWeight = (me, leader) => (me ? 2 : (leader ? 1 : 0));
+        return getWeight(isBMe, b.user.id === party.leaderId) - getWeight(isAMe, a.user.id === party.leaderId);
+    });
+
+    const MenuItemCard = ({ item }) => {
+        const tableItem = billSummary?.tableItems?.find(ti => ti.name === item.name && !ti.isCustom);
+        const totalOrdered = tableItem ? tableItem.quantity : 0;
+        return (
+            <motion.div
+                layout
+                onClick={() => handleAddMenuToBill(item)}
+                className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
+            >
+                {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
+                    <div className="flex items-center justify-between mt-2">
+                        <p className="text-[13px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()}</p>
+                        <div className="flex items-center gap-2">
+                            {totalOrdered > 0 && (<span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-0.5 rounded-md">โต๊ะสั่งแล้ว {totalOrdered}</span>)}
+                            {!isCompleted && (<button className="w-8 h-8 rounded-full bg-[#2B361B] flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-95"><Plus size={16} /></button>)}
+                        </div>
+                    </div>
                 </div>
-                <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-[#2B361B]'}`}>{member.user.id === user?.id ? 'คุณ' : member.user.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+            </motion.div>
+        );
+    };
 
-        <div
-          className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? "bg-green-50 border-green-200" : "bg-[#EAD9CF]/40 border-[#EAD9CF]"}`}
-        >
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
-            {isCompleted ? (
-              <Check size={20} className="text-green-600" />
-            ) : (
-              <Utensils size={20} className="text-[#A65D2E]" />
-            )}
-          </div>
-          <div>
-            <h3 className="font-bold text-[14px] leading-tight">
-              {isCompleted
-                ? "ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว"
-                : "กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ"}
-            </h3>
-            <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">
-              {isCompleted
-                ? "คุณสามารถดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง แต่ไม่สามารถแก้ไขข้อมูลได้แล้ว"
-                : "เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ"}
-            </p>
-          </div>
-        </div>
+    return (
+        <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] overflow-hidden">
+            <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
+                <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
+                <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
+                <div className="flex-1 overflow-hidden"><h1 className="text-xl font-extrabold text-[#2B361B]">เลือกเมนูเข้าบนบิลโต๊ะ</h1><p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 ">{party.name}</p>{isCompleted && <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">ปิดจ็อบแล้ว</span>}</div>
 
-        <div className="space-y-4 mb-10 relative">
-          <div className="sticky -top-10 z-30 -mx-6 px-6 py-4 bg-[#FFF8F5]/80 backdrop-blur-xl mb-2 flex flex-col gap-4 border-b border-[#BC6C25]/5">
-            <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] flex items-center gap-2">
-              <div className="h-px flex-1 bg-[#EAD9CF]" />
-              เมนูจากร้าน {party.restaurant?.name}
-              <div className="h-px flex-1 bg-[#EAD9CF]" />
-            </h3>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setIsChatOpen(true)}
+                        className={`p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative ${hasUnreadMessages ? 'animate-pulse' : ''}`}
+                    >
+                        <MessageSquare size={20} />
+                        {hasUnreadMessages && (
+                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                        )}
+                    </button>
+                    <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
+                </div>
+            </header>
 
-            {/* 🔍 Search Menu Input */}
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
-                <Search size={16} strokeWidth={2.5} />
-              </div>
-              <input
-                type="text"
-                placeholder="ค้นหาเมนูอาหาร..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm"
-              />
+            <main
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="h-full overflow-y-auto no-scrollbar pt-24 pb-48 px-6 scroll-smooth"
+            >
+                {/* 🌟 Review Prompt for Completed Party */}
+                {isCompleted && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+                                <Star size={24} className={`${hasReviewed ? 'text-gray-400' : 'text-yellow-400 fill-current animate-bounce'}`} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-bold text-[14px]">{hasReviewed ? 'ได้รับรีวิวของคุณแล้ว' : 'ประทับใจมื้อนี้แค่ไหน?'}</h3>
+                                <p className="text-[10px] text-white/60 mt-0.5">{hasReviewed ? 'ขอบคุณที่ร่วมแบ่งปันประสบการณ์ครับ' : 'ให้คะแนนร้านอาหาร'}</p>
+                            </div>
+                            <button
+                                onClick={() => !hasReviewed && setIsReviewModalOpen(true)}
+                                disabled={hasReviewed}
+                                className={`px-5 py-2.5 rounded-full text-[11px] font-black transition-all ${hasReviewed ? 'bg-white/10 text-white/40' : 'bg-[#A65D2E] text-white shadow-lg active:scale-95'}`}
+                            >
+                                {hasReviewed ? 'รีวิวแล้ว' : 'เขียนรีวิว'}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+
+                <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] mb-4">สมาชิกในปาร์ตี้ ({party.members?.length || 0} คน)</h3>
+                <div className="mb-6" style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)' }}>
+                    <div className="pl-5 flex gap-4 overflow-x-auto no-scrollbar pt-2 pb-2">
+                        {sortedMembers?.map((member) => (
+                            <div key={member.id} className="flex-none flex flex-col items-center gap-2 relative">
+                                <div className="relative">
+                                    <div
+                                        onClick={() => handleAvatarClick(member.user.id)}
+                                        className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-gray-200 cursor-pointer active:scale-95 transition-transform"
+                                    >
+                                        <img src={member.user.avatarUrl || `https://i.pravatar.cc/150?u=${member.user.id}`} alt={member.user.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    {member.user.id === user?.id && (<div className="absolute -top-1 -right-0 bg-[#182806] p-1 rounded-full shadow-sm border border-white pointer-events-none"><UserIcon size={10} className="text-white fill-current" /></div>)}
+                                    {member.user.id === party.leaderId && (<div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white pointer-events-none"><Crown size={10} className="text-white fill-current" /></div>)}
+                                    {isLeader && member.user.id !== party.leaderId && !isCompleted && (<button onClick={() => handleKickMember(member.user.id, member.user.name)} className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors z-10"><X size={10} strokeWidth={3} /></button>)}
+                                </div>
+                                <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-[#2B361B]'}`}>{member.user.id === user?.id ? 'คุณ' : member.user.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-[#EAD9CF]/40 border-[#EAD9CF]'}`}>
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">{isCompleted ? <Check size={20} className="text-green-600" /> : <Utensils size={20} className="text-[#A65D2E]" />}</div>
+                    <div><h3 className="font-bold text-[14px] leading-tight">{isCompleted ? 'ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3><p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">{isCompleted ? 'คุณสามารถดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง แต่ไม่สามารถแก้ไขข้อมูลได้แล้ว' : 'เมื่อกด ระบบจะถือว่าคุณเริ่มทานและร่วมหารเมนูนี้อัตโนมัติ'}</p></div>
+                </div>
+
+                <div className="space-y-4 mb-10 relative">
+                    <div className="sticky -top-10 z-30 -mx-6 px-6 py-4 bg-[#FFF8F5]/80 backdrop-blur-xl mb-2 flex flex-col gap-4 border-b border-[#BC6C25]/5">
+                        <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] flex items-center gap-2">
+                            <div className="h-px flex-1 bg-[#EAD9CF]" />
+                            เมนูจากร้าน {party.restaurant?.name}
+                            <div className="h-px flex-1 bg-[#EAD9CF]" />
+                        </h3>
+
+                        {/* 🔍 Search Menu Input */}
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]">
+                                <Search size={16} strokeWidth={2.5} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="ค้นหาเมนูอาหาร..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        {filteredMenuItems.length > 0 ? (
+                            filteredMenuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)
+                        ) : (
+                            <div className="text-center py-10 opacity-40">
+                                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">ไม่พบเมนูที่ค้นหา</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+
+            <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-[#EEE2D1] p-6 pb-10" style={{ maskImage: 'linear-gradient(to top, black 90%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 90%, transparent 100%)' }}>
+                <div className="max-w-md mx-auto pointer-events-auto">
+                    <div className="flex justify-between items-center mb-3"><div className="flex items-center gap-2"><Receipt size={18} className="text-[#A8A29F]" /><span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider">ยอดรวมของคุณ (คนเดียว)</span></div><span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-1 rounded-md uppercase">คุณหารอยู่ {mySummary.items.length} รายการ</span></div>
+                    <div className="flex justify-between items-end mb-6"><div className="text-4xl font-black text-[#2B361B] tracking-tight flex items-center gap-2"><motion.span key={mySummary.summary.netTotal} initial={{ opacity: 0, scale: 0.9, y: 5 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}</motion.span></div>{mySummary.items.length > 0 && (<div className="text-right flex flex-col items-end"><p className="text-[9px] text-[#A8A29F] font-bold leading-tight">(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</p><p className="text-[8px] text-[#A65D2E] font-black uppercase mt-0.5">* หารเท่ากัน {billSummary?.members?.length} คน</p></div>)}</div>
+                    <button onClick={() => navigate(`/party/${id}/split-bill/summary`)} className="w-full bg-[#182806] hover:bg-[#2D3E1A] text-white py-4 rounded-2xl font-bold shadow-lg active:scale-[0.98] transition-all flex justify-center items-center gap-2 relative overflow-hidden">{isCompleted ? 'ดูสรุปบิลทั้งโต๊ะ' : 'จัดการบิลทั้งโต๊ะ'}{billSummary?.tableItems?.length > 0 && (<span className="absolute right-4 bg-[#A65D2E] text-white text-[10px] px-2 py-0.5 rounded-full font-black">{isCompleted ? 'ยอดรวม' : 'โต๊ะสั่งแล้ว'} {billSummary.tableItems.reduce((acc, curr) => acc + curr.quantity, 0)} จาน</span>)}</button>
+                </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)
-            ) : (
-              <div className="text-center py-10 opacity-40">
-                <Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" />
-                <p className="text-[10px] font-black uppercase tracking-widest">ไม่พบเมนูที่ค้นหา</p>
-              </div>
-            )}
-          </div>
+            {/* 🚀 To the Top Button */}
+            <AnimatePresence>
+                {showBackToTop && (
+                    <motion.button
+                        initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                        onClick={scrollToTop}
+                        className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                        <ArrowUp size={20} strokeWidth={3} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
+            {/* 💬 Shared Group Chat Overlay */}
+            <GroupChatOverlay
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                party={party}
+                user={user}
+            />
+
+            {/* 🌟 Review Modal */}
+            <CreateReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                restaurantId={party?.restaurantId}
+                partyId={id}
+                onReviewSuccess={() => {
+                    setHasHasReviewed(true);
+                    loadData();
+                    toast.success("ขอบคุณสำหรับรีวิวครับ!");
+                }}
+            />
+
+            {/* 🌟 Profile Quick View Sheet */}
+            <ProfileQuickViewSheet
+                isOpen={isProfileSheetOpen}
+                userId={selectedUserId}
+                onClose={() => setIsProfileSheetOpen(false)}
+                navigate={navigate}
+            />
         </div>
-      </main>
-
-      <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-[#EEE2D1] p-6 pb-10" style={{ maskImage: 'linear-gradient(to top, black 90%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 90%, transparent 100%)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto">
-          <div className="flex justify-between items-center mb-3"><div className="flex items-center gap-2"><Receipt size={18} className="text-[#A8A29F]" /><span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider">ยอดรวมของคุณ (คนเดียว)</span></div><span className="text-[10px] font-bold bg-[#F7EAD7] text-[#A65D2E] px-2 py-1 rounded-md uppercase">คุณหารอยู่ {mySummary.items.length} รายการ</span></div>
-          <div className="flex justify-between items-end mb-6"><div className="text-4xl font-black text-[#2B361B] tracking-tight flex items-center gap-2"><motion.span key={mySummary.summary.netTotal} initial={{ opacity: 0, scale: 0.9, y: 5 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}</motion.span></div>{mySummary.items.length > 0 && (<div className="text-right flex flex-col items-end"><p className="text-[9px] text-[#A8A29F] font-bold leading-tight">(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</p><p className="text-[8px] text-[#A65D2E] font-black uppercase mt-0.5">* หารเท่ากัน {billSummary?.members?.length} คน</p></div>)}</div>
-          <button onClick={() => navigate(`/party/${id}/split-bill/summary`)} className="w-full bg-[#182806] hover:bg-[#2D3E1A] text-white py-4 rounded-2xl font-bold shadow-lg active:scale-[0.98] transition-all flex justify-center items-center gap-2 relative overflow-hidden">{isCompleted ? 'ดูสรุปบิลทั้งโต๊ะ' : 'จัดการบิลทั้งโต๊ะ'}{billSummary?.tableItems?.length > 0 && (<span className="absolute right-4 bg-[#A65D2E] text-white text-[10px] px-2 py-0.5 rounded-full font-black">{isCompleted ? 'ยอดรวม' : 'โต๊ะสั่งแล้ว'} {billSummary.tableItems.reduce((acc, curr) => acc + curr.quantity, 0)} จาน</span>)}</button>
-        </div>
-      </div>
-
-      {/* 🚀 To the Top Button */}
-      <AnimatePresence>
-        {showBackToTop && (
-          <motion.button
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.8 }}
-            onClick={scrollToTop}
-            className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"
-          >
-            <ArrowUp size={20} strokeWidth={3} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* 🌟 Review Modal */}
-      <CreateReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        restaurantId={party?.restaurantId}
-        partyId={id}
-        onReviewSuccess={() => {
-          setHasHasReviewed(true);
-          loadData();
-          toast.success("ขอบคุณสำหรับรีวิวครับ!");
-        }}
-      />
-
-      {/* 🌟 Profile Quick View Sheet */}
-      <ProfileQuickViewSheet
-        isOpen={isProfileSheetOpen}
-        userId={selectedUserId}
-        onClose={() => setIsProfileSheetOpen(false)}
-        navigate={navigate}
-      />
-    </div>
-  );
+    );
 };
 
 export default SplitBillMenu;
