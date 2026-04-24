@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo  } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pencil, Trash2 } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
+import { X, Pencil, Trash2, Search } from "lucide-react"; // 🌟 เปลี่ยนกลับเป็น X
 import useUserStore from "../../stores/userStore";
 import { apiDeleteMenu } from "../../api/menuApi";
 import AddMenuModal from "../Modals/AddMenuModal";
@@ -24,6 +24,8 @@ const AllMenus = ({
     userRole === "OWNER" &&
     restaurant?.ownerId &&
     String(loggedInUserId) === String(restaurant.ownerId);
+  
+    const [searchQuery, setSearchQuery] = useState("")
 
   const handleEdit = (menu) => {
     setSelectedMenu(menu);
@@ -41,6 +43,10 @@ const AllMenus = ({
       }
     }
   };
+
+  const filteredMenus = useMemo(() => {
+    return menus.filter(menu => menu.name?.toLowerCase().includes(searchQuery.toLowerCase()) || menu.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+  }, [menus, searchQuery])
 
   return (
     <AnimatePresence>
@@ -73,7 +79,7 @@ const AllMenus = ({
             {/* --- Header --- */}
             <div className="flex items-center justify-between px-6 py-5 bg-base-100 border-b border-base-content/10 shrink-0">
               <h2 className="text-xl font-bold text-base-content">
-                เมนูทั้งหมด ({menus.length})
+                เมนูทั้งหมด ({filteredMenus.length})
               </h2>
               {/* 🌟 ย้ายปุ่มกลับมาขวา */}
               <button
@@ -94,10 +100,22 @@ const AllMenus = ({
               </button>
             </div>
 
+            {/* SearchBar */}
+            <div className="px-6 py-3 bg-base-100 border-b border-base-content/6 shrink-0">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-base-content/30">
+                  <Search size={18} />
+                  </div>
+                  <input type="text" placeholder="ค้นหาเมนูอาหาร" 
+                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-base-200/50 border border-base-content/10 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"/>
+                </div>
+            </div>
+
             {/* --- Content --- */}
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar pb-32">
-              {menus.length > 0 ? (
-                menus.map((menu, index) => (
+              {filteredMenus.length > 0 ? (
+                filteredMenus.map((menu, index) => (
                   <div
                     key={index}
                     className="flex gap-4 bg-base-100 p-4 rounded-3xl shadow-sm border border-base-content/10 relative group"
@@ -146,7 +164,7 @@ const AllMenus = ({
                 ))
               ) : (
                 <div className="text-center py-10 text-base-content/40 font-medium">
-                  ยังไม่มีเมนู
+                  {searchQuery ? "ไม่พบเมนูที่ค้นหา" : "ยังไม่มีเมนู"}
                 </div>
               )}
             </div>
