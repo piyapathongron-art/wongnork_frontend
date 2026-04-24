@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
-import { X, Loader2, MapPin } from "lucide-react";
-import { apiCreateParty } from "../../api/party"; //
-import MapBox from "../MapBox"; //
-import useRestaurantStore from "../../stores/restaurantStore"; //
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Loader2, MapPin, Users, Clock, MessageSquare, Phone } from "lucide-react";
+import { apiCreateParty } from "../../api/party";
+import MapBox from "../MapBox";
+import useRestaurantStore from "../../stores/restaurantStore";
+import { createPartySchema } from "../../validations/schema";
 
 const CreatePartyModal = ({
   isOpen,
@@ -16,7 +19,9 @@ const CreatePartyModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const mapRef = useRef(null);
 
-  // Get restaurants from the shared store
+  const now = new Date();
+  const nowISO = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+
   const filteredRestaurants = useRestaurantStore(
     (state) => state.filteredRestaurants,
   );
@@ -29,22 +34,23 @@ const CreatePartyModal = ({
     formState: { errors },
     reset,
   } = useForm({
-    // resolver: zodResolver(yourSchemaHere),
+    resolver: zodResolver(createPartySchema),
     defaultValues: {
       maxParticipants: 2,
       serviceCharge: 0,
       vat: 0,
+      meetupTime: nowISO,
+      contactInfo: "",
+      details: "",
     },
   });
 
   const selectedRestaurantId = watch("restaurantId");
 
-  // 1. Silent Marker Selection: Updates form state without a toast
   const handleMarkerSelect = (restaurant) => {
     setValue("restaurantId", String(restaurant.id));
   };
 
-  // 2. Fly To Sync: Map follows the dropdown selection
   useEffect(() => {
     if (selectedRestaurantId && mapRef.current) {
       const target = filteredRestaurants.find(
@@ -75,8 +81,11 @@ const CreatePartyModal = ({
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      // Match the API signature: apiCreateParty(restaurantId, body)
+
       const { restaurantId, ...body } = data;
+
+      if (!body.contactInfo) body.contactInfo = "-";
+
       await apiCreateParty(restaurantId, body);
 
       toast.success("Party Created!");
@@ -90,134 +99,169 @@ const CreatePartyModal = ({
     }
   };
 
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-base-200 w-full max-w-lg rounded-[40px] overflow-hidden shadow-2xl border border-primary/20 flex flex-col max-h-[92vh]">
-        {/* MAP SECTION */}
-        <div className="h-48 w-full bg-zinc-800 relative flex-shrink-0">
-          <MapBox
-            ref={mapRef}
-            isDark={true}
-            onMarkerClick={handleMarkerSelect}
-            disableAutoCenter={!!initialRestaurant}
-            initialRestaurant={initialRestaurant}
-          />
-          <button
+  const modalContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="absolute bottom-4 left-4 z-10 px-3 py-1 bg-[#BC6C25] text-white text-[9px] font-black uppercase rounded-full flex items-center gap-1 shadow-lg">
-            <MapPin className="w-3 h-3" />
-            Interactive Map Selection
-          </div>
-        </div>
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          />
 
-        {/* FORM SECTION - pb-32 prevents overlap with Nav Bar */}
-        <div className="p-8 overflow-y-auto no-scrollbar pb-32">
-          <h2 className="text-xl font-black uppercase tracking-widest text-base-content mb-6">
-            Create Party
-          </h2>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-4 text-left"
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="bg-base-100 w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-base-content/10 flex flex-col max-h-[85vh] relative z-10"
           >
-            {/* Location Dropdown */}
-            <div>
-              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
-                Meeting Point
-              </label>
-              <select
-                {...register("restaurantId", {
-                  required: "กรุณาเลือกสถานที่นัดหมาย",
-                })}
-                className="w-full bg-white/50 border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25] appearance-none cursor-pointer"
+            {/* MAP SECTION */}
+            <div className="h-28 w-full bg-base-300 relative flex-shrink-0">
+              <MapBox
+                ref={mapRef}
+                isDark={false}
+                onMarkerClick={handleMarkerSelect}
+                disableAutoCenter={!!initialRestaurant}
+                initialRestaurant={initialRestaurant}
+              />
+              <button
+                onClick={onClose}
+                className="absolute top-3 right-3 z-10 p-1.5 bg-base-100/80 hover:bg-base-100 backdrop-blur-md rounded-full text-base-content shadow-lg transition-all"
               >
-                <option value="">Select place or tap marker...</option>
-                {filteredRestaurants.map((res) => (
-                  <option key={res.id} value={res.id}>
-                    {res.name}
-                  </option>
-                ))}
-              </select>
-              {errors.restaurantId && (
-                <p className="text-red-500 text-[10px] mt-1 ml-2 font-bold uppercase">
-                  {errors.restaurantId.message}
-                </p>
-              )}
-            </div>
-
-            {/* Party Name */}
-            <div>
-              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
-                Party Name
-              </label>
-              <input
-                {...register("name")}
-                className="w-full bg-white/50border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
-                placeholder="Chill at the Hideaway"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Max Participants */}
-              <div>
-                <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
-                  Max Slots
-                </label>
-                <input
-                  type="number"
-                  {...register("maxParticipants", { valueAsNumber: true })}
-                  className="w-full bg-white/50 border-2 border-base-300 rounded-2xl px-4 py-3 text-sm"
-                />
-              </div>
-
-              {/* Meetup Time */}
-              <div>
-                <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
-                  Time
-                </label>
-                <input
-                  type="datetime-local"
-                  {...register("meetupTime")}
-                  className="w-full bg-white/50 border-2 border-base-300  rounded-2xl px-4 py-3 text-sm"
-                />
+                <X className="w-4 h-4" />
+              </button>
+              <div className="absolute bottom-3 left-4 z-10 px-3 py-1 bg-primary text-primary-content text-[9px] font-black uppercase rounded-full flex items-center gap-1.5 shadow-xl ring-2 ring-base-100/50">
+                <MapPin className="w-3 h-3" />
+                Select Place
               </div>
             </div>
 
-            {/* Contact Info */}
-            <div>
-              <label className="block text-[10px] font-black uppercase text-primary mb-1 ml-2">
-                Contact Info
-              </label>
-              <input
-                {...register("contactInfo")}
-                className="w-full bg-white/50  border-2 border-base-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#BC6C25]"
-                placeholder="Line ID or Tel"
-              />
-            </div>
+            {/* FORM SECTION */}
+            <div className="p-6 overflow-y-auto no-scrollbar pb-10">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <Users size={20} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-base-content tracking-tight">Create Party</h2>
+                  <p className="text-[9px] font-bold text-base-content/40 uppercase tracking-widest">Start a new meeting</p>
+                </div>
+              </div>
 
-            {/* Submit Button */}
-            <button
-              disabled={isSubmitting || !selectedRestaurantId}
-              type="submit"
-              className="w-full bg-primary text-base-200 font-black uppercase py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
-            >
-              {isSubmitting ? (
-                <Loader2 className="animate-spin w-5 h-5" />
-              ) : (
-                "Start the Party"
-              )}
-            </button>
-          </form>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-4 text-left"
+              >
+                <div className="space-y-1.5">
+                  <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                    <MapPin size={10} /> Meeting Point
+                  </label>
+                  <select
+                    {...register("restaurantId")}
+                    className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="">Select place or tap marker...</option>
+                    {filteredRestaurants.map((res) => (
+                      <option key={res.id} value={res.id}>
+                        {res.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.restaurantId && (
+                    <p className="text-error text-[9px] mt-1 ml-2 font-bold uppercase">
+                      {errors.restaurantId.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                    <MessageSquare size={10} /> Party Name
+                  </label>
+                  <input
+                    {...register("name")}
+                    className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                    placeholder="Ex: Chill Friday Night"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                    Description
+                  </label>
+                  <textarea
+                    {...register("details")}
+                    rows="2"
+                    className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none resize-none"
+                    placeholder="Notes for members..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                      <Users size={10} /> Max Slots
+                    </label>
+                    <input
+                      type="number"
+                      {...register("maxParticipants", { valueAsNumber: true })}
+                      className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                      <Clock size={10} /> Time
+                    </label>
+                    <input
+                      type="datetime-local"
+                      min={nowISO}
+                      {...register("meetupTime")}
+                      className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="flex items-center gap-2 text-[9px] font-black uppercase text-primary ml-1 tracking-widest">
+                    <Phone size={10} /> Contact <span className="text-base-content/20 font-normal normal-case">(Optional)</span>
+                  </label>
+                  <input
+                    {...register("contactInfo")}
+                    className="w-full bg-base-200 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
+                    placeholder="Line ID, Tel, etc."
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    disabled={isSubmitting || !selectedRestaurantId}
+                    type="submit"
+                    className="w-full bg-primary text-primary-content font-black uppercase py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="animate-spin w-4 h-4" />
+                    ) : (
+                      <>
+                        <span>Start the Party</span>
+                        <Users size={16} strokeWidth={3} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default CreatePartyModal;

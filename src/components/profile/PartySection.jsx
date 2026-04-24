@@ -51,6 +51,11 @@ const PartySection = ({
                                 )}
                                 <div className="w-full h-24 rounded-2xl overflow-hidden bg-base-300 relative">
                                     <img alt={party.name} className="w-full h-full object-cover" src={imageUrl} />
+                                    {party.status === 'PENDING_SETTLEMENT' && (
+                                        <div className="absolute inset-0 bg-orange-600/40 backdrop-blur-[2px] flex items-center justify-center p-2">
+                                            <span className="bg-white text-orange-600 text-[8px] font-black px-2 py-1 rounded-full uppercase shadow-lg border border-orange-200">Settlement Needed</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-0.5">
                                     <p className="text-[10px] font-bold text-accent uppercase tracking-wide">

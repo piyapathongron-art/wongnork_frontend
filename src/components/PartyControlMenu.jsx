@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom"; // 🌟 Import createPortal
+import { createPortal } from "react-dom";
 import {
   MoreVertical,
   LogOut,
@@ -11,11 +11,224 @@ import {
   Hash,
   Check,
   AlertTriangle,
+  MessageSquare,
+  Phone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { apiLeaveParty, apiUpdatePartySettings } from "../api/party";
 import { useNavigate } from "react-router";
+
+// 🌟 Moved outside to prevent re-creation and "flashing" on every render
+const ConfirmModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  desc,
+  confirmText,
+  type = "danger",
+  isLoading
+}) => {
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 pointer-events-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative bg-base-100 w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl border border-base-content/10"
+          >
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${type === "danger" ? "bg-error/10 text-error" : "bg-warning/10 text-warning"}`}
+            >
+              <AlertTriangle size={40} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-xl font-black text-base-content mb-2">
+              {title}
+            </h3>
+            <p className="text-sm text-base-content/50 mb-8 leading-relaxed">
+              {desc}
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={onConfirm}
+                disabled={isLoading}
+                className={`w-full py-4 rounded-2xl font-black text-sm shadow-md transition-all active:scale-[0.98] ${type === "danger" ? "bg-error text-white hover:opacity-90" : "bg-warning text-warning-content hover:opacity-90"}`}
+              >
+                {isLoading ? "กำลังดำเนินการ..." : confirmText}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full py-3 text-sm font-bold text-base-content/50 hover:bg-base-200 rounded-xl transition-colors"
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
+
+const EditPartyModal = ({ isOpen, onClose, onSubmit, editForm, setEditForm, isLoading, partyMembersCount }) => {
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 pointer-events-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/40 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative bg-base-100 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-base-content/10 overflow-hidden max-h-[90vh] flex flex-col"
+          >
+            <div className="flex justify-between items-center mb-6 shrink-0">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Edit3 size={20} strokeWidth={2.5} />
+                 </div>
+                 <h3 className="text-xl font-black text-base-content tracking-tight">แก้ไขปาร์ตี้</h3>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-base-200 rounded-full transition-colors text-base-content/40"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={onSubmit} className="space-y-5 overflow-y-auto no-scrollbar pr-1 pb-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Hash size={12} /> ชื่อกลุ่ม
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.name}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
+                  className="w-full bg-base-200 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 ring-primary/20 transition-all text-sm font-bold text-base-content"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <MessageSquare size={12} /> รายละเอียด
+                </label>
+                <textarea
+                  rows="2"
+                  value={editForm.details}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, details: e.target.value })
+                  }
+                  placeholder="ใส่รายละเอียดต้อนรับสมาชิก..."
+                  className="w-full bg-base-200 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 ring-primary/20 transition-all text-sm font-bold text-base-content resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Users size={12} /> รับเพิ่ม (Max)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={partyMembersCount}
+                    value={editForm.maxParticipants}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, maxParticipants: e.target.value })
+                    }
+                    className="w-full bg-base-200 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 ring-primary/20 transition-all text-sm font-bold text-base-content"
+                  />
+                  <p className="text-[8px] text-primary font-bold ml-1 uppercase">
+                    * ขั้นต่ำ {partyMembersCount} คน
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Clock size={12} /> เวลานัดหมาย
+                  </label>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={editForm.meetupTime}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, meetupTime: e.target.value })
+                    }
+                    className="w-full bg-base-200 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 ring-primary/20 transition-all text-[11px] font-bold text-base-content"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Phone size={12} /> ช่องทางติดต่อ
+                </label>
+                <input
+                  type="text"
+                  value={editForm.contactInfo}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, contactInfo: e.target.value })
+                  }
+                  placeholder="Line ID, เบอร์โทร..."
+                  className="w-full bg-base-200 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 ring-primary/20 transition-all text-sm font-bold text-base-content"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-3 sticky bottom-0 bg-base-100 mt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-3.5 text-sm font-bold text-base-content/50 hover:bg-base-200 rounded-2xl transition-colors active:scale-95"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-[1.5] bg-primary text-primary-content py-3.5 rounded-2xl text-sm font-black shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                >
+                  {isLoading ? (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  ) : (
+                    <>
+                      <Check size={18} strokeWidth={3} /> บันทึก
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
 
 const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
   const navigate = useNavigate();
@@ -31,12 +244,27 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
 
   // Edit Form State
   const [editForm, setEditForm] = useState({
-    name: party?.name || "",
-    maxMembers: party?.maxMembers || 2,
-    meetupTime: party?.meetupTime
-      ? new Date(party.meetupTime).toISOString().slice(0, 16)
-      : "",
+    name: "",
+    maxParticipants: 2,
+    meetupTime: "",
+    details: "",
+    contactInfo: ""
   });
+
+  // Sync editForm if party prop changes
+  useEffect(() => {
+    if (party) {
+      setEditForm({
+        name: party.name || "",
+        maxParticipants: party.maxParticipants || 2,
+        details: party.details || "",
+        contactInfo: party.contactInfo || "",
+        meetupTime: party.meetupTime
+          ? new Date(party.meetupTime).toLocaleString('sv-SE').replace(' ', 'T').slice(0, 16)
+          : "",
+      });
+    }
+  }, [party]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -81,99 +309,42 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
     e.preventDefault();
     const now = new Date();
     const selectedTime = new Date(editForm.meetupTime);
-    if (selectedTime < now)
+    
+    // Allow saving past time if it hasn't changed from original (for existing parties)
+    const originalTime = new Date(party.meetupTime);
+    if (selectedTime < now && selectedTime.getTime() !== originalTime.getTime()) {
       return toast.error("ไม่สามารถตั้งเวลานัดหมายย้อนหลังได้");
-    if (editForm.maxMembers < party.members.length)
+    }
+
+    if (editForm.maxParticipants < (party.members?.length || 0))
       return toast.error(
-        `ไม่สามารถลดจำนวนคนเหลือน้อยกว่า ${party.members.length} คนได้`,
+        `ไม่สามารถลดจำนวนคนเหลือน้อยกว่า ${party.members?.length || 0} คนได้`,
       );
 
     setIsLoading(true);
     try {
       await apiUpdatePartySettings(party.id, {
         name: editForm.name,
-        maxMembers: parseInt(editForm.maxMembers),
+        details: editForm.details,
+        contactInfo: editForm.contactInfo || "-",
+        maxParticipants: parseInt(editForm.maxParticipants),
         meetupTime: selectedTime.toISOString(),
       });
       toast.success("อัปเดตข้อมูลปาร์ตี้เรียบร้อย");
       setIsEditModalOpen(false);
       if (onUpdate) onUpdate();
     } catch (error) {
-      toast.error("อัปเดตข้อมูลไม่สำเร็จ");
+      toast.error(error.response?.data?.message || "อัปเดตข้อมูลไม่สำเร็จ");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 🌟 Helper component to render Modal via Portal
-  const ModalPortal = ({ children }) => {
-    return createPortal(children, document.body);
-  };
-
-  const ConfirmModal = ({
-    isOpen,
-    onClose,
-    onConfirm,
-    title,
-    desc,
-    confirmText,
-    type = "danger",
-  }) => (
-    <AnimatePresence>
-      {isOpen && (
-        <ModalPortal>
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 pointer-events-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl"
-            >
-              <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${type === "danger" ? "bg-red-50 text-red-500" : "bg-orange-50 text-orange-500"}`}
-              >
-                <AlertTriangle size={40} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-xl font-black text-[#2B361B] mb-2">
-                {title}
-              </h3>
-              <p className="text-sm text-[#8B837E] mb-8 leading-relaxed">
-                {desc}
-              </p>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={onConfirm}
-                  disabled={isLoading}
-                  className={`w-full py-4 rounded-2xl font-black text-sm shadow-md transition-all active:scale-[0.98] ${type === "danger" ? "bg-red-500 text-white hover:bg-red-600" : "bg-orange-500 text-white hover:bg-orange-600"}`}
-                >
-                  {isLoading ? "กำลังดำเนินการ..." : confirmText}
-                </button>
-                <button
-                  onClick={onClose}
-                  className="w-full py-3 text-sm font-bold text-[#8B837E] hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  ยกเลิก
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        </ModalPortal>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-2 rounded-full hover:bg-[#F7EAD7] transition-colors text-[#2B361B]"
+        className="p-2.5 rounded-full bg-white/50 border border-base-content/10 text-base-content shadow-sm hover:bg-base-200 transition-all relative z-10"
       >
         <MoreVertical size={20} />
       </button>
@@ -184,7 +355,7 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
             initial={{ opacity: 0, scale: 0.9, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#EEE2D1] overflow-hidden z-50"
+            className="absolute right-0 mt-3 w-56 bg-base-100 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] border border-base-content/10 overflow-hidden z-[100]"
           >
             <div className="py-2">
               {isLeader && !isCompleted && (
@@ -193,9 +364,9 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
                     setIsEditModalOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-[#2B361B] hover:bg-[#FFF8F5] transition-colors"
+                  className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-base-content hover:bg-base-200 transition-colors"
                 >
-                  <Edit3 size={16} className="text-[#A65D2E]" />{" "}
+                  <Edit3 size={16} className="text-primary" />{" "}
                   แก้ไขข้อมูลปาร์ตี้
                 </button>
               )}
@@ -205,17 +376,20 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
                   setIsMenuOpen(false);
                 }}
                 disabled={isCompleted}
-                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-[#2B361B] hover:bg-[#FFF8F5] transition-colors disabled:opacity-50"
+                className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-base-content hover:bg-base-200 transition-colors disabled:opacity-50"
               >
-                <LogOut size={16} className="text-[#A65D2E]" /> ออกจากปาร์ตี้
+                <LogOut size={16} className="text-primary" /> ออกจากปาร์ตี้
               </button>
+              {isLeader && !isCompleted && (
+                <div className="h-px bg-base-content/5 my-1 mx-2" />
+              )}
               {isLeader && !isCompleted && (
                 <button
                   onClick={() => {
                     setIsCancelModalOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
+                  className="w-full px-4 py-3 flex items-center gap-3 text-sm font-bold text-error hover:bg-error/5 transition-colors"
                 >
                   <Trash2 size={16} /> ยกเลิกปาร์ตี้
                 </button>
@@ -225,7 +399,6 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
         )}
       </AnimatePresence>
 
-      {/* --- Modals Rendered via Portal --- */}
       <ConfirmModal
         isOpen={isLeaveModalOpen}
         onClose={() => setIsLeaveModalOpen(false)}
@@ -234,7 +407,9 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
         desc="คุณแน่ใจหรือไม่ที่จะออกจากกลุ่มนี้? หากคุณเป็นหัวหน้า ระบบจะโอนสิทธิ์ให้สมาชิกคนถัดไป"
         confirmText="ใช่, ออกเลย"
         type="orange"
+        isLoading={isLoading}
       />
+
       <ConfirmModal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
@@ -243,111 +418,18 @@ const PartyControlMenu = ({ party, isLeader, isCompleted, onUpdate }) => {
         desc="⚠️ การกระทำนี้จะลบปาร์ตี้นี้ถาวรและเอาสมาชิกทุกคนออก คุณแน่ใจใช่หรือไม่?"
         confirmText="ใช่, ยกเลิกถาวร"
         type="danger"
+        isLoading={isLoading}
       />
 
-      <AnimatePresence>
-        {isEditModalOpen && (
-          <ModalPortal>
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center px-6 pointer-events-auto">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsEditModalOpen(false)}
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-              />
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative bg-[#FFF8F5] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-[#EEE2D1] overflow-hidden"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-[#2B361B]">
-                    แก้ไขปาร์ตี้ ✨
-                  </h3>
-                  <button
-                    onClick={() => setIsEditModalOpen(false)}
-                    className="p-2 hover:bg-[#F7EAD7] rounded-full transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-                <form onSubmit={handleEditSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1">
-                      <Hash size={12} /> ชื่อกลุ่ม
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={editForm.name}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, name: e.target.value })
-                      }
-                      className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1">
-                      <Users size={12} /> จำนวนคนรับ (Max)
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min={party.members.length}
-                      value={editForm.maxMembers}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, maxMembers: e.target.value })
-                      }
-                      className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold"
-                    />
-                    <p className="text-[9px] text-[#A65D2E] font-medium ml-1">
-                      * ห้ามน้อยกว่า {party.members.length} คนที่มีอยู่
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest ml-1 flex items-center gap-1">
-                      <Clock size={12} /> เวลานัดหมาย
-                    </label>
-                    <input
-                      type="datetime-local"
-                      required
-                      value={editForm.meetupTime}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, meetupTime: e.target.value })
-                      }
-                      className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all text-sm font-bold"
-                    />
-                  </div>
-                  <div className="pt-4 flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsEditModalOpen(false)}
-                      className="flex-1 py-3 text-sm font-bold text-[#8B837E] hover:bg-[#EAD9CF] rounded-xl transition-colors"
-                    >
-                      ยกเลิก
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="flex-1 bg-[#182806] hover:bg-[#2D3E1A] transition-colors text-white py-3 rounded-xl text-sm font-bold shadow-md flex items-center justify-center gap-2"
-                    >
-                      {isLoading ? (
-                        "กำลังบันทึก..."
-                      ) : (
-                        <>
-                          <Check size={16} /> บันทึก
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          </ModalPortal>
-        )}
-      </AnimatePresence>
+      <EditPartyModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handleEditSubmit}
+        editForm={editForm}
+        setEditForm={setEditForm}
+        isLoading={isLoading}
+        partyMembersCount={party?.members?.length || 0}
+      />
     </div>
   );
 };

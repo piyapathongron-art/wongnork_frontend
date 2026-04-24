@@ -58,8 +58,11 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
         }
     }, [messages, typingUser, isOpen]);
 
+    const isPartyClosed = party?.status === 'COMPLETED' || party?.status === 'CANCELLED';
+
     // 🌟 3. จัดการการพิมพ์
     const handleInputChange = (e) => {
+        if (isPartyClosed) return;
         setChatInput(e.target.value);
         if (!party?.id) return;
         socket.emit('typing', party.id);
@@ -72,7 +75,7 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     // 🌟 4. ส่งข้อความ
     const handleSendMessage = (e) => {
         if (e) e.preventDefault();
-        if (!chatInput.trim() || !party?.id) return;
+        if (!chatInput.trim() || !party?.id || isPartyClosed) return;
 
         socket.emit('send_message', {
             text: chatInput,
@@ -93,16 +96,16 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed inset-0 z-[100] bg-[#FFF8F5] flex flex-col"
+                    className="fixed inset-0 z-[100] bg-base-100 flex flex-col"
                 >
                     {/* Header */}
-                    <header className="px-6 py-4 flex items-center gap-4 border-b border-[#EEE2D1] bg-white/80 backdrop-blur-xl">
-                        <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors">
-                            <ArrowLeft size={24} className="text-[#2B361B]" />
+                    <header className="px-6 py-4 flex items-center gap-4 border-b border-base-content/10 bg-base-100/80 backdrop-blur-xl">
+                        <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-base-200 transition-colors">
+                            <ArrowLeft size={24} className="text-base-content" />
                         </button>
                         <div className="flex-1 min-w-0">
-                            <h2 className="text-lg font-black text-[#2B361B] truncate">แชทกลุ่มปาร์ตี้</h2>
-                            <p className="text-[10px] font-bold text-[#A65D2E] uppercase tracking-wider">{party.name}</p>
+                            <h2 className="text-lg font-black text-base-content truncate">แชทกลุ่มปาร์ตี้</h2>
+                            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">{party.name}</p>
                         </div>
                     </header>
 
@@ -115,17 +118,17 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                             return (
                                 <div key={msg.id} className={`flex flex-col ${msg.type === 'SYSTEM' ? 'items-center' : (isMe ? 'items-end' : 'items-start')}`}>
                                     {msg.type === 'SYSTEM' ? (
-                                        <span className="bg-[#EAD9CF]/50 text-[#8B837E] text-[9px] font-black px-4 py-1 rounded-full uppercase tracking-widest">{msg.text}</span>
+                                        <span className="bg-base-300/50 text-base-content/50 text-[9px] font-black px-4 py-1 rounded-full uppercase tracking-widest">{msg.text}</span>
                                     ) : (
                                         <div className={`flex items-start gap-2 max-w-[90%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                                             {/* 👤 Avatar - แสดงเฉพาะของคนอื่น */}
                                             {!isMe && (
-                                                <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm overflow-hidden bg-gray-100 shrink-0">
+                                                <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm overflow-hidden bg-base-300 shrink-0">
                                                     {msgUser.avatarUrl ? (
                                                         <img src={msgUser.avatarUrl} alt={msgUser.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center bg-[#F7EAD7]">
-                                                            <UserIcon size={14} className="text-[#BC6C25]" />
+                                                        <div className="w-full h-full flex items-center justify-center bg-base-200">
+                                                            <UserIcon size={14} className="text-primary" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -134,14 +137,14 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                             {/* 💬 Message Bubble Area */}
                                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                                                 {!isMe && (
-                                                    <span className="text-[10px] text-[#BC6C25] uppercase mb-1 ml-1">
+                                                    <span className="text-[10px] text-primary uppercase mb-1 ml-1 font-bold">
                                                         {msgUser.name}
                                                     </span>
                                                 )}
-                                                <div className={`p-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe ? 'bg-[#182806] text-white rounded-tr-none' : 'bg-white border border-[#EEE2D1] text-[#2B361B] rounded-tl-none'}`}>
+                                                <div className={`p-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe ? 'bg-primary text-primary-content rounded-tr-none' : 'bg-base-100 border border-base-content/10 text-base-content rounded-tl-none'}`}>
                                                     {msg.text}
                                                 </div>
-                                                <span className="text-[8px] font-bold text-gray-400 mt-1 px-1">
+                                                <span className="text-[8px] font-bold text-base-content/30 mt-1 px-1">
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
@@ -152,12 +155,12 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                         })}
 
                         {/* Typing Indicator */}
-                        {typingUser && (
-                            <div className="flex items-center gap-2 text-gray-400 px-1 animate-pulse">
+                        {typingUser && !isPartyClosed && (
+                            <div className="flex items-center gap-2 text-base-content/30 px-1 animate-pulse">
                                 <div className="flex gap-1">
-                                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                    <div className="w-1 h-1 bg-base-content/20 rounded-full"></div>
+                                    <div className="w-1 h-1 bg-base-content/20 rounded-full"></div>
+                                    <div className="w-1 h-1 bg-base-content/20 rounded-full"></div>
                                 </div>
                                 <span className="text-[9px] font-bold italic uppercase">{typingUser} is typing...</span>
                             </div>
@@ -166,31 +169,40 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                     </div>
 
                     {/* Chat Input */}
-                    <div className="p-6 bg-white border-t border-[#EEE2D1] pb-10">
-                        <form
-                            onSubmit={handleSendMessage}
-                            className="flex items-center gap-3 bg-[#FFF8F5] border border-[#EEE2D1] rounded-2xl p-2 focus-within:border-[#A65D2E] transition-all shadow-inner"
-                        >
-                            <button type="button" className="p-2 text-[#A8A29F] hover:text-[#A65D2E] transition-colors"><Smile size={20} /></button>
-                            <input
-                                type="text"
-                                value={chatInput}
-                                onChange={handleInputChange}
-                                placeholder="พิมพ์ข้อความคุยกับเพื่อนร่วมโต๊ะ..."
-                                className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-[#2B361B]"
-                            />
-                            <button
-                                type="submit"
-                                disabled={!chatInput.trim()}
-                                className="w-10 h-10 bg-[#182806] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                    <div className="p-6 bg-base-100 border-t border-base-content/5 pb-10">
+                        {isPartyClosed ? (
+                            <div className="w-full py-4 bg-base-200 rounded-2xl flex items-center justify-center border border-base-content/10">
+                                <span className="text-xs font-black uppercase tracking-[0.2em] text-base-content/30 italic">
+                                    — ปาร์ตี้นี้จบลงแล้ว (ปิดการสนทนา) —
+                                </span>
+                            </div>
+                        ) : (
+                            <form
+                                onSubmit={handleSendMessage}
+                                className="flex items-center gap-3 bg-base-200 border border-base-content/10 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner"
                             >
-                                <Send size={18} />
-                            </button>
-                        </form>
+                                <button type="button" className="p-2 text-base-content/40 hover:text-primary transition-colors"><Smile size={20} /></button>
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={handleInputChange}
+                                    placeholder="พิมพ์ข้อความคุยกับเพื่อนร่วมโต๊ะ..."
+                                    className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-base-content"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!chatInput.trim()}
+                                    className="w-10 h-10 bg-primary text-primary-content rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                    <Send size={18} />
+                                </button>
+                            </form>
+                        )}
                     </div>
                 </motion.div>
             )}
         </AnimatePresence>
+
     );
 };
 
