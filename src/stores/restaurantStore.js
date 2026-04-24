@@ -11,9 +11,9 @@ const useRestaurantStore = create((set, get) => ({
   searchQuery: "",
   isLoading: false,
   userLocation: null,
-  isLoading:false,
+  isLoading: false,
 
-  setRestaurant: (data) => set({restaurant : data}),
+  setRestaurant: (data) => set({ restaurant: data }),
   setRestaurants: (data) => {
     set({ restaurants: data });
     get().applyFilter();
@@ -60,17 +60,17 @@ const useRestaurantStore = create((set, get) => ({
   },
 
   setSortBy: (sort) => {
-    if(get().sortBy === sort) reeturn
+    if (get().sortBy === sort) return
 
-    set({sortBy: sort})
+    set({ sortBy: sort })
     get().applyFilter()
   },
 
   setUserLocation: (loc) => {
     const currentLoc = get().userLocation
-    if(currentLoc?.lat === loc.lat && currentLoc.lng === loc.lng) return
+    if (currentLoc?.lat === loc.lat && currentLoc.lng === loc.lng) return
 
-    set({userLocation : loc})
+    set({ userLocation: loc })
     get().applyFilter()
   },
 
@@ -90,17 +90,17 @@ const useRestaurantStore = create((set, get) => ({
     });
 
     // Sort
-    if(sortBy === "distance" && userLocation) {
-      filtered.sort((a,b) => {
+    if (sortBy === "distance" && userLocation) {
+      filtered.sort((a, b) => {
         const distA = calculateDistance(userLocation.lat, userLocation.lng, a.lat, a.lng)
         const distB = calculateDistance(userLocation.lat, userLocation.lng, b.lat, b.lng)
-        
-        return distA-distB
+
+        return distA - distB
       })
-    } else if(sortBy === "reviews") {
-      filtered.sort((a,b) => {
+    } else if (sortBy === "reviews") {
+      filtered.sort((a, b) => {
         const getAvg = (revs) => revs?.length > 0
-        ? revs.reduce((sum, r) => sum + r.rating, 0)/revs.length : 0
+          ? revs.reduce((sum, r) => sum + r.rating, 0) / revs.length : 0
         return getAvg(b.reviews) - getAvg(a.reviews)
       })
     }
