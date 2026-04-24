@@ -60,7 +60,7 @@ const useRestaurantStore = create((set, get) => ({
   },
 
   setSortBy: (sort) => {
-    if(get().sortBy === sort) reeturn
+    if(get().sortBy === sort) return
 
     set({sortBy: sort})
     get().applyFilter()
