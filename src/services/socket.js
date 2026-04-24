@@ -18,10 +18,12 @@ export function getSocket(token) {
 
     currenToken = token;
 
-    socket = io(BACKEND_URL, {
+    socket = io("/", {
         auth: { token },
+        transports: ['polling', 'websocket'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        // secure: true,
     })
 
     socket.on("connect", () => {
