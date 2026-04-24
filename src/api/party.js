@@ -66,6 +66,10 @@ const apiVerifyPayment = async (partyId, userId) => {
     return await mainApi.post(`/parties/${partyId}/payment/verify/${userId}`);
 }
 
+const apiCancelPayment = async (partyId) => {
+    return await mainApi.post(`/parties/${partyId}/payment/cancel`);
+}
+
 export {
     apiGetParties,
     apiGetPartyById,
@@ -80,5 +84,6 @@ export {
     apiGetSplitBill,
     apiUpdatePartySettings,
     apiNotifyPayment,
-    apiVerifyPayment
+    apiVerifyPayment,
+    apiCancelPayment
 }

@@ -22,7 +22,8 @@ import {
     ShieldCheck,
     Clock as ClockIcon,
     X,
-    QrCode
+    QrCode,
+    RefreshCcw
 } from 'lucide-react';
 import {
     apiGetPartyById,
@@ -33,7 +34,8 @@ import {
     apiAddOrderItem,
     apiUpdatePartySettings,
     apiNotifyPayment,
-    apiVerifyPayment
+    apiVerifyPayment,
+    apiCancelPayment
 } from '../api/party';
 import useUserStore from '../stores/userStore';
 import { toast } from 'sonner';
@@ -135,6 +137,14 @@ const SplitBillSummary = () => {
     const isCompleted = party?.status === 'COMPLETED';
     const isPendingSettlement = party?.status === 'PENDING_SETTLEMENT';
 
+    // 🌟 Current User Payment Status
+    const mySummary = billSummary?.members?.find(m => m.user.id === user?.id) || {
+        items: [],
+        summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 },
+        paymentStatus: 'PENDING'
+    };
+    const isMyPaymentLocked = mySummary.paymentStatus === 'PAID' || mySummary.paymentStatus === 'VERIFIED';
+
     const handleScroll = (e) => {
         if (e.target.scrollTop > 400) setShowBackToTop(true);
         else setShowBackToTop(false);
@@ -183,7 +193,7 @@ const SplitBillSummary = () => {
     };
 
     const handleQuantityChange = async (itemId, action) => {
-        if (actionLoading || isCompleted) return;
+        if (actionLoading || isCompleted || isMyPaymentLocked) return;
         const item = billSummary.tableItems.find(i => i.id === itemId);
         if (action === 'decrement' && item.quantity <= 1) {
             setItemToDelete(item);
@@ -201,7 +211,7 @@ const SplitBillSummary = () => {
     };
 
     const handleDeleteItem = async () => {
-        if (!itemToDelete || actionLoading || isCompleted) return;
+        if (!itemToDelete || actionLoading || isCompleted || isMyPaymentLocked) return;
         setActionLoading(true);
         try {
             await apiRemoveOrderItem(id, itemToDelete.id);
@@ -216,7 +226,7 @@ const SplitBillSummary = () => {
     };
 
     const handleToggleSharer = async (itemId, isOptIn) => {
-        if (actionLoading || isCompleted) return;
+        if (actionLoading || isCompleted || isMyPaymentLocked) return;
         setActionLoading(true);
         const action = isOptIn ? 'leave' : 'join';
         try {
@@ -295,17 +305,27 @@ const SplitBillSummary = () => {
         }
     };
 
+    const handleCancelPayment = async () => {
+        if (actionLoading || mySummary.paymentStatus !== 'PAID') return;
+        if (!window.confirm("คุณต้องการยกเลิกการแจ้งโอนเงินเพื่อแก้ไขรายการอาหารใหม่ใช่หรือไม่?")) return;
+        
+        setActionLoading(true);
+        try {
+            await apiCancelPayment(id);
+            toast.success("ยกเลิกการแจ้งโอนแล้ว คุณสามารถแก้ไขรายการอาหารได้");
+            await loadData();
+        } catch (error) {
+            toast.error("ยกเลิกไม่สำเร็จ");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     if (loading && !billSummary) return (
         <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
             <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
         </div>
     );
-
-    const mySummary = billSummary?.members?.find(m => m.user.id === user?.id) || {
-        items: [],
-        summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 },
-        paymentStatus: 'PENDING'
-    };
 
     return (
         <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] font-sans overflow-hidden flex flex-col">
@@ -395,12 +415,20 @@ const SplitBillSummary = () => {
                     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         <div className="flex justify-between items-center px-1">
                             <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em]">เมนูในบิล ({billSummary?.tableItems?.length || 0})</h3>
-                            {!isCompleted && (
+                            {!isCompleted && !isMyPaymentLocked && (
                                 <button onClick={() => setIsAddCustomModalOpen(true)} className="text-[#A65D2E] text-[10px] font-black uppercase flex items-center gap-1.5 bg-[#F7EAD7] px-3 py-1.5 rounded-full active:scale-95 transition-all">
                                     <Plus size={12} strokeWidth={3} /> เพิ่มเมนูพิเศษ
                                 </button>
                             )}
                         </div>
+
+                        {isMyPaymentLocked && (
+                            <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
+                                <ShieldCheck size={18} className="text-blue-500 shrink-0" />
+                                <p className="text-[10px] text-blue-700 leading-relaxed font-medium">รายการหารถูกล็อกไว้เนื่องจากคุณแจ้งชำระเงินแล้ว <br/> หากต้องการหารอาหารเพิ่ม กรุณายกเลิกการแจ้งโอนเงินในหน้า "การจ่ายเงิน" ก่อนครับ</p>
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             <AnimatePresence mode="popLayout">
                                 {billSummary?.tableItems?.map((item) => {
@@ -408,7 +436,7 @@ const SplitBillSummary = () => {
                                     return (
                                         <motion.div key={item.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={`p-4 rounded-[1.5rem] bg-white border shadow-sm transition-all ${isOptIn ? 'border-[#A65D2E] ring-1 ring-[#A65D2E]/10' : 'border-[#EEE2D1] opacity-70'}`}>
                                             <div className="flex gap-3 mb-3">{item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-lg object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-12 h-12 rounded-lg bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={16} className="text-[#A65D2E]" /></div>)}<div className="flex-1 min-w-0"><h4 className="font-bold text-[14px] text-[#2B361B] truncate">{item.name} {item.isCustom && <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 font-medium ml-1">พิเศษ</span>}</h4><div className="text-[12px] font-black text-[#A65D2E]">฿{item.price?.toLocaleString()} <span className="text-[10px] text-gray-400 font-normal">/ จาน</span></div></div></div>
-                                            <div className="flex items-center justify-between border-t border-[#EEE2D1]/50 pt-3"><div className="flex items-center gap-2"><button onClick={() => handleToggleSharer(item.id, isOptIn)} disabled={isCompleted} className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isOptIn ? 'bg-[#A65D2E] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{isOptIn ? <><Check size={12} strokeWidth={3} /> คุณร่วมหาร</> : 'ฉันไม่ได้กิน'}</button>{item.sharers.length > 0 && (<div className="flex -space-x-1">{item.sharers.slice(0, 3).map(s => (<img key={s.id} src={s.avatarUrl || `https://i.pravatar.cc/150?u=${s.id}`} alt={s.name} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 object-cover shadow-sm" />))}{item.sharers.length > 3 && <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[8px] font-bold text-gray-600 shadow-sm">+{item.sharers.length - 3}</div>}</div>)}</div><div className="flex items-center gap-3 bg-[#FFF8F5] p-1 rounded-xl border border-[#EEE2D1]"><button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 transition-colors disabled:opacity-30">{item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}</button><span className="font-bold text-[14px] w-4 text-center text-[#2B361B]">{item.quantity}</span><button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading || isCompleted} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white transition-colors disabled:opacity-30"><Plus size={14} /></button></div></div>
+                                            <div className="flex items-center justify-between border-t border-[#EEE2D1]/50 pt-3"><div className="flex items-center gap-2"><button onClick={() => handleToggleSharer(item.id, isOptIn)} disabled={isCompleted || isMyPaymentLocked} className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isOptIn ? 'bg-[#A65D2E] text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'} disabled:opacity-50`}>{isOptIn ? <><Check size={12} strokeWidth={3} /> คุณร่วมหาร</> : 'ฉันไม่ได้กิน'}</button>{item.sharers.length > 0 && (<div className="flex -space-x-1">{item.sharers.slice(0, 3).map(s => (<img key={s.id} src={s.avatarUrl || `https://i.pravatar.cc/150?u=${s.id}`} alt={s.name} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 object-cover shadow-sm" />))}{item.sharers.length > 3 && <div className="w-6 h-6 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[8px] font-bold text-gray-600 shadow-sm">+{item.sharers.length - 3}</div>}</div>)}</div><div className="flex items-center gap-3 bg-[#FFF8F5] p-1 rounded-xl border border-[#EEE2D1]"><button onClick={() => handleQuantityChange(item.id, 'decrement')} disabled={actionLoading || isCompleted || isMyPaymentLocked} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white shadow-sm text-red-500 transition-colors disabled:opacity-30">{item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}</button><span className="font-bold text-[14px] w-4 text-center text-[#2B361B]">{item.quantity}</span><button onClick={() => handleQuantityChange(item.id, 'increment')} disabled={actionLoading || isCompleted || isMyPaymentLocked} className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#2B361B] shadow-sm text-white transition-colors disabled:opacity-30"><Plus size={14} /></button></div></div>
                                             {isOptIn && item.costPerPerson > 0 && (<div className="mt-3 bg-[#FFF8F5] rounded-xl p-2.5 flex justify-between items-center border border-[#EEE2D1]"><span className="text-[10px] font-bold text-[#8B837E]">คุณหารอยู่ที่:</span><span className="text-[13px] font-black text-[#A65D2E]">฿{Math.ceil(item.costPerPerson).toLocaleString()}</span></div>)}
                                         </motion.div>
                                     );
@@ -508,7 +536,18 @@ const SplitBillSummary = () => {
                                             {status === 'PENDING' && (<span className="text-[9px] font-black uppercase text-gray-400 bg-gray-50 px-3 py-1 rounded-full flex items-center gap-1 border border-gray-100"><ClockIcon size={10} /> Pending</span>)}
                                             {status === 'PAID' && (
                                                 <div className="flex flex-col items-end gap-1">
-                                                    <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">รอตรวจ</span>
+                                                    <div className='flex gap-1'>
+                                                        <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">รอตรวจ</span>
+                                                        {isMe && (
+                                                            <button 
+                                                                onClick={handleCancelPayment}
+                                                                title="แก้ไขสลิป"
+                                                                className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
+                                                            >
+                                                                <RefreshCcw size={12} />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                     {isLeader && (<button onClick={() => handleVerifyPayment(m.user.id)} disabled={actionLoading} className="text-[8px] font-black uppercase text-white bg-green-600 px-2 py-1 rounded-lg shadow-sm active:scale-95 transition-all">Verify</button>)}
                                                 </div>
                                             )}
