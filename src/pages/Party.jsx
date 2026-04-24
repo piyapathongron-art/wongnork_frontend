@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import NavBar from "../components/NavBar";
 import PartyCard from "../components/PartyCard";
-import { UserPlus, Search, Users, AlertCircle } from "lucide-react";
+import { UserPlus, Search, Users, AlertCircle, ArrowUp } from "lucide-react";
 import { toast } from "react-toastify";
 import { apiGetParties, apiJoinParty, apiLeaveParty } from "../api/party";
 import useUserStore from "../stores/userStore";
@@ -22,6 +22,22 @@ const Party = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [incomingRestaurant, setIncomingRestaurant] = useState(null);
+
+  // 🌟 To Top Button State
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const handleScroll = useCallback((e) => {
+    if (e.target.scrollTop > 200) {
+      setShowBackToTop(true);
+    } else {
+      setShowBackToTop(false);
+    }
+  }, []);
+
+  const scrollToTop = () => {
+    const container = document.getElementById("scroll-container");
+    container?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // 🌟 Search & Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,7 +86,7 @@ const Party = () => {
   // 🌟 Filtered Parties Logic
   const filteredDiscovery = React.useMemo(() => {
     return parties
-      .filter((p) => p.status !== "COMPLETED") // 🎯 กรองกลุ่มที่จบแล้วออกจากรายการค้นหาด้วย
+      .filter((p) => p.status !== "COMPLETED") // กรองกลุ่มที่จบแล้วออกจากรายการค้นหาด้วย
       .filter((p) => !myJoinedGroups.some((myP) => myP.id === p.id))
       .filter((p) => {
         const matchesSearch =
@@ -125,11 +141,11 @@ const Party = () => {
           ...p,
           dist: userLoc
             ? calculateDistance(
-                userLoc.lat,
-                userLoc.lng,
-                p.restaurant?.lat,
-                p.restaurant?.lng,
-              )
+              userLoc.lat,
+              userLoc.lng,
+              p.restaurant?.lat,
+              p.restaurant?.lng,
+            )
             : null,
         }))
         .sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
@@ -197,6 +213,7 @@ const Party = () => {
       {/* 1. MAIN SCROLL CONTAINER */}
       <div
         id="scroll-container"
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto px-4 pb-48 no-scrollbar scroll-smooth"
       >
         <div className="flex flex-col gap-2 max-w-md mx-auto pt-4">
@@ -213,7 +230,7 @@ const Party = () => {
                     restaurant.images?.find((img) => img.isCover)?.url ||
                     restaurant.images?.[0]?.url ||
                     "https://picsum.photos/seed/restaurant/400/300";
-                  
+
                   const unreadCount = unreadCounts[party.id] || 0;
 
                   return (
@@ -228,7 +245,7 @@ const Party = () => {
                           {unreadCount > 9 ? "9+" : unreadCount}
                         </div>
                       )}
-                      
+
                       <div className={`relative p-[2.5px] rounded-full shadow-sm ${unreadCount > 0 ? "bg-red-500 animate-pulse" : "bg-gradient-to-tr from-[#BC6C25] via-[#F7EAD7] to-[#A65D2E]"}`}>
                         <div className="w-[60px] h-[60px] rounded-full border-2 border-[#FDF2ED] overflow-hidden bg-white">
                           <img
@@ -300,11 +317,10 @@ const Party = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${
-                      selectedCategory === cat
-                        ? "bg-[#182806] text-white border-[#182806] shadow-md"
-                        : "bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800"
-                    }`}
+                    className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat
+                      ? "bg-[#182806] text-white border-[#182806] shadow-md"
+                      : "bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800"
+                      }`}
                   >
                     {cat}
                   </button>
@@ -344,8 +360,23 @@ const Party = () => {
         </div>
       </div>
 
-      {/* 2. FLOATING UI LAYER */}
+      {/* FLOATING UI LAYER */}
       <div className="absolute inset-0 pointer-events-none">
+        {/* To the Top Button */}
+        <AnimatePresence>
+          {showBackToTop && (
+            <motion.button
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.8 }}
+              onClick={scrollToTop}
+              className="absolute bottom-52 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-100 flex items-center justify-center active:scale-90 transition-transform pointer-events-auto"
+            >
+              <ArrowUp size={20} strokeWidth={3} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
         <button
           className="absolute bottom-28 right-6 w-20 h-20 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] dark:border-zinc-900 z-50 active:scale-90 transition-all pointer-events-auto"
           onClick={() => setIsModalOpen(true)}
