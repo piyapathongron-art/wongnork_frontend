@@ -185,6 +185,12 @@ const MapBox = forwardRef(
       initialCenter, // ให้ไปเกิดที่ร้านเลย
     );
 
+    useEffect(() => {
+      if (filteredRestaurants.length === 0) {
+        fetchRestaurants();
+      }
+    }, [fetchRestaurants, filteredRestaurants.length]);
+
     return (
       <div style={{ width: "100%", height: "100%", position: "relative" }}>
         <div ref={mapNodeRef} style={{ position: "absolute", inset: 0 }} />

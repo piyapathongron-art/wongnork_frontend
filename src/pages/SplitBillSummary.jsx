@@ -12,7 +12,10 @@ import {
     UserIcon,
     Star,
     ArrowUp,
-    MessageSquare
+    MessageSquare,
+    Landmark,
+    AlertCircle,
+    Edit2
 } from 'lucide-react';
 import {
     apiGetPartyById,
@@ -30,6 +33,7 @@ import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
 import GroupChatOverlay from '../components/GroupChatOverlay';
 import { getSocket } from '../services/socket';
+import PaymentModal from '../components/Modals/PaymentModal';
 
 const SplitBillSummary = () => {
     const { id } = useParams();
@@ -45,7 +49,15 @@ const SplitBillSummary = () => {
     // UI States
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+
+    // Modal state for Complete Party Confirmation
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+
+    // 🌟 Edit Settings State
+    const [isEditingSettings, setIsEditingSettings] = useState(false);
+
+    // Payment Modal State
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     // Review System State
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -58,11 +70,13 @@ const SplitBillSummary = () => {
     const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
     const [customItemForm, setCustomItemForm] = useState({ name: '', price: '' });
 
-    // Modal state for Complete Party Confirmation
-    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
-
     // Leader Settings State (for inputs)
-    const [settingsForm, setSettingsForm] = useState({ vat: 0, serviceCharge: 0 });
+    const [settingsForm, setSettingsForm] = useState({
+        vat: 0,
+        serviceCharge: 0,
+        promptPayNumber: '',
+        promptPayName: ''
+    });
 
     const loadData = useCallback(async () => {
         try {
@@ -73,7 +87,14 @@ const SplitBillSummary = () => {
             const partyData = partyRes.data.data;
             setParty(partyData);
             setBillSummary(billRes.data.data);
-            setSettingsForm({ vat: partyData.vat, serviceCharge: partyData.serviceCharge });
+
+            // 🌟 Auto-fill logic: ถ้าในบิลไม่มี แต่ในโปรไฟล์มี ให้เอาในโปรไฟล์มาใช้เลย
+            setSettingsForm({
+                vat: partyData.vat || 0,
+                serviceCharge: partyData.serviceCharge || 0,
+                promptPayNumber: partyData.leader?.promptPayNumber || user?.promptPayNumber || '',
+                promptPayName: partyData.leader?.promptPayName || user?.promptPayName || ''
+            });
 
             if (partyData.restaurant?.reviews) {
                 const myReview = partyData.restaurant.reviews.find(r => r.userId === user?.id && r.partyId === id);
@@ -85,11 +106,20 @@ const SplitBillSummary = () => {
         } finally {
             setLoading(false);
         }
-    }, [id, user?.id]);
+    }, [id, user?.id, user?.promptPayNumber, user?.promptPayName]);
 
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // 🌟 Socket Room Management
+    useEffect(() => {
+        const token = useUserStore.getState().token;
+        if (!token || !id) return;
+        const socket = getSocket(token);
+        socket.emit("join_room", id);
+    }, [id]);
+
 
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
@@ -127,11 +157,8 @@ const SplitBillSummary = () => {
 
     // Handle Scrolling logic
     const handleScroll = (e) => {
-        if (e.target.scrollTop > 400) {
-            setShowBackToTop(true);
-        } else {
-            setShowBackToTop(false);
-        }
+        if (e.target.scrollTop > 400) setShowBackToTop(true);
+        else setShowBackToTop(false);
     };
 
     const scrollToTop = () => {
@@ -142,12 +169,22 @@ const SplitBillSummary = () => {
         if (!isLeader || isCompleted || actionLoading) return;
         setActionLoading(true);
         try {
+            // 1. Update Party VAT/SC
             await apiUpdatePartySettings(id, {
                 vat: parseFloat(settingsForm.vat) || 0,
                 serviceCharge: parseFloat(settingsForm.serviceCharge) || 0
             });
+
+            // 2. Update User Payment Info (PromptPay)
+            const { apiUpdateProfile } = await import('../api/mainApi');
+            await apiUpdateProfile({
+                promptPayNumber: settingsForm.promptPayNumber,
+                promptPayName: settingsForm.promptPayName
+            });
+
             await loadData();
-            toast.success("อัปเดตข้อมูลบิลสำเร็จ");
+            setIsEditingSettings(false); // 🌟 ปิดโหมดแก้ไขเมื่อบันทึกสำเร็จ
+            toast.success("อัปเดตข้อมูลบิลและช่องทางรับเงินสำเร็จ");
         } catch (error) {
             toast.error("อัปเดตไม่สำเร็จ");
         } finally {
@@ -181,7 +218,6 @@ const SplitBillSummary = () => {
         try {
             await apiUpdateOrderItemQuantity(id, itemId, action);
 
-            // 🌟 ส่ง System Message
             const { token } = useUserStore.getState();
             const socket = getSocket(token);
             socket.emit('send_message', {
@@ -204,7 +240,6 @@ const SplitBillSummary = () => {
         try {
             await apiRemoveOrderItem(id, itemToDelete.id);
 
-            // 🌟 ส่ง System Message
             const { token } = useUserStore.getState();
             const socket = getSocket(token);
             socket.emit('send_message', {
@@ -231,7 +266,6 @@ const SplitBillSummary = () => {
         try {
             await apiToggleOrderItemSharer(id, itemId, action);
 
-            // 🌟 ส่ง System Message
             const { token } = useUserStore.getState();
             const socket = getSocket(token);
             socket.emit('send_message', {
@@ -297,9 +331,7 @@ const SplitBillSummary = () => {
                         className={`p-2.5 rounded-full bg-white/50 border border-[#EEE2D1] text-[#182806] shadow-sm hover:bg-[#F7EAD7] transition-all relative ${hasUnreadMessages ? 'animate-pulse' : ''}`}
                     >
                         <MessageSquare size={20} />
-                        {hasUnreadMessages && (
-                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-                        )}
+                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
                     <PartyControlMenu party={party} isLeader={isLeader} isCompleted={isCompleted} onUpdate={loadData} />
                 </div>
@@ -345,13 +377,126 @@ const SplitBillSummary = () => {
                 {isCompleted && (<div className="mt-12 mb-8 p-6 bg-green-50 border border-green-200 rounded-2xl text-center"><Check size={32} className="text-green-600 mx-auto mb-2" /><h4 className="text-green-800 font-bold">ปาร์ตี้นี้ปิดยอดเรียบร้อยแล้ว</h4><p className="text-green-600/70 text-[10px] mt-1">ข้อมูลถูกล็อกไว้เพื่อความถูกต้องในการโอนเงิน</p></div>)}
 
                 {isLeader && (
-                    <div className="bg-white border border-[#EEE2D1] rounded-[1.5rem] p-5 mb-8 shadow-sm">
-                        <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-widest mb-4 flex items-center gap-2"><Receipt size={14} className="text-[#A65D2E]" /> ตั้งค่าค่าใช้จ่ายเพิ่มเติม (โดยหัวหน้า)</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div><label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">Service Charge (฿)</label><input type="number" value={settingsForm.serviceCharge} onChange={(e) => setSettingsForm({ ...settingsForm, serviceCharge: e.target.value })} onBlur={handleUpdateSettings} disabled={isCompleted || actionLoading} placeholder="0" className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all disabled:opacity-50" /></div>
-                            <div><label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">VAT (฿)</label><input type="number" value={settingsForm.vat} onChange={(e) => setSettingsForm({ ...settingsForm, vat: e.target.value })} onBlur={handleUpdateSettings} disabled={isCompleted || actionLoading} placeholder="0" className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all disabled:opacity-50" /></div>
+                    <div className="bg-white border border-[#EEE2D1] rounded-[2.5rem] p-6 mb-8 shadow-sm transition-all">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-[10px] font-black text-[#8B837E] uppercase tracking-widest flex items-center gap-2">
+                                <Receipt size={14} className="text-[#A65D2E]" /> ตั้งค่าบิลและช่องทางรับเงิน
+                            </h3>
+                            {!isCompleted && !isEditingSettings && (
+                                <button
+                                    onClick={() => setIsEditingSettings(true)}
+                                    className="p-2 bg-[#F7EAD7] text-[#A65D2E] rounded-full hover:bg-[#EAD9CF] transition-colors"
+                                >
+                                    <Edit2 size={14} />
+                                    <span className="sr-only">Edit</span>
+                                </button>
+                            )}
                         </div>
-                        {!isCompleted && <p className="text-[8px] text-gray-400 mt-3 italic text-center">* ยอดเงินที่กรอกจะถูกหารเฉลี่ยให้สมาชิกทุกคนในปาร์ตี้อัตโนมัติ</p>}
+
+                        {!isEditingSettings ? (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50">
+                                        <p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">Service Charge</p>
+                                        <p className="text-sm font-bold text-[#2B361B]">฿{settingsForm.serviceCharge.toLocaleString()}</p>
+                                    </div>
+                                    <div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50">
+                                        <p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">VAT</p>
+                                        <p className="text-sm font-bold text-[#2B361B]">฿{settingsForm.vat.toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <div className="bg-[#F7FCF0] p-4 rounded-2xl border border-[#182806]/10 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-white rounded-xl shadow-sm">
+                                            <Landmark size={16} className="text-[#182806]" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[8px] font-black text-[#182806]/60 uppercase">พร้อมเพย์รับเงิน</p>
+                                            <p className="text-sm font-black text-[#182806]">{settingsForm.promptPayNumber || 'ยังไม่ได้ระบุ'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-5 animate-in fade-in duration-300">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">Service Charge (฿)</label>
+                                        <input type="number" value={settingsForm.serviceCharge} onChange={(e) => setSettingsForm({ ...settingsForm, serviceCharge: e.target.value })} placeholder="0" className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">VAT (฿)</label>
+                                        <input type="number" value={settingsForm.vat} onChange={(e) => setSettingsForm({ ...settingsForm, vat: e.target.value })} placeholder="0" className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none focus:border-[#A65D2E] transition-all" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-[#182806] uppercase block mb-2 ml-1">เบอร์พร้อมเพย์รับเงิน</label>
+                                    <input type="text" value={settingsForm.promptPayNumber} onChange={(e) => setSettingsForm({ ...settingsForm, promptPayNumber: e.target.value })} placeholder="08x-xxx-xxxx" className="w-full bg-[#F7FCF0] border border-[#182806]/10 rounded-xl py-3 px-4 text-sm font-bold outline-none focus:border-[#182806] transition-all text-[#182806]" />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => {
+                                            setIsEditingSettings(false);
+                                            loadData(); // Reset form
+                                        }}
+                                        className="flex-1 py-2.5 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold active:scale-95 transition-all"
+                                    >
+                                        ยกเลิก
+                                    </button>
+                                    <button
+                                        onClick={handleUpdateSettings}
+                                        disabled={actionLoading}
+                                        className="flex-[2] py-2.5 bg-[#182806] text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        {actionLoading ? 'กำลังบันทึก...' : <><Check size={14} strokeWidth={3} /> บันทึกการตั้งค่า</>}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {!isEditingSettings && !isCompleted && (
+                            <p className="text-[8px] text-gray-400 mt-4 italic text-center">* ยอดเงินที่กรอกจะถูกหารเฉลี่ยให้สมาชิกทุกคนอัตโนมัติ</p>
+                        )}
+                    </div>
+                )}
+
+                {!isLeader && party?.leader?.promptPayNumber && (
+                    <div className="mb-8 p-5 rounded-[2rem] bg-blue-600 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 border border-white/20">
+                                <Landmark size={24} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-bold text-[14px]">พร้อมโอนหรือยัง?</h3>
+                                <p className="text-[10px] text-white/70 mt-0.5">กดเพื่อแสดง QR Code พร้อมเพย์ของหัวหน้า</p>
+                            </div>
+                            <button
+                                onClick={() => setIsPaymentModalOpen(true)}
+                                className="px-5 py-2.5 bg-white text-blue-600 rounded-full text-[11px] font-black shadow-lg active:scale-95 transition-all"
+                            >
+                                สแกนจ่าย
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/*  no PromptPay */}
+                {!isLeader && !party?.leader?.promptPayNumber && (
+                    <div className={`mb-8 p-5 rounded-[2rem] border relative overflow-hidden transition-all ${isCompleted ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${isCompleted ? 'bg-white text-orange-500' : 'bg-white text-gray-400'}`}>
+                                <AlertCircle size={24} strokeWidth={2.5} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className={`font-bold text-[14px] ${isCompleted ? 'text-orange-900' : 'text-gray-700'}`}>
+                                    {isCompleted ? 'ไม่พบข้อมูลการโอนเงิน' : 'ยังไม่มีช่องทางรับเงิน'}
+                                </h3>
+                                <p className={`text-[10px] mt-0.5 leading-relaxed ${isCompleted ? 'text-orange-700/80' : 'text-gray-500'}`}>
+                                    หัวหน้าตี้นี้ไม่ได้ลงทะเบียน PromptPay กับระบบ <br />
+                                    กรุณาสอบถามเลขบัญชีเพื่อโอนเงินกับหัวหน้าโดยตรงครับ
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -375,7 +520,7 @@ const SplitBillSummary = () => {
                 {isLeader && !isCompleted && (<button onClick={() => setIsCompleteModalOpen(true)} className="w-full mt-12 mb-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"><Check size={18} strokeWidth={3} /> ปิดจ็อบปาร์ตี้และสรุปยอดบิล</button>)}
             </main>
 
-            <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10">
+            <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10">
                 <div className="max-w-md mx-auto">
                     <div className="flex justify-between items-center mb-1"><span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider flex items-center gap-1"><UserIcon size={14} /> ยอดที่คุณต้องจ่าย</span><div className="text-2xl font-black text-[#A65D2E] tracking-tight"><motion.span key={mySummary.summary.netTotal} initial={{ opacity: 0, scale: 0.9, y: 5 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}</motion.span></div></div>
                     {mySummary.items.length >= 0 && (<div className="text-[9px] text-[#A8A29F] font-medium text-right mt-1 flex flex-col"><span>(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</span><span className="text-[#A65D2E] font-bold uppercase mt-0.5">* หารเท่ากันทั้งโต๊ะ {billSummary?.members?.length} คน</span></div>)}
@@ -403,6 +548,14 @@ const SplitBillSummary = () => {
                 onClose={() => setIsChatOpen(false)}
                 party={party}
                 user={user}
+            />
+
+            {/* 💳 Payment QR Modal */}
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                leader={party?.leader}
+                amount={mySummary.summary.netTotal}
             />
 
             {/* Modal: Delete Confirmation */}

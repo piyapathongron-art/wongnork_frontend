@@ -22,9 +22,9 @@ export const useMapInit = (
           ? "mapbox://styles/mapbox/dark-v10"
           : "mapbox://styles/mapbox/streets-v11",
         center: centerCoordinates,
-        zoom: 15.5,
-        pitch: 45,
-        bearing: -17.6,
+        zoom: initialCenter ? 12 : 15.5,
+        pitch: initialCenter ? 0 : 45,
+        bearing: initialCenter ? 0 : -17.6,
         antialias: true,
       });
 

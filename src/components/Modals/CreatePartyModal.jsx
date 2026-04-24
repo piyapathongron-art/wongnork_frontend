@@ -66,7 +66,7 @@ const CreatePartyModal = ({
         if (mapRef.current) {
           mapRef.current.flyToRestaurant(initialRestaurant);
         }
-      }, 500);
+      }, 100);
 
       return () => clearTimeout(timer);
     }
@@ -101,7 +101,7 @@ const CreatePartyModal = ({
             ref={mapRef}
             isDark={true}
             onMarkerClick={handleMarkerSelect}
-            disableAutoCenter={true}
+            disableAutoCenter={!!initialRestaurant}
             initialRestaurant={initialRestaurant}
           />
           <button
