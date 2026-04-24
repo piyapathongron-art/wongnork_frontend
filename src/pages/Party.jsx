@@ -91,10 +91,11 @@ const Party = () => {
   // 🌟 Filtered Parties Logic
   const filteredDiscovery = React.useMemo(() => {
     return parties
-      .filter((p) => p.status === "OPEN" || p.status === "FULL") // กรองเอาเฉพาะกลุ่มที่เปิดรับคนอยู่จริงๆ
+      .filter((p) => p.status === "OPEN" || p.status === "FULL")
       .filter((p) => !myJoinedGroups.some((myP) => myP.id === p.id))
       .filter((p) => {
         const matchesSearch =
+          !searchQuery ||
           p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.restaurant?.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -104,6 +105,7 @@ const Party = () => {
 
         return matchesSearch && matchesCategory;
       });
+      // Note: parties is already sorted by dist in loadData
   }, [parties, myJoinedGroups, searchQuery, selectedCategory]);
 
   // 🌟 ปาร์ตี้ที่รอการปิดกลุ่ม (Leader Action Needed)
@@ -347,10 +349,18 @@ const Party = () => {
           )}
 
           {/* SECTION: DISCOVER HEADER (Sticky) */}
-          <header className="sticky top-0 z-40 bg-[#FDF2ED]/90 dark:bg-black/90 backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-[#BC6C25]/5 mb-2">
-            <h1 className="text-2xl font-black tracking-[0.2em] text-[#2B361B] dark:text-white uppercase mb-4">
-              Discover Nearby
-            </h1>
+          <header className="sticky top-0 z-40 bg-base-100/90 dark:bg-black/90 backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-base-content/5 mb-2">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-black tracking-tight text-base-content uppercase">
+                Discover
+              </h1>
+              {!userLoc && !loading && (
+                <div className="flex items-center gap-1.5 bg-warning/10 text-warning px-3 py-1 rounded-full animate-pulse">
+                  <AlertCircle size={12} strokeWidth={3} />
+                  <span className="text-[8px] font-black uppercase">Enable Location</span>
+                </div>
+              )}
+            </div>
 
             {/* SEARCH & FILTER SECTION */}
             <div className="flex flex-col gap-4">
