@@ -57,6 +57,15 @@ const apiUpdatePartySettings = async (partyId, body) => {
     return await mainApi.put(`/parties/${partyId}/settings`, body);
 }
 
+const apiNotifyPayment = async (partyId, body) => {
+    // body: { paymentSlipUrl }
+    return await mainApi.post(`/parties/${partyId}/payment/notify`, body);
+}
+
+const apiVerifyPayment = async (partyId, userId) => {
+    return await mainApi.post(`/parties/${partyId}/payment/verify/${userId}`);
+}
+
 export {
     apiGetParties,
     apiGetPartyById,
@@ -69,5 +78,7 @@ export {
     apiToggleOrderItemSharer,
     apiRemoveOrderItem,
     apiGetSplitBill,
-    apiUpdatePartySettings
+    apiUpdatePartySettings,
+    apiNotifyPayment,
+    apiVerifyPayment
 }
