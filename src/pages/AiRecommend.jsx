@@ -17,7 +17,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { apiAiRecommend } from '../api/features.js';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import useUserStore from '../stores/userStore.js';
 import useAiStore from '../stores/aiStore.js';
 import { useNavigate } from 'react-router';

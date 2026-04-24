@@ -3,7 +3,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, CheckCircle2, Landmark, Download, Info } from 'lucide-react';
 import { generatePromptPayPayload } from '../../utils/promptpay.util';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const PaymentModal = ({ isOpen, onClose, leader, amount }) => {
     const canvasRef = useRef(null);
@@ -13,7 +13,7 @@ const PaymentModal = ({ isOpen, onClose, leader, amount }) => {
 
     const handleCopyNumber = () => {
         navigator.clipboard.writeText(leader.promptPayNumber);
-        toast.success("คัดลอกเบอร์โทรแล้ว", { position: "top-center", autoClose: 1500 });
+        toast.success("คัดลอกเบอร์โทรแล้ว");
     };
 
     const handleDownloadQR = () => {
@@ -25,7 +25,7 @@ const PaymentModal = ({ isOpen, onClose, leader, amount }) => {
         link.download = `Wongnork-Pay-${leader.name}.png`;
         link.href = url;
         link.click();
-        toast.info("บันทึกรูป QR Code เรียบร้อย", { position: "top-center", autoClose: 2000 });
+        toast.info("บันทึกรูป QR Code เรียบร้อย");
     };
 
     return (

@@ -15,7 +15,7 @@ import {
   Phone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { apiLeaveParty, apiUpdatePartySettings } from "../api/party";
 import { useNavigate } from "react-router";
 

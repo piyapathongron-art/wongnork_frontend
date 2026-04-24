@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { apiUpdateProfile } from "../api/mainApi";
 import uploadCloudinary from "../utils/cloudinary";
 

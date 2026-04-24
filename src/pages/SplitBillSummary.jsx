@@ -27,7 +27,7 @@ import {
     apiUpdatePartySettings
 } from '../api/party';
 import useUserStore from '../stores/userStore';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';

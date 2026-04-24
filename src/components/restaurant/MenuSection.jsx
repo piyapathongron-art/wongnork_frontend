@@ -4,7 +4,7 @@ import useUserStore from "../../stores/userStore";
 import { string } from "zod";
 import { Pencil, Trash2 } from "lucide-react";
 import { apiDeleteMenu } from "../../api/menuApi";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 // import useRestaurantStore from "../../stores/restaurantStore";
 
 const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) => {

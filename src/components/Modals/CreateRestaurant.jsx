@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { X, Loader2, MapPin, Store, Utensils } from 'lucide-react';
 import { apiCreateRestaurant } from '../../api/restaurant';
 import MapBox from '../MapBox';

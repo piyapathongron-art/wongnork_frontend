@@ -4,7 +4,7 @@ import { apiGetRestaurantById } from "../api/restaurant";
 
 import { apiToggleSaveRestaurant, apiGetme } from "../api/mainApi";
 
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import {
   ArrowLeft,

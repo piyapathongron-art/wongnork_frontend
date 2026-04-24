@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant, apiGetPublicProfile } from '../api/mainApi';
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { LucideChefHat, AlertCircle, ArrowLeft, Settings, LogOut, Landmark, User, Camera, X, SunIcon, MoonIcon } from 'lucide-react';
 import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import ReviewSection from '../components/profile/ReviewSection';

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import NavBar from "../components/NavBar";
 import PartyCard from "../components/PartyCard";
 import { UserPlus, Search, Users, AlertCircle, ArrowUp, MapPin, Clock, CheckCircle2, X as CloseIcon } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { apiGetParties, apiJoinParty } from "../api/party";
 import useUserStore from "../stores/userStore";
 import useChatStore from "../stores/chatStore";

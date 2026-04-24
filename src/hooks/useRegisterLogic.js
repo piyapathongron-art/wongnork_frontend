@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import useUserStore from "../stores/userStore";
 import { registerSchema } from "../validations/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export const useRegisterLogic = () => {
   const [showPassword, setShowPassword] = useState(false);

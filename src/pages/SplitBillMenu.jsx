@@ -19,7 +19,7 @@ import {
 import { apiGetPartyById, apiGetSplitBill, apiAddOrderItem, apiKickMember } from '../api/party';
 import { apiGetMenuByRestaurantId } from '../api/menuApi';
 import useUserStore from '../stores/userStore';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import PartyControlMenu from '../components/PartyControlMenu';
 import CreateReviewModal from '../components/Modals/CreateReviewModal';
@@ -131,7 +131,7 @@ const SplitBillMenu = () => {
                 type: 'SYSTEM'
             });
 
-            toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`, { autoClose: 1000, position: "top-center", theme: "dark" });
+            toast.success(`เพิ่ม ${menu.name} ลงบิลแล้ว (+1)`);
             const billRes = await apiGetSplitBill(id);
             setBillSummary(billRes.data.data);
         } catch (error) {

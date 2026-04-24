@@ -8,7 +8,7 @@ import { getSocket } from '../services/socket';
 import { apiGetMessage } from '../api/socketApi';
 import { useSocket } from '../hooks/useSocket';
 import uploadCloudinary from '../utils/cloudinary';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const [chatInput, setChatInput] = useState('');
