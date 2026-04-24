@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Send, Smile, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, Send, Smile, User as UserIcon, Image, Loader2 } from 'lucide-react';
 import useUserStore from '../stores/userStore';
 import useChatStore from '../stores/chatStore';
 import { getSocket } from '../services/socket';
 import { apiGetMessage } from '../api/socketApi';
 import { useSocket } from '../hooks/useSocket';
+import uploadCloudinary from '../utils/cloudinary';
+import { toast } from 'react-toastify';
 
 const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const [chatInput, setChatInput] = useState('');
     const [typingUser, setTypingUser] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    
     const chatEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const imageInputRef = useRef(null);
 
     const { token } = useUserStore();
     const setChatOpen = useChatStore((state) => state.setChatOpen);
@@ -28,7 +33,7 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
         return () => setChatOpen(false);
     }, [isOpen, party?.id, setChatOpen]);
 
-    // 🌟 1. ดึงประวัติแชท (ไม่ต้องจัดการ Room เพราะ Parent ทำแล้ว)
+    // 🌟 1. ดึงประวัติแชท
     useEffect(() => {
         if (!party?.id || !isOpen) return;
 
@@ -86,6 +91,35 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
         setChatInput('');
     };
 
+    // 🌟 5. จัดการการอัปโหลดรูป
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !party?.id || isPartyClosed) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            return toast.error("ขนาดไฟล์ต้องไม่เกิน 5MB");
+        }
+
+        setIsUploading(true);
+        try {
+            const imageUrl = await uploadCloudinary(file);
+            
+            socket.emit('send_message', {
+                imageUrl: imageUrl,
+                partyId: party.id,
+                type: "MESSAGE"
+            });
+
+            toast.success("ส่งรูปภาพแล้ว");
+        } catch (error) {
+            console.error("Upload failed:", error);
+            toast.error("อัปโหลดรูปภาพไม่สำเร็จ");
+        } finally {
+            setIsUploading(false);
+            if (imageInputRef.current) imageInputRef.current.value = "";
+        }
+    };
+
     if (!party) return null;
 
     return (
@@ -99,7 +133,7 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                     className="fixed inset-0 z-[100] bg-base-100 flex flex-col"
                 >
                     {/* Header */}
-                    <header className="px-6 py-4 flex items-center gap-4 border-b border-base-content/10 bg-base-100/80 backdrop-blur-xl">
+                    <header className="px-6 py-4 flex items-center gap-4 border-b border-base-content/10 bg-base-100/80 backdrop-blur-xl shrink-0">
                         <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-base-200 transition-colors">
                             <ArrowLeft size={24} className="text-base-content" />
                         </button>
@@ -118,10 +152,10 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                             return (
                                 <div key={msg.id} className={`flex flex-col ${msg.type === 'SYSTEM' ? 'items-center' : (isMe ? 'items-end' : 'items-start')}`}>
                                     {msg.type === 'SYSTEM' ? (
-                                        <span className="bg-base-300/50 text-base-content/50 text-[9px] font-black px-4 py-1 rounded-full uppercase tracking-widest">{msg.text}</span>
+                                        <span className="bg-base-300/50 text-base-content/50 text-[9px] font-black px-4 py-1 rounded-full uppercase tracking-widest text-center">{msg.text}</span>
                                     ) : (
-                                        <div className={`flex items-start gap-2 max-w-[90%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                                            {/* 👤 Avatar - แสดงเฉพาะของคนอื่น */}
+                                        <div className={`flex items-start gap-2 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                            {/* 👤 Avatar */}
                                             {!isMe && (
                                                 <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm overflow-hidden bg-base-300 shrink-0">
                                                     {msgUser.avatarUrl ? (
@@ -134,16 +168,33 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                                 </div>
                                             )}
 
-                                            {/* 💬 Message Bubble Area */}
+                                            {/* 💬 Message Bubble */}
                                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                                                 {!isMe && (
                                                     <span className="text-[10px] text-primary uppercase mb-1 ml-1 font-bold">
                                                         {msgUser.name}
                                                     </span>
                                                 )}
-                                                <div className={`p-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe ? 'bg-primary text-primary-content rounded-tr-none' : 'bg-base-100 border border-base-content/10 text-base-content rounded-tl-none'}`}>
-                                                    {msg.text}
-                                                </div>
+                                                
+                                                {/* Image Rendering */}
+                                                {msg.imageUrl && (
+                                                    <div className={`mb-1 overflow-hidden rounded-2xl border-2 border-white shadow-sm bg-base-200 ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
+                                                        <img 
+                                                            src={msg.imageUrl} 
+                                                            alt="Chat attach" 
+                                                            className="max-w-full max-h-64 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                                            onClick={() => window.open(msg.imageUrl, '_blank')}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Text Rendering */}
+                                                {msg.text && (
+                                                    <div className={`p-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${isMe ? 'bg-primary text-primary-content rounded-tr-none' : 'bg-base-100 border border-base-content/10 text-base-content rounded-tl-none'}`}>
+                                                        {msg.text}
+                                                    </div>
+                                                )}
+
                                                 <span className="text-[8px] font-bold text-base-content/30 mt-1 px-1">
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
@@ -169,40 +220,56 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                     </div>
 
                     {/* Chat Input */}
-                    <div className="p-6 bg-base-100 border-t border-base-content/5 pb-10">
+                    <div className="p-6 bg-base-100 border-t border-base-content/5 pb-10 shrink-0">
                         {isPartyClosed ? (
                             <div className="w-full py-4 bg-base-200 rounded-2xl flex items-center justify-center border border-base-content/10">
-                                <span className="text-xs font-black uppercase tracking-[0.2em] text-base-content/30 italic">
+                                <span className="text-xs font-black uppercase tracking-[0.2em] text-base-content/30 italic text-center px-4">
                                     — ปาร์ตี้นี้จบลงแล้ว (ปิดการสนทนา) —
                                 </span>
                             </div>
                         ) : (
-                            <form
-                                onSubmit={handleSendMessage}
-                                className="flex items-center gap-3 bg-base-200 border border-base-content/10 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner"
-                            >
-                                <button type="button" className="p-2 text-base-content/40 hover:text-primary transition-colors"><Smile size={20} /></button>
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={handleInputChange}
-                                    placeholder="พิมพ์ข้อความคุยกับเพื่อนร่วมโต๊ะ..."
-                                    className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-base-content"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!chatInput.trim()}
-                                    className="w-10 h-10 bg-primary text-primary-content rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                            <div className="flex flex-col gap-2">
+                                <form
+                                    onSubmit={handleSendMessage}
+                                    className="flex items-center gap-3 bg-base-200 border border-base-content/10 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner"
                                 >
-                                    <Send size={18} />
-                                </button>
-                            </form>
+                                    <input 
+                                        type="file" 
+                                        ref={imageInputRef}
+                                        className="hidden" 
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        disabled={isUploading}
+                                        onClick={() => imageInputRef.current?.click()}
+                                        className="p-2 text-base-content/40 hover:text-primary transition-colors disabled:opacity-50"
+                                    >
+                                        {isUploading ? <Loader2 size={20} className="animate-spin text-primary" /> : <Image size={20} />}
+                                    </button>
+                                    
+                                    <input
+                                        type="text"
+                                        value={chatInput}
+                                        onChange={handleInputChange}
+                                        placeholder="พิมพ์ข้อความคุยกับเพื่อน..."
+                                        className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-base-content"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!chatInput.trim() || isUploading}
+                                        className="w-10 h-10 bg-primary text-primary-content rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                                    >
+                                        <Send size={18} />
+                                    </button>
+                                </form>
+                            </div>
                         )}
                     </div>
                 </motion.div>
             )}
         </AnimatePresence>
-
     );
 };
 
