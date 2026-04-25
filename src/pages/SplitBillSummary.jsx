@@ -76,7 +76,8 @@ const SplitBillSummary = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
-    
+    const [isCancelPaymentModalOpen, setIsCancelPaymentModalOpen] = useState(false);
+
     // Payment Status State
     const [isNotifyPaymentModalOpen, setIsNotifyPaymentModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -171,6 +172,7 @@ const SplitBillSummary = () => {
             setIsEditingSettings(false);
             toast.success("อัปเดตข้อมูลบิลและช่องทางรับเงินสำเร็จ");
         } catch (error) {
+            console.log(error)
             toast.error("อัปเดตไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -186,6 +188,7 @@ const SplitBillSummary = () => {
             setIsCompleteModalOpen(false);
             toast.success("ปิดปาร์ตี้เรียบร้อยแล้ว!");
         } catch (error) {
+            console.log(error)
             toast.error("ไม่สามารถปิดปาร์ตี้ได้");
         } finally {
             setActionLoading(false);
@@ -204,6 +207,7 @@ const SplitBillSummary = () => {
             await apiUpdateOrderItemQuantity(id, itemId, action);
             await loadData();
         } catch (error) {
+            console.log(error)
             toast.error("เกิดข้อผิดพลาด");
         } finally {
             setActionLoading(false);
@@ -219,6 +223,7 @@ const SplitBillSummary = () => {
             setItemToDelete(null);
             await loadData();
         } catch (error) {
+            console.log(error)
             toast.error("ลบรายการไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -256,6 +261,7 @@ const SplitBillSummary = () => {
             setCustomItemForm({ name: '', price: '' });
             await loadData();
         } catch (error) {
+            console.log(error)
             toast.error("เพิ่มเมนูไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -285,6 +291,7 @@ const SplitBillSummary = () => {
             setSelectedFile(null);
             await loadData();
         } catch (error) {
+            console.log(error)
             toast.error("แจ้งชำระเงินไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -306,10 +313,8 @@ const SplitBillSummary = () => {
     };
 
     const handleCancelPayment = async () => {
-        if (actionLoading || mySummary.paymentStatus !== 'PAID') return;
-        if (!window.confirm("คุณต้องการยกเลิกการแจ้งโอนเงินเพื่อแก้ไขรายการอาหารใหม่ใช่หรือไม่?")) return;
-        
         setActionLoading(true);
+        setIsCancelPaymentModalOpen(false);
         try {
             await apiCancelPayment(id);
             toast.success("ยกเลิกการแจ้งโอนแล้ว คุณสามารถแก้ไขรายการอาหารได้");
@@ -396,13 +401,13 @@ const SplitBillSummary = () => {
 
                 {/* 🌟 Tab Switcher */}
                 <div className="flex p-1.5 bg-[#EAD9CF]/30 rounded-2xl mb-8 border border-[#EEE2D1] sticky top-0 z-30 backdrop-blur-md">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('items')}
                         className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'items' ? 'bg-white text-[#2B361B] shadow-sm' : 'text-[#8B837E]'}`}
                     >
                         <Utensils size={14} /> รายการอาหาร
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('payments')}
                         className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'payments' ? 'bg-white text-primary shadow-sm' : 'text-[#8B837E]'}`}
                     >
@@ -425,7 +430,7 @@ const SplitBillSummary = () => {
                         {isMyPaymentLocked && (
                             <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
                                 <ShieldCheck size={18} className="text-blue-500 shrink-0" />
-                                <p className="text-[10px] text-blue-700 leading-relaxed font-medium">รายการหารถูกล็อกไว้เนื่องจากคุณแจ้งชำระเงินแล้ว <br/> หากต้องการหารอาหารเพิ่ม กรุณายกเลิกการแจ้งโอนเงินในหน้า "การจ่ายเงิน" ก่อนครับ</p>
+                                <p className="text-[10px] text-blue-700 leading-relaxed font-medium">รายการหารถูกล็อกไว้เนื่องจากคุณแจ้งชำระเงินแล้ว <br /> หากต้องการหารอาหารเพิ่ม กรุณายกเลิกการแจ้งโอนเงินในหน้า "การจ่ายเงิน" ก่อนครับ</p>
                             </div>
                         )}
 
@@ -449,10 +454,10 @@ const SplitBillSummary = () => {
                 {/* 🌟 Tab Content: Payment Dashboard */}
                 {activeTab === 'payments' && (
                     <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                        
+
                         {/* PromptPay Alert for Members */}
                         {!isLeader && !party?.leader?.promptPayNumber && (
-                             <div className="p-5 rounded-3xl bg-red-50 border border-red-100 flex items-start gap-4">
+                            <div className="p-5 rounded-3xl bg-red-50 border border-red-100 flex items-start gap-4">
                                 <div className="w-12 h-12 bg-white text-red-500 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-red-100"><AlertCircle size={24} strokeWidth={2.5} /></div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-black text-red-900 leading-tight">ยังไม่มีช่องทางรับเงิน! ⚠️</h4>
@@ -463,7 +468,7 @@ const SplitBillSummary = () => {
 
                         {/* Payment Button for Members */}
                         {!isLeader && party?.leader?.promptPayNumber && (
-                            <button 
+                            <button
                                 onClick={() => setIsPaymentModalOpen(true)}
                                 className="w-full p-6 rounded-[2.5rem] bg-blue-600 text-white shadow-xl relative overflow-hidden active:scale-[0.98] transition-all"
                             >
@@ -509,7 +514,7 @@ const SplitBillSummary = () => {
                         <div className="flex justify-between items-center px-1">
                             <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em]">สรุปการโอนเงินรายคน</h3>
                             {mySummary.paymentStatus === 'PENDING' && mySummary.summary.netTotal > 0 && (
-                                <button 
+                                <button
                                     onClick={() => setIsNotifyPaymentModalOpen(true)}
                                     className="text-primary text-[10px] font-black uppercase flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full active:scale-95 transition-all shadow-sm"
                                 >
@@ -539,8 +544,8 @@ const SplitBillSummary = () => {
                                                     <div className='flex gap-1'>
                                                         <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">รอตรวจ</span>
                                                         {isMe && (
-                                                            <button 
-                                                                onClick={handleCancelPayment}
+                                                            <button
+                                                                onClick={() => setIsCancelPaymentModalOpen(true)}
                                                                 title="แก้ไขสลิป"
                                                                 className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
                                                             >
@@ -585,7 +590,7 @@ const SplitBillSummary = () => {
 
             <GroupChatOverlay isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} party={party} user={user} />
             <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} leader={party?.leader} amount={mySummary.summary.netTotal} />
-            
+
             <AnimatePresence>{isAddCustomModalOpen && (<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-6"><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#FFF8F5] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-[#EEE2D1]"><h3 className="text-xl font-bold text-[#2B361B] mb-6">เพิ่มเมนูพิเศษ 🍳</h3><div className="space-y-4 mb-8"><div><label className="text-[10px] font-bold text-[#8B837E] uppercase block mb-2 ml-1">ชื่อเมนู</label><input type="text" value={customItemForm.name} onChange={(e) => setCustomItemForm({ ...customItemForm, name: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all" /></div><div><label className="text-[10px] font-bold text-[#8B837E] uppercase block mb-2 ml-1">ราคา (฿)</label><input type="number" value={customItemForm.price} onChange={(e) => setCustomItemForm({ ...customItemForm, price: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all" /></div></div><div className="flex gap-3"><button onClick={() => setIsAddCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-[#8B837E] rounded-xl transition-colors">ยกเลิก</button><button onClick={handleAddCustomItem} disabled={actionLoading} className="flex-1 bg-[#A65D2E] text-white py-3 rounded-xl text-sm font-bold shadow-md">เพิ่มลงบิล</button></div></motion.div></div>)}</AnimatePresence>
 
             <AnimatePresence>
@@ -608,6 +613,38 @@ const SplitBillSummary = () => {
                     <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[350] flex flex-col items-center justify-center p-6" onClick={() => setSlipPreviewUrl(null)}>
                         <button className="absolute top-8 right-8 p-3 text-white transition-colors backdrop-blur-sm bg-white/10 rounded-full"><X size={24} /></button>
                         <div className="relative max-w-sm w-full bg-white rounded-3xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}><div className="p-4 bg-gray-50 border-b flex items-center justify-between"><span className="text-xs font-black text-gray-500 uppercase tracking-widest">หลักฐานการโอนเงิน</span><button onClick={() => window.open(slipPreviewUrl, '_blank')} className="text-blue-600 text-[10px] font-bold flex items-center gap-1"><ExternalLink size={12} /> เปิดรูปเต็ม</button></div><img src={slipPreviewUrl} className="w-full object-contain max-h-[70vh] bg-base-200" alt="Slip" /></div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* 🌟 Modal: Cancel Payment Confirmation */}
+            <AnimatePresence>
+                {isCancelPaymentModalOpen && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[280] flex items-center justify-center px-6">
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl border border-[#EEE2D1]">
+                            <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <RefreshCcw size={40} strokeWidth={2.5} />
+                            </div>
+                            <h3 className="text-xl font-black text-[#2B361B] mb-3">ยกเลิกการแจ้งโอน?</h3>
+                            <p className="text-sm text-[#8B837E] mb-8 leading-relaxed">
+                                สลิปเดิมจะถูกลบออก และระบบจะปลดล็อกรายการอาหารเพื่อให้คุณแก้ไขหรือแจ้งโอนใหม่อีกครั้งครับ
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleCancelPayment}
+                                    disabled={actionLoading}
+                                    className="w-full py-4 bg-[#182806] text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all"
+                                >
+                                    ยืนยันยกเลิกและแก้ไข
+                                </button>
+                                <button
+                                    onClick={() => setIsCancelPaymentModalOpen(false)}
+                                    className="w-full py-3 text-sm font-bold text-[#8B837E] hover:bg-gray-100 rounded-xl transition-colors"
+                                >
+                                    กลับไปหน้าเดิม
+                                </button>
+                            </div>
+                        </motion.div>
                     </div>
                 )}
             </AnimatePresence>
