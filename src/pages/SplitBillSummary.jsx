@@ -23,7 +23,8 @@ import {
     Clock as ClockIcon,
     X,
     QrCode,
-    RefreshCcw
+    RefreshCcw,
+    ChevronRight
 } from 'lucide-react';
 import {
     apiGetPartyById,
@@ -63,12 +64,6 @@ const SplitBillSummary = () => {
     // 🌟 Tab State
     const [activeTab, setActiveTab] = useState('items'); // 'items' | 'payments'
 
-    // UI States
-    const [showBackToTop, setShowBackToTop] = useState(false);
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const unreadCounts = useChatStore(state => state.unreadCounts);
-    const hasUnreadMessages = (unreadCounts[id] || 0) > 0;
-
     // Modal states
     const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
     const [isEditingSettings, setIsEditingSettings] = useState(false);
@@ -76,23 +71,28 @@ const SplitBillSummary = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
-    const [isCancelPaymentModalOpen, setIsCancelPaymentModalOpen] = useState(false);
-
-    // Payment Status State
+    
+    // 🌟 Payment Status & Action Modal
     const [isNotifyPaymentModalOpen, setIsNotifyPaymentModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    const [slipPreviewUrl, setSlipPreviewUrl] = useState(null);
+    const [memberToManage, setMemberToManage] = useState(null); // Member object for the Detail Modal
 
     // Form States
     const [customItemForm, setCustomItemForm] = useState({ name: '', price: '' });
     const [settingsForm, setSettingsForm] = useState({
         vat: 0,
         serviceCharge: 0,
+        discount: 0,
         promptPayNumber: '',
         promptPayName: ''
     });
     const [hasReviewed, setHasHasReviewed] = useState(false);
+
+    const [showBackToTop, setShowBackToTop] = useState(false);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const unreadCounts = useChatStore(state => state.unreadCounts);
+    const hasUnreadMessages = (unreadCounts[id] || 0) > 0;
 
     const loadData = useCallback(async () => {
         try {
@@ -107,6 +107,7 @@ const SplitBillSummary = () => {
             setSettingsForm({
                 vat: partyData.vat || 0,
                 serviceCharge: partyData.serviceCharge || 0,
+                discount: partyData.discount || 0,
                 promptPayNumber: partyData.leader?.promptPayNumber || user?.promptPayNumber || '',
                 promptPayName: partyData.leader?.promptPayName || user?.promptPayName || ''
             });
@@ -139,12 +140,9 @@ const SplitBillSummary = () => {
     const isPendingSettlement = party?.status === 'PENDING_SETTLEMENT';
 
     // 🌟 Current User Payment Status
-    const mySummary = billSummary?.members?.find(m => m.user.id === user?.id) || {
-        items: [],
-        summary: { subtotal: 0, serviceCharge: 0, vat: 0, netTotal: 0 },
-        paymentStatus: 'PENDING'
-    };
-    const isMyPaymentLocked = mySummary.paymentStatus === 'PAID' || mySummary.paymentStatus === 'VERIFIED';
+    const mySummaryInMembers = billSummary?.members?.find(m => m.user.id === user?.id);
+    const myPaymentStatus = mySummaryInMembers?.paymentStatus || 'PENDING';
+    const isMyPaymentLocked = myPaymentStatus === 'PAID' || myPaymentStatus === 'VERIFIED';
 
     const handleScroll = (e) => {
         if (e.target.scrollTop > 400) setShowBackToTop(true);
@@ -160,6 +158,7 @@ const SplitBillSummary = () => {
             await apiUpdatePartySettings(id, {
                 vat: parseFloat(settingsForm.vat) || 0,
                 serviceCharge: parseFloat(settingsForm.serviceCharge) || 0,
+                discount: parseFloat(settingsForm.discount) || 0,
                 promptPayNumber: settingsForm.promptPayNumber,
                 promptPayName: settingsForm.promptPayName
             });
@@ -172,7 +171,6 @@ const SplitBillSummary = () => {
             setIsEditingSettings(false);
             toast.success("อัปเดตข้อมูลบิลและช่องทางรับเงินสำเร็จ");
         } catch (error) {
-            console.log(error)
             toast.error("อัปเดตไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -188,7 +186,6 @@ const SplitBillSummary = () => {
             setIsCompleteModalOpen(false);
             toast.success("ปิดปาร์ตี้เรียบร้อยแล้ว!");
         } catch (error) {
-            console.log(error)
             toast.error("ไม่สามารถปิดปาร์ตี้ได้");
         } finally {
             setActionLoading(false);
@@ -207,7 +204,6 @@ const SplitBillSummary = () => {
             await apiUpdateOrderItemQuantity(id, itemId, action);
             await loadData();
         } catch (error) {
-            console.log(error)
             toast.error("เกิดข้อผิดพลาด");
         } finally {
             setActionLoading(false);
@@ -223,7 +219,6 @@ const SplitBillSummary = () => {
             setItemToDelete(null);
             await loadData();
         } catch (error) {
-            console.log(error)
             toast.error("ลบรายการไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -261,7 +256,6 @@ const SplitBillSummary = () => {
             setCustomItemForm({ name: '', price: '' });
             await loadData();
         } catch (error) {
-            console.log(error)
             toast.error("เพิ่มเมนูไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -291,7 +285,6 @@ const SplitBillSummary = () => {
             setSelectedFile(null);
             await loadData();
         } catch (error) {
-            console.log(error)
             toast.error("แจ้งชำระเงินไม่สำเร็จ");
         } finally {
             setActionLoading(false);
@@ -304,6 +297,7 @@ const SplitBillSummary = () => {
         try {
             await apiVerifyPayment(id, userId);
             toast.success("ยืนยันยอดเงินเรียบร้อย ✅");
+            setMemberToManage(null); // Close modal
             await loadData();
         } catch (error) {
             toast.error("ไม่สามารถยืนยันได้");
@@ -314,10 +308,10 @@ const SplitBillSummary = () => {
 
     const handleCancelPayment = async () => {
         setActionLoading(true);
-        setIsCancelPaymentModalOpen(false);
         try {
             await apiCancelPayment(id);
             toast.success("ยกเลิกการแจ้งโอนแล้ว คุณสามารถแก้ไขรายการอาหารได้");
+            setMemberToManage(null); // Close modal
             await loadData();
         } catch (error) {
             toast.error("ยกเลิกไม่สำเร็จ");
@@ -331,6 +325,12 @@ const SplitBillSummary = () => {
             <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
         </div>
     );
+
+    const mySummary = billSummary?.members?.find(m => m.user.id === user?.id) || {
+        items: [],
+        summary: { subtotal: 0, serviceCharge: 0, vat: 0, discount: 0, netTotal: 0 },
+        paymentStatus: 'PENDING'
+    };
 
     return (
         <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] font-sans overflow-hidden flex flex-col">
@@ -395,19 +395,24 @@ const SplitBillSummary = () => {
                     <div className="relative z-10">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-[#F7EAD7] opacity-80 mb-1 block">ยอดรวมทั้งโต๊ะ (Grand Total)</span>
                         <div className="text-4xl font-black mb-1">฿{Math.ceil(billSummary?.grandTotal || 0).toLocaleString()}</div>
-                        <div className="text-[10px] font-bold text-[#F7EAD7]/60 flex gap-2"><span>(ค่าอาหาร ฿{Math.ceil(billSummary?.grandTotal - (billSummary?.vatAmount + billSummary?.serviceChargeAmount) || 0).toLocaleString()} + บริการ ฿{Math.ceil(billSummary?.serviceChargeAmount || 0).toLocaleString()} + ภาษี ฿{Math.ceil(billSummary?.vatAmount || 0).toLocaleString()})</span></div>
+                        <div className="text-[10px] font-bold text-[#F7EAD7]/60 flex flex-wrap gap-x-3 gap-y-1">
+                            <span>ค่าอาหาร ฿{Math.ceil(billSummary?.grandTotal + (billSummary?.discountAmount || 0) - (billSummary?.vatAmount + billSummary?.serviceChargeAmount) || 0).toLocaleString()}</span>
+                            <span>เซอร์วิส ฿{Math.ceil(billSummary?.serviceChargeAmount || 0).toLocaleString()}</span>
+                            <span>ภาษี ฿{Math.ceil(billSummary?.vatAmount || 0).toLocaleString()}</span>
+                            {billSummary?.discountAmount > 0 && <span className="text-green-400 font-black">ส่วนลด -฿{Math.ceil(billSummary?.discountAmount).toLocaleString()}</span>}
+                        </div>
                     </div>
                 </div>
 
                 {/* 🌟 Tab Switcher */}
                 <div className="flex p-1.5 bg-[#EAD9CF]/30 rounded-2xl mb-8 border border-[#EEE2D1] sticky top-0 z-30 backdrop-blur-md">
-                    <button
+                    <button 
                         onClick={() => setActiveTab('items')}
                         className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'items' ? 'bg-white text-[#2B361B] shadow-sm' : 'text-[#8B837E]'}`}
                     >
                         <Utensils size={14} /> รายการอาหาร
                     </button>
-                    <button
+                    <button 
                         onClick={() => setActiveTab('payments')}
                         className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'payments' ? 'bg-white text-primary shadow-sm' : 'text-[#8B837E]'}`}
                     >
@@ -430,7 +435,7 @@ const SplitBillSummary = () => {
                         {isMyPaymentLocked && (
                             <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
                                 <ShieldCheck size={18} className="text-blue-500 shrink-0" />
-                                <p className="text-[10px] text-blue-700 leading-relaxed font-medium">รายการหารถูกล็อกไว้เนื่องจากคุณแจ้งชำระเงินแล้ว <br /> หากต้องการหารอาหารเพิ่ม กรุณายกเลิกการแจ้งโอนเงินในหน้า "การจ่ายเงิน" ก่อนครับ</p>
+                                <p className="text-[10px] text-blue-700 leading-relaxed font-medium">รายการหารถูกล็อกไว้เนื่องจากคุณแจ้งชำระเงินแล้ว <br/> หากต้องการหารอาหารเพิ่ม กรุณายกเลิกการแจ้งโอนเงินในหน้า "การจ่ายเงิน" ก่อนครับ</p>
                             </div>
                         )}
 
@@ -454,10 +459,10 @@ const SplitBillSummary = () => {
                 {/* 🌟 Tab Content: Payment Dashboard */}
                 {activeTab === 'payments' && (
                     <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-
+                        
                         {/* PromptPay Alert for Members */}
                         {!isLeader && !party?.leader?.promptPayNumber && (
-                            <div className="p-5 rounded-3xl bg-red-50 border border-red-100 flex items-start gap-4">
+                             <div className="p-5 rounded-3xl bg-red-50 border border-red-100 flex items-start gap-4">
                                 <div className="w-12 h-12 bg-white text-red-500 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-red-100"><AlertCircle size={24} strokeWidth={2.5} /></div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-black text-red-900 leading-tight">ยังไม่มีช่องทางรับเงิน! ⚠️</h4>
@@ -468,7 +473,7 @@ const SplitBillSummary = () => {
 
                         {/* Payment Button for Members */}
                         {!isLeader && party?.leader?.promptPayNumber && (
-                            <button
+                            <button 
                                 onClick={() => setIsPaymentModalOpen(true)}
                                 className="w-full p-6 rounded-[2.5rem] bg-blue-600 text-white shadow-xl relative overflow-hidden active:scale-[0.98] transition-all"
                             >
@@ -494,14 +499,19 @@ const SplitBillSummary = () => {
                                 </div>
                                 {!isEditingSettings ? (
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4"><div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50"><p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">Service Charge</p><p className="text-sm font-bold text-[#2B361B]">฿{settingsForm.serviceCharge.toLocaleString()}</p></div><div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50"><p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">VAT</p><p className="text-sm font-bold text-[#2B361B]">฿{settingsForm.vat.toLocaleString()}</p></div></div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50"><p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">Service</p><p className="text-[11px] font-bold text-[#2B361B]">฿{settingsForm.serviceCharge.toLocaleString()}</p></div>
+                                            <div className="bg-[#FFF8F5] p-3 rounded-2xl border border-[#EEE2D1]/50"><p className="text-[8px] font-black text-[#A65D2E] uppercase mb-1">VAT</p><p className="text-[11px] font-bold text-[#2B361B]">฿{settingsForm.vat.toLocaleString()}</p></div>
+                                            <div className="bg-green-50 p-3 rounded-2xl border border-green-100/50"><p className="text-[8px] font-black text-green-600 uppercase mb-1">Discount</p><p className="text-[11px] font-bold text-green-700">฿{settingsForm.discount.toLocaleString()}</p></div>
+                                        </div>
                                         <div className="bg-[#F7FCF0] p-4 rounded-2xl border border-[#182806]/10 flex items-center gap-3"><div className="p-2 bg-white rounded-xl shadow-sm"><Landmark size={16} className="text-[#182806]" /></div><div><p className="text-[8px] font-black text-[#182806]/60 uppercase">พร้อมเพย์รับเงิน</p><p className="text-sm font-black text-[#182806]">{settingsForm.promptPayNumber || 'ยังไม่ได้ระบุ'}</p></div></div>
                                     </div>
                                 ) : (
                                     <div className="space-y-5">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div><label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">Service Charge (฿)</label><input type="number" value={settingsForm.serviceCharge} onChange={(e) => setSettingsForm({ ...settingsForm, serviceCharge: e.target.value })} className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none" /></div>
-                                            <div><label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">VAT (฿)</label><input type="number" value={settingsForm.vat} onChange={(e) => setSettingsForm({ ...settingsForm, vat: e.target.value })} className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-sm font-bold outline-none" /></div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div><label className="text-[8px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">Service (฿)</label><input type="number" value={settingsForm.serviceCharge} onChange={(e) => setSettingsForm({ ...settingsForm, serviceCharge: e.target.value })} className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-xs font-bold outline-none" /></div>
+                                            <div><label className="text-[9px] font-black text-[#A65D2E] uppercase block mb-1 ml-1">VAT (฿)</label><input type="number" value={settingsForm.vat} onChange={(e) => setSettingsForm({ ...settingsForm, vat: e.target.value })} className="w-full bg-[#FFF8F5] border border-[#EEE2D1] rounded-xl py-2 px-3 text-xs font-bold outline-none" /></div>
+                                            <div><label className="text-[8px] font-black text-green-600 uppercase block mb-1 ml-1">Discount (฿)</label><input type="number" value={settingsForm.discount} onChange={(e) => setSettingsForm({ ...settingsForm, discount: e.target.value })} className="w-full bg-green-50 border border-green-100 rounded-xl py-2 px-3 text-xs font-bold outline-none text-green-700" /></div>
                                         </div>
                                         <div><label className="text-[9px] font-black text-[#182806] uppercase block mb-2 ml-1">เบอร์พร้อมเพย์รับเงิน</label><input type="text" value={settingsForm.promptPayNumber} onChange={(e) => setSettingsForm({ ...settingsForm, promptPayNumber: e.target.value })} className="w-full bg-[#F7FCF0] border border-[#182806]/10 rounded-xl py-3 px-4 text-sm font-bold outline-none" /></div>
                                         <div className="flex gap-3 pt-2"><button onClick={() => { setIsEditingSettings(false); loadData(); }} className="flex-1 py-2.5 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold active:scale-95 transition-all">ยกเลิก</button><button onClick={handleUpdateSettings} disabled={actionLoading} className="flex-[2] py-2.5 bg-[#182806] text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">{actionLoading ? 'กำลังบันทึก...' : <><Check size={14} strokeWidth={3} /> บันทึก</>}</button></div>
@@ -513,8 +523,8 @@ const SplitBillSummary = () => {
                         {/* Payment Tracking Dashboard */}
                         <div className="flex justify-between items-center px-1">
                             <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em]">สรุปการโอนเงินรายคน</h3>
-                            {mySummary.paymentStatus === 'PENDING' && mySummary.summary.netTotal > 0 && (
-                                <button
+                            {myPaymentStatus === 'PENDING' && mySummary.summary.netTotal > 0 && (
+                                <button 
                                     onClick={() => setIsNotifyPaymentModalOpen(true)}
                                     className="text-primary text-[10px] font-black uppercase flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full active:scale-95 transition-all shadow-sm"
                                 >
@@ -527,36 +537,32 @@ const SplitBillSummary = () => {
                             {billSummary?.members?.map((m) => {
                                 const isMe = m.user.id === user?.id;
                                 const status = m.paymentStatus;
-                                const amount = m.summary.netTotal;
+                                const amount = Math.max(0, m.summary.netTotal);
                                 return (
-                                    <div key={m.memberId} className="bg-white border border-[#EEE2D1] p-4 rounded-[2rem] flex items-center gap-4 shadow-sm relative overflow-hidden">
+                                    <div 
+                                        key={m.memberId} 
+                                        onClick={() => setMemberToManage(m)}
+                                        className="bg-white border border-[#EEE2D1] p-4 rounded-[2rem] flex items-center gap-4 shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all"
+                                    >
                                         <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${status === 'VERIFIED' ? 'bg-green-500' : status === 'PAID' ? 'bg-blue-500' : 'bg-gray-200'}`} />
                                         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0"><img src={m.user.avatarUrl || `https://i.pravatar.cc/150?u=${m.user.id}`} className="w-full h-full object-cover" alt={m.user.name} /></div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2"><h4 className="font-bold text-sm text-[#2B361B] truncate">{isMe ? 'คุณ (ยอดของคุณ)' : m.user.name}</h4>{status === 'VERIFIED' && <ShieldCheck size={14} className="text-green-600" />}</div>
-                                            <p className="text-[12px] font-black text-[#A65D2E]">฿{Math.ceil(amount).toLocaleString()}</p>
+                                            {amount <= 0 ? (
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-2 py-0.5 rounded-md">กินฟรี! 🎉</span>
+                                            ) : (
+                                                <p className="text-[12px] font-black text-[#A65D2E]">฿{Math.ceil(amount).toLocaleString()}</p>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {m.paymentSlipUrl && (<button onClick={() => setSlipPreviewUrl(m.paymentSlipUrl)} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors shadow-sm"><Eye size={16} /></button>)}
                                             {status === 'PENDING' && (<span className="text-[9px] font-black uppercase text-gray-400 bg-gray-50 px-3 py-1 rounded-full flex items-center gap-1 border border-gray-100"><ClockIcon size={10} /> Pending</span>)}
                                             {status === 'PAID' && (
                                                 <div className="flex flex-col items-end gap-1">
-                                                    <div className='flex gap-1'>
-                                                        <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">รอตรวจ</span>
-                                                        {isMe && (
-                                                            <button
-                                                                onClick={() => setIsCancelPaymentModalOpen(true)}
-                                                                title="แก้ไขสลิป"
-                                                                className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-500 transition-all active:scale-90"
-                                                            >
-                                                                <RefreshCcw size={12} />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    {isLeader && (<button onClick={() => handleVerifyPayment(m.user.id)} disabled={actionLoading} className="text-[8px] font-black uppercase text-white bg-green-600 px-2 py-1 rounded-lg shadow-sm active:scale-95 transition-all">Verify</button>)}
+                                                    <span className="text-[9px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">รอตรวจ</span>
                                                 </div>
                                             )}
                                             {status === 'VERIFIED' && (<span className="text-[9px] font-black uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">Paid</span>)}
+                                            <ChevronRight size={16} className="text-gray-300" />
                                         </div>
                                     </div>
                                 );
@@ -575,13 +581,17 @@ const SplitBillSummary = () => {
                         <span className="text-[12px] font-bold text-[#8B837E] uppercase tracking-wider flex items-center gap-1.5"><UserIcon size={14} className="text-primary" /> ยอดโอนรวมของคุณ</span>
                         <div className="text-2xl font-black text-primary tracking-tight">
                             <motion.span key={mySummary.summary.netTotal} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-                                ฿{Math.ceil(mySummary.summary.netTotal || 0).toLocaleString()}
+                                ฿{Math.max(0, Math.ceil(mySummary.summary.netTotal || 0)).toLocaleString()}
                             </motion.span>
                         </div>
                     </div>
-                    <div className="text-[9px] text-[#A8A29F] font-medium text-right mt-1 flex flex-col">
-                        <span>(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()})</span>
-                    </div>
+                    {mySummary.summary.netTotal <= 0 ? (
+                        <div className="text-[10px] text-green-600 font-black text-right mt-1">✨ ส่วนลดครอบคลุมค่าใช้จ่ายของคุณทั้งหมดแล้ว!</div>
+                    ) : (
+                        <div className="text-[9px] text-[#A8A29F] font-medium text-right mt-1 flex flex-col">
+                            <span>(ค่าอาหาร ฿{Math.ceil(mySummary.summary.subtotal).toLocaleString()} + บริการ ฿{Math.ceil(mySummary.summary.serviceCharge).toLocaleString()} + ภาษี ฿{Math.ceil(mySummary.summary.vat).toLocaleString()} {mySummary.summary.discount > 0 && <span className="text-green-600 font-bold">- ส่วนลด ฿{Math.ceil(mySummary.summary.discount).toLocaleString()}</span>})</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -589,67 +599,122 @@ const SplitBillSummary = () => {
             <AnimatePresence>{showBackToTop && (<motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} onClick={scrollToTop} className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"><ArrowUp size={20} /></motion.button>)}</AnimatePresence>
 
             <GroupChatOverlay isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} party={party} user={user} />
-            <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} leader={party?.leader} amount={mySummary.summary.netTotal} />
-
+            <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} leader={party?.leader} amount={Math.max(0, mySummary.summary.netTotal)} />
+            
             <AnimatePresence>{isAddCustomModalOpen && (<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-6"><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#FFF8F5] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-[#EEE2D1]"><h3 className="text-xl font-bold text-[#2B361B] mb-6">เพิ่มเมนูพิเศษ 🍳</h3><div className="space-y-4 mb-8"><div><label className="text-[10px] font-bold text-[#8B837E] uppercase block mb-2 ml-1">ชื่อเมนู</label><input type="text" value={customItemForm.name} onChange={(e) => setCustomItemForm({ ...customItemForm, name: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all" /></div><div><label className="text-[10px] font-bold text-[#8B837E] uppercase block mb-2 ml-1">ราคา (฿)</label><input type="number" value={customItemForm.price} onChange={(e) => setCustomItemForm({ ...customItemForm, price: e.target.value })} className="w-full bg-white border border-[#EEE2D1] rounded-xl py-3 px-4 outline-none focus:border-[#A65D2E] transition-all" /></div></div><div className="flex gap-3"><button onClick={() => setIsAddCustomModalOpen(false)} className="flex-1 py-3 text-sm font-bold text-[#8B837E] rounded-xl transition-colors">ยกเลิก</button><button onClick={handleAddCustomItem} disabled={actionLoading} className="flex-1 bg-[#A65D2E] text-white py-3 rounded-xl text-sm font-bold shadow-md">เพิ่มลงบิล</button></div></motion.div></div>)}</AnimatePresence>
 
             <AnimatePresence>
                 {isNotifyPaymentModalOpen && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[250] flex items-end sm:items-center justify-center p-4">
                         <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="bg-base-100 w-full max-w-sm rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative">
-                            <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-black text-[#2B361B]">แจ้งชำระเงิน 💰</h3><button onClick={() => setIsNotifyPaymentModalOpen(false)} className="p-2 bg-base-200 rounded-full text-base-content/40 transition-colors"><X size={20} /></button></div>
+                            <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-black text-[#2B361B]">{mySummary.summary.netTotal <= 0 ? 'ยืนยันความถูกต้อง ✨' : 'แจ้งชำระเงิน 💰'}</h3><button onClick={() => setIsNotifyPaymentModalOpen(false)} className="p-2 bg-base-200 rounded-full text-base-content/40 transition-colors"><X size={20} /></button></div>
                             <div className="space-y-6">
-                                <div className="text-center"><p className="text-[10px] font-bold text-[#8B837E] uppercase mb-1">ยอดที่ต้องโอน</p><div className="text-4xl font-black text-primary">฿{Math.ceil(mySummary.summary.netTotal).toLocaleString()}</div></div>
-                                <div onClick={() => fileInputRef.current?.click()} className={`relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer overflow-hidden ${previewUrl ? 'border-primary' : 'border-gray-200 bg-gray-50'}`}>{previewUrl ? (<img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />) : (<><Camera size={32} className="text-gray-300 mb-2" /><p className="text-[10px] font-bold text-gray-400 uppercase">แนบสลิปการโอนเงิน</p></>)}<input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} /></div>
-                                <button onClick={handleNotifyPayment} disabled={actionLoading} className="w-full py-4 bg-primary text-primary-content rounded-2xl font-black text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">{actionLoading ? <span className="loading loading-spinner loading-xs"></span> : <><Check size={18} strokeWidth={3} /> แจ้งจ่ายเงินตอนนี้</>}</button>
+                                <div className="text-center"><p className="text-[10px] font-bold text-[#8B837E] uppercase mb-1">ยอดที่ต้องโอน</p><div className="text-4xl font-black text-primary">฿{Math.max(0, Math.ceil(mySummary.summary.netTotal)).toLocaleString()}</div></div>
+                                {mySummary.summary.netTotal > 0 ? (
+                                    <div onClick={() => fileInputRef.current?.click()} className={`relative h-48 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer overflow-hidden ${previewUrl ? 'border-primary' : 'border-gray-200 bg-gray-50'}`}>{previewUrl ? (<img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />) : (<><Camera size={32} className="text-gray-300 mb-2" /><p className="text-[10px] font-bold text-gray-400 uppercase">แนบสลิปการโอนเงิน</p></>)}<input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} /></div>
+                                ) : (
+                                    <div className="bg-green-50 border border-green-100 p-6 rounded-3xl flex flex-col items-center text-center"><div className="w-16 h-16 bg-white text-green-500 rounded-full flex items-center justify-center shadow-sm mb-3"><Star size={32} fill="currentColor" /></div><h4 className="font-black text-green-700 mb-1">ส่วนลดครอบคลุมทั้งหมด!</h4><p className="text-[10px] text-green-600/70 font-medium">คุณสามารถกดยืนยันยอด 0 บาท เพื่อล็อกรายการอาหารของคุณได้เลยครับ</p></div>
+                                )}
+                                <button onClick={handleNotifyPayment} disabled={actionLoading} className="w-full py-4 bg-primary text-primary-content rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">{actionLoading ? <span className="loading loading-spinner loading-xs"></span> : <><Check size={18} strokeWidth={3} /> {mySummary.summary.netTotal <= 0 ? 'ยืนยันว่าเรียบร้อย' : 'แจ้งจ่ายเงินตอนนี้'}</>}</button>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
+            {/* 🌟 NEW: Member Payment Action Modal */}
             <AnimatePresence>
-                {slipPreviewUrl && (
-                    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[350] flex flex-col items-center justify-center p-6" onClick={() => setSlipPreviewUrl(null)}>
-                        <button className="absolute top-8 right-8 p-3 text-white transition-colors backdrop-blur-sm bg-white/10 rounded-full"><X size={24} /></button>
-                        <div className="relative max-w-sm w-full bg-white rounded-3xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}><div className="p-4 bg-gray-50 border-b flex items-center justify-between"><span className="text-xs font-black text-gray-500 uppercase tracking-widest">หลักฐานการโอนเงิน</span><button onClick={() => window.open(slipPreviewUrl, '_blank')} className="text-blue-600 text-[10px] font-bold flex items-center gap-1"><ExternalLink size={12} /> เปิดรูปเต็ม</button></div><img src={slipPreviewUrl} className="w-full object-contain max-h-[70vh] bg-base-200" alt="Slip" /></div>
+                {memberToManage && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-end sm:items-center justify-center p-4">
+                        <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="bg-base-100 w-full max-w-sm rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative">
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex items-center gap-3">
+                                    <img src={memberToManage.user.avatarUrl || `https://i.pravatar.cc/150?u=${memberToManage.user.id}`} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+                                    <div>
+                                        <h3 className="font-black text-[#2B361B] text-lg leading-tight">{memberToManage.user.name}</h3>
+                                        <p className="text-[10px] font-bold text-primary uppercase">ยอดโอน: ฿{Math.max(0, Math.ceil(memberToManage.summary.netTotal)).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setMemberToManage(null)} className="p-2 bg-base-200 rounded-full text-base-content/40 hover:text-base-content transition-colors"><X size={20} /></button>
+                            </div>
+
+                            <div className="space-y-6">
+                                {memberToManage.paymentSlipUrl ? (
+                                    <div className="relative group">
+                                        <img src={memberToManage.paymentSlipUrl} className="w-full h-64 object-contain rounded-2xl bg-base-200 border border-base-content/5" />
+                                        <button onClick={() => window.open(memberToManage.paymentSlipUrl, '_blank')} className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md p-2 rounded-xl text-primary shadow-lg active:scale-95 transition-all"><ExternalLink size={16} /></button>
+                                    </div>
+                                ) : (
+                                    <div className="h-40 bg-base-200 rounded-2xl flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-base-content/10">
+                                        <ClockIcon size={32} className="mb-2 opacity-20" />
+                                        <p className="text-[10px] font-bold uppercase tracking-widest">ยังไม่ได้แนบหลักฐาน</p>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col gap-3">
+                                    {/* Action for Leader */}
+                                    {isLeader && memberToManage.paymentStatus === 'PAID' && (
+                                        <button 
+                                            onClick={() => handleVerifyPayment(memberToManage.user.id)}
+                                            disabled={actionLoading}
+                                            className="w-full py-4 bg-green-600 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {actionLoading ? <span className="loading loading-spinner loading-xs"></span> : <><ShieldCheck size={18} strokeWidth={3} /> ยืนยันยอดเงินถูกต้อง</>}
+                                        </button>
+                                    )}
+
+                                    {/* Action for Member themself */}
+                                    {memberToManage.user.id === user?.id && memberToManage.paymentStatus === 'PAID' && (
+                                        <button 
+                                            onClick={handleCancelPayment}
+                                            disabled={actionLoading}
+                                            className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {actionLoading ? <span className="loading loading-spinner loading-xs"></span> : <><RefreshCcw size={18} strokeWidth={3} /> ยกเลิกการส่งสลิปเพื่อแก้ไข</>}
+                                        </button>
+                                    )}
+
+                                    <button onClick={() => setMemberToManage(null)} className="w-full py-3 text-xs font-bold text-[#8B837E] hover:bg-gray-100 rounded-xl transition-colors">กลับ</button>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
-            {/* 🌟 Modal: Cancel Payment Confirmation */}
+            <AnimatePresence>{isCompleteModalOpen && (<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center px-6"><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl"><div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><Check size={40} strokeWidth={3} /></div><h3 className="text-xl font-black text-[#2B361B] mb-3">ยืนยันการสรุปยอดบิล?</h3><p className="text-sm text-[#8B837E] mb-8 leading-relaxed">เมื่อยืนยันแล้ว สมาชิกจะไม่สามารถแก้ไขรายการหรือร่วมหารเพิ่มได้อีก คุณแน่ใจใช่หรือไม่?</p><div className="flex gap-3"><button onClick={() => setIsCompleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] rounded-xl font-bold text-sm active:scale-95 transition-all">ยังก่อน</button><button onClick={handleCompleteParty} disabled={actionLoading} className="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all">ใช่, ปิดจ็อบเลย</button></div></motion.div></div>)}</AnimatePresence>
+
+            {/* 🌟 NEW: Delete Item Confirmation Modal */}
             <AnimatePresence>
-                {isCancelPaymentModalOpen && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[280] flex items-center justify-center px-6">
+                {itemToDelete && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center px-6">
                         <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl border border-[#EEE2D1]">
-                            <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <RefreshCcw size={40} strokeWidth={2.5} />
+                            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Trash2 size={40} strokeWidth={2.5} />
                             </div>
-                            <h3 className="text-xl font-black text-[#2B361B] mb-3">ยกเลิกการแจ้งโอน?</h3>
+                            <h3 className="text-xl font-black text-[#2B361B] mb-2">ลบรายการนี้?</h3>
                             <p className="text-sm text-[#8B837E] mb-8 leading-relaxed">
-                                สลิปเดิมจะถูกลบออก และระบบจะปลดล็อกรายการอาหารเพื่อให้คุณแก้ไขหรือแจ้งโอนใหม่อีกครั้งครับ
+                                คุณต้องการลบ <span className="font-black text-[#2B361B]">"{itemToDelete.name}"</span> <br/> ออกจากบิลโต๊ะใช่หรือไม่?
                             </p>
                             <div className="flex flex-col gap-3">
-                                <button
-                                    onClick={handleCancelPayment}
+                                <button 
+                                    onClick={handleDeleteItem}
                                     disabled={actionLoading}
-                                    className="w-full py-4 bg-[#182806] text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all"
+                                    className="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] transition-all"
                                 >
-                                    ยืนยันยกเลิกและแก้ไข
+                                    {actionLoading ? <span className="loading loading-spinner loading-xs"></span> : "ยืนยันการลบ"}
                                 </button>
-                                <button
-                                    onClick={() => setIsCancelPaymentModalOpen(false)}
+                                <button 
+                                    onClick={() => setItemToDelete(null)}
                                     className="w-full py-3 text-sm font-bold text-[#8B837E] hover:bg-gray-100 rounded-xl transition-colors"
                                 >
-                                    กลับไปหน้าเดิม
+                                    ยกเลิก
                                 </button>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
-
-            <AnimatePresence>{isCompleteModalOpen && (<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center px-6"><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl"><div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><Check size={40} strokeWidth={3} /></div><h3 className="text-xl font-black text-[#2B361B] mb-3">ยืนยันการสรุปยอดบิล?</h3><p className="text-sm text-[#8B837E] mb-8 leading-relaxed">เมื่อยืนยันแล้ว สมาชิกจะไม่สามารถแก้ไขรายการหรือร่วมหารเพิ่มได้อีก คุณแน่ใจใช่หรือไม่?</p><div className="flex gap-3"><button onClick={() => setIsCompleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] rounded-xl font-bold text-sm transition-all active:scale-95">ยังก่อน</button><button onClick={handleCompleteParty} disabled={actionLoading} className="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95">ใช่, ปิดจ็อบเลย</button></div></motion.div></div>)}</AnimatePresence>
 
             <CreateReviewModal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} restaurantId={party?.restaurant?.id} partyId={id} onReviewSuccess={() => { setHasHasReviewed(true); loadData(); }} />
         </div>
