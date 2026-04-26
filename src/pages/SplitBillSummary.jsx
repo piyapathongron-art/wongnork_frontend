@@ -36,7 +36,8 @@ import {
     apiUpdatePartySettings,
     apiNotifyPayment,
     apiVerifyPayment,
-    apiCancelPayment
+    apiCancelPayment,
+    apiJoinParty
 } from '../api/party';
 import useUserStore from '../stores/userStore';
 import { toast } from 'sonner';
@@ -93,16 +94,54 @@ const SplitBillSummary = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const unreadCounts = useChatStore(state => state.unreadCounts);
     const hasUnreadMessages = (unreadCounts[id] || 0) > 0;
+    const [errorObj, setErrorObj] = useState(null);
 
     const loadData = useCallback(async () => {
+        console.log("🛠️ [SplitBillSummary] loadData Triggered! user:", user?.id, "partyId:", id);
         try {
-            const [partyRes, billRes] = await Promise.all([
-                apiGetPartyById(id),
-                apiGetSplitBill(id)
-            ]);
-            const partyData = partyRes.data.data;
+            setErrorObj(null);
+            setLoading(true);
+            const partyRes = await apiGetPartyById(id);
+            let partyData = partyRes.data.data;
+            console.log("🛠️ [SplitBillSummary] Fetched partyData:", partyData);
+
+            // เช็คว่าเป็นสมาชิกในปาร์ตี้หรือยัง
+            let isMember = partyData.members?.some(m => m.user.id === user?.id || m.userId === user?.id);
+            console.log("🛠️ [SplitBillSummary] isMember:", isMember);
+
+            // ถ้ายังไม่ได้เป็นสมาชิก ให้ Auto-join
+            if (!isMember && user?.id) {
+                console.log("🛠️ [SplitBillSummary] User is not a member. Attempting Auto-Join...");
+                try {
+                    const joinRes = await apiJoinParty(id);
+                    console.log("🛠️ [SplitBillSummary] Auto-Join Success:", joinRes.data);
+                    toast.success("เข้าร่วมปาร์ตี้อัตโนมัติ!");
+                    // ดึงข้อมูลปาร์ตี้ใหม่หลังจาก join สำเร็จ
+                    const updatedPartyRes = await apiGetPartyById(id);
+                    partyData = updatedPartyRes.data.data;
+                    isMember = true;
+                    console.log("🛠️ [SplitBillSummary] Fetched updated partyData after join.");
+                } catch (joinErr) {
+                    console.error("🚨 [SplitBillSummary] Auto-Join Failed:", joinErr);
+                    const errorMsg = joinErr.response?.data?.error || joinErr.response?.data?.message || "ไม่สามารถเข้าร่วมปาร์ตี้ได้";
+                    toast.error(errorMsg);
+                    setErrorObj(`Auto-Join Error: ${errorMsg}`);
+                    // navigate('/');
+                    setLoading(false);
+                    return;
+                }
+            } else if (!user?.id) {
+                 console.log("⚠️ [SplitBillSummary] user?.id is missing. Waiting for user store to hydrate...");
+            }
+
             setParty(partyData);
-            setBillSummary(billRes.data.data);
+
+            if (isMember || user?.role === "ADMIN") {
+                console.log("🛠️ [SplitBillSummary] Fetching split bill...");
+                const billRes = await apiGetSplitBill(id);
+                setBillSummary(billRes.data.data);
+                console.log("🛠️ [SplitBillSummary] Split bill fetched:", billRes.data.data);
+            }
 
             setSettingsForm({
                 vat: partyData.vat || 0,
@@ -117,12 +156,14 @@ const SplitBillSummary = () => {
                 if (myReview) setHasHasReviewed(true);
             }
         } catch (error) {
-            console.error(error);
+            console.error("🚨 [SplitBillSummary] Critical Error in loadData:", error);
+            setErrorObj(`Critical Error: ${error.message || "ไม่สามารถดึงข้อมูลบิลได้"}`);
             toast.error("ไม่สามารถดึงข้อมูลบิลได้");
+            // navigate('/');
         } finally {
             setLoading(false);
         }
-    }, [id, user?.id, user?.promptPayNumber, user?.promptPayName]);
+    }, [id, user]);
 
     useEffect(() => {
         loadData();
@@ -320,6 +361,17 @@ const SplitBillSummary = () => {
         }
     };
 
+    if (errorObj) {
+        return (
+            <div className="w-full min-h-screen bg-[#FFF8F5] flex flex-col justify-center items-center p-6 text-center">
+                <AlertCircle className="text-red-500 w-16 h-16 mb-4" />
+                <h2 className="text-xl font-bold text-[#2B361B] mb-2">เข้าปาร์ตี้ไม่ได้ 🥲</h2>
+                <p className="text-red-500 mb-6 bg-red-50 p-4 rounded-xl font-mono text-sm break-all">{errorObj}</p>
+                <button onClick={() => navigate('/')} className="px-6 py-3 bg-[#A65D2E] text-white rounded-full font-bold">กลับหน้าหลัก</button>
+            </div>
+        );
+    }
+
     if (loading && !billSummary) return (
         <div className="w-full min-h-screen bg-[#FFF8F5] flex justify-center items-center">
             <span className="text-[#A65D2E] font-bold animate-pulse tracking-widest">LOADING...</span>
@@ -378,7 +430,7 @@ const SplitBillSummary = () => {
                     </motion.div>
                 )}
 
-                {isCompleted && (
+                {isCompleted && party?.restaurantId && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mb-8 p-5 rounded-[2rem] bg-[#182806] text-white shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16" />
                         <div className="flex items-center gap-4 relative z-10">
@@ -716,7 +768,7 @@ const SplitBillSummary = () => {
                 )}
             </AnimatePresence>
 
-            <CreateReviewModal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} restaurantId={party?.restaurant?.id} partyId={id} onReviewSuccess={() => { setHasHasReviewed(true); loadData(); }} />
+            {party?.restaurantId && <CreateReviewModal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} restaurantId={party?.restaurant?.id} partyId={id} onReviewSuccess={() => { setHasHasReviewed(true); loadData(); }} />}
         </div>
     );
 };
