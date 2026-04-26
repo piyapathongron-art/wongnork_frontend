@@ -303,7 +303,7 @@ const SplitBillMenu = () => {
                                 placeholder="ค้นหาเมนูอาหาร..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm"
+                                className="w-full bg-base-100 border border-primary/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-base-content placeholder:text-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                             />
                         </div>
                     </div>

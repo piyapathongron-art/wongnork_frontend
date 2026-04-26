@@ -24,25 +24,25 @@ const Login = () => {
   } = form;
 
   const inputClass =
-    "w-full bg-[#EAD9CF]/60 border-none rounded-xl py-3.5 px-4 pl-11 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#A65D2E] outline-none transition-all text-sm";
+    "w-full bg-base-300/60 border-none rounded-xl py-3.5 px-4 pl-11 text-base-content placeholder-base-content/50 focus:ring-2 focus:ring-primary outline-none transition-all text-sm";
 
   return (
     <>
       <div className="text-center mb-2 sm:mb-4 animate-fade-up">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
-          <span className="text-[#2D3E25] block">WONG</span>
+          <span className="text-base-content block">WONG</span>
           <span className="text-accent block">NORK</span>
         </h1>
-        <p className="text-[#2D3E25] font-medium mt-1 sm:mt-2 text-sm sm:text-base">
+        <p className="text-base-content font-medium mt-1 sm:mt-2 text-sm sm:text-base">
           Eat | Share | Connect
         </p>
-        <div className="w-32 sm:w-48 h-[1px] bg-gray-300 mt-4 sm:mt-6 mx-auto"></div>
-        <div className="text-[20px] sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
+        <div className="w-32 sm:w-48 h-[1px] bg-base-content/20 mt-4 sm:mt-6 mx-auto"></div>
+        <div className="text-[20px] sm:text-[25px] text-base-content font-bold mt-2 sm:mt-3">
           Sign in
         </div>
       </div>
 
-      <div className="bg-[#FFF8F4] w-full rounded-[2.5rem] py-6 px-6 sm:py-8 sm:px-8 shadow-xl animate-fade-up flex flex-col">
+      <div className="bg-base-100 w-full rounded-[2.5rem] py-6 px-6 sm:py-8 sm:px-8 shadow-xl animate-fade-up flex flex-col">
         <form
           onSubmit={handleSubmit(submitLogin)}
           className="space-y-4 sm:space-y-6"
@@ -50,12 +50,12 @@ const Login = () => {
           <fieldset disabled={isSubmitting} className="space-y-4">
             {/* Email */}
             <div className="relative">
-              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1.5 ml-1">
+              <label className="block text-[9px] font-black text-base-content/50 uppercase tracking-[0.2em] mb-1.5 ml-1">
                 Email Address
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/60"
                   size={16}
                 />
                 <input
@@ -75,7 +75,7 @@ const Login = () => {
             {/* Password */}
             <div>
               <div className="flex justify-between mb-1.5 px-1">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                <label className="text-[9px] font-black text-base-content/50 uppercase tracking-[0.2em]">
                   Password
                 </label>
                 {/* <button
@@ -87,7 +87,7 @@ const Login = () => {
               </div>
               <div className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A65D2E]/60"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/60"
                   size={16}
                 />
                 <input
@@ -99,7 +99,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#A65D2E] cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-primary cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -113,7 +113,7 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#A65D2E] hover:bg-[#8e4f27] text-white font-semibold py-3 rounded-xl shadow-lg transform active:scale-[0.98] transition-all mt-2 cursor-pointer"
+              className="w-full bg-primary hover:brightness-90 text-white font-semibold py-3 rounded-xl shadow-lg transform active:scale-[0.98] transition-all mt-2 cursor-pointer"
             >
               Sign In
             </button>
@@ -122,24 +122,24 @@ const Login = () => {
 
         {/* 🌟 ปรับลด py-8 เหลือ py-5 สำหรับเส้นคั่น */}
         <div className="relative flex items-center py-5 sm:py-8">
-          <div className="flex-grow border-t border-gray-200"></div>
-          <span className="flex-shrink mx-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+          <div className="flex-grow border-t border-base-content/20"></div>
+          <span className="flex-shrink mx-4 text-[10px] font-bold text-base-content/50 uppercase tracking-[0.2em]">
             Or Connect
           </span>
-          <div className="flex-grow border-t border-gray-200"></div>
+          <div className="flex-grow border-t border-base-content/20"></div>
         </div>
 
         {/* 🌟 คอนเทนเนอร์หลัก */}
         <div className="relative w-full h-[50px] flex justify-center items-center rounded-2xl group overflow-hidden">
           {/* 🎨 1. ปุ่ม Custom ของเรา (ปรับ Text และ Icon ให้ดูซอฟต์และอ่านง่ายขึ้น) */}
-          <div className="absolute inset-0 flex items-center justify-center gap-2.5 bg-white border border-[#EAD9CF] rounded-2xl group-active:scale-[0.98] transition-all pointer-events-none shadow-sm">
+          <div className="absolute inset-0 flex items-center justify-center gap-2.5 bg-base-100 border border-base-content/20 rounded-2xl group-active:scale-[0.98] transition-all pointer-events-none shadow-sm">
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
               className="w-4 h-4"
               alt="google logo"
             />
             {/* 🌟 ปรับตรงนี้: ใช้ text-xs, font-bold สีซอฟต์ลง และไม่ใช้ uppercase แล้ว */}
-            <span className="text-xs font-bold text-[#736356]">
+            <span className="text-xs font-bold text-base-content/70">
               Sign in with Google
             </span>
           </div>
@@ -158,7 +158,7 @@ const Login = () => {
         </div>
 
         {/* 🌟 ปรับ mt-10 เหลือ mt-6 */}
-        <div className="flex text-[11px] font-bold text-gray-500 uppercase tracking-widest mt-6 justify-center">
+        <div className="flex text-[11px] font-bold text-base-content/50 uppercase tracking-widest mt-6 justify-center">
           Don't have an account?{" "}
           <button
             type="button"

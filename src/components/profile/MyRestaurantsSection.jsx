@@ -31,7 +31,7 @@ const MyRestaurantsSection = ({ ownedRestaurants, navigate }) => {
                                     <h4 className="font-bold text-sm text-base-content truncate">
                                         {restaurant.name || 'ไม่ทราบชื่อร้าน'}
                                     </h4>
-                                    <p className="text-[10px] text-[#A8A29F] mt-0.5 truncate">
+                                    <p className="text-[10px] text-base-content/50 mt-0.5 truncate">
                                         {restaurant.address || 'คลิกเพื่อดูรายละเอียด'}
                                     </p>
                                 </div>

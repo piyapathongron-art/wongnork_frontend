@@ -43,8 +43,8 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
       icon: "🔗",
       style: {
         borderRadius: "16px",
-        background: "#FFF8F4",
-        color: "#A65D2E",
+        background: "var(--color-base-100)",
+        color: "var(--color-primary)",
         fontWeight: "bold",
         fontSize: "14px",
         marginBottom: "80px",
@@ -98,15 +98,15 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
                   >
                     {option.icon}
                   </div>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase">
+                  <span className="text-[10px] font-bold text-base-content/50 uppercase">
                     {option.name}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-2xl border border-dashed border-gray-200 flex items-center justify-between">
-              <p className="text-[10px] text-gray-400 truncate mr-4">
+            <div className="bg-base-200 p-4 rounded-2xl border border-dashed border-base-content/20 flex items-center justify-between">
+              <p className="text-[10px] text-base-content/50 truncate mr-4">
                 {shareUrl}
               </p>
               <button

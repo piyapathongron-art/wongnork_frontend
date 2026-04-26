@@ -9,6 +9,7 @@ import { apiCreateParty } from "../../api/party";
 import MapBox from "../MapBox";
 import useRestaurantStore from "../../stores/restaurantStore";
 import { createPartySchema } from "../../validations/schema";
+import { useThemeStore } from "../../stores/themeStore";
 
 const CreatePartyModal = ({
   isOpen,
@@ -25,6 +26,8 @@ const CreatePartyModal = ({
   const filteredRestaurants = useRestaurantStore(
     (state) => state.filteredRestaurants,
   );
+
+  const isDark =useThemeStore((state) => state.isDark)
 
   const {
     register,
@@ -123,7 +126,7 @@ const CreatePartyModal = ({
             <div className="h-28 w-full bg-base-300 relative flex-shrink-0">
               <MapBox
                 ref={mapRef}
-                isDark={false}
+                isDark={isDark}
                 onMarkerClick={handleMarkerSelect}
                 disableAutoCenter={!!initialRestaurant}
                 initialRestaurant={initialRestaurant}

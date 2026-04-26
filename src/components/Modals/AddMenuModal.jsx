@@ -58,16 +58,16 @@ const ModalHeader = ({ onClose }) => (
 );
 
 const ImageUploadField = ({ previewUrl, isUploading, onFileChange }) => (
-    <div className="relative w-full h-48 bg-zinc-100 rounded-3xl border-2 border-dashed border-base-300 overflow-hidden group">
+    <div className="relative w-full h-48 bg-base-300 rounded-3xl border-2 border-dashed border-base-content/20 overflow-hidden group">
         {previewUrl ? (
             <>
                 <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-neutral/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Camera className="text-white w-8 h-8" />
                 </div>
             </>
         ) : (
-            <div className="flex flex-col items-center justify-center h-full text-zinc-400">
+            <div className="flex flex-col items-center justify-center h-full text-base-content/50">
                 {isUploading ? <Loader2 className="animate-spin mb-2" /> : <ImageIcon className="mb-2 opacity-20 w-10 h-10" />}
                 <p className="text-[10px] font-black uppercase tracking-widest">
                     {isUploading ? "Uploading..." : "Click to upload image"}
