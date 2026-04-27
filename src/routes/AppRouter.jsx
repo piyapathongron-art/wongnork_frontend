@@ -24,9 +24,6 @@ const Profile = lazy(() => import("../pages/Profile"));
 const SplitBillMenu = lazy(() => import("../pages/SplitBillMenu"));
 const SplitBillSummary = lazy(() => import("../pages/SplitBillSummary"));
 
-// ขอ mock ไว้ดูก่อนนะท่าน
-const PostMealSummary = lazy(() => import("../pages/PostMealSummary"));
-
 // ==========================================
 // 2. Router Configuration
 // ==========================================
@@ -64,7 +61,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "/profile", element: <Profile /> },
-          { path: "/profile/:id", element: <Profile /> }
+          { path: "/profile/:id", element: <Profile /> },
         ],
       },
     ],
@@ -78,11 +75,6 @@ const router = createBrowserRouter([
     children: [
       { path: "/party/:id/split-bill", element: <SplitBillMenu /> },
       { path: "/party/:id/split-bill/summary", element: <SplitBillSummary /> },
-
-      // mock ไว้ดูคับท่าน
-      { path: "/party/:id/post-meal", element: <PostMealSummary /> },
-      // 🌟 (Option) แถวนี้สำหรับพิมพ์เทสเองง่ายๆ ไม่ต้องมี ID
-      { path: "/test-review", element: <PostMealSummary /> },
     ],
   },
 ]);
