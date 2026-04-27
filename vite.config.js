@@ -4,8 +4,23 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(),tailwindcss()],
+  plugins: [react(), tailwindcss()],
   server: {
-    allowedHosts: ['.trycloudflare.com']
+    allowedHosts: ['.trycloudflare.com'],
+    proxy: {
+      // สำหรับ API ปกติ
+      '/api': {
+        target: 'http://localhost:8899',
+        changeOrigin: true,
+        secure: false,
+      },
+      // สำหรับ Socket.io
+      '/socket.io': {
+        target: 'http://localhost:8899',
+        changeOrigin: true,
+        secure: false,
+        ws: true, // 🌟 สำคัญมาก: ต้องเปิดเพื่อให้รองรับ WebSocket
+      }
+    }
   }
 })

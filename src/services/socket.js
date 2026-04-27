@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
+// เมื่อใช้ Proxy เราจะเชื่อมต่อมาที่ Host ปัจจุบัน (Window Origin)
+// โดย Vite จะทำหน้าที่ส่งต่อ (Proxy) ไปยัง Backend ให้เอง
 let socket = null;
 let currenToken = null;
 
@@ -18,10 +18,12 @@ export function getSocket(token) {
 
     currenToken = token;
 
-    socket = io(BACKEND_URL, {
+    // ไม่ต้องใส่ URL เต็มๆ เพื่อให้มันใช้ Host เดียวกับหน้าเว็บ
+    socket = io("/", {
         auth: { token },
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        transports: ["websocket", "polling"] // รองรับทั้งคู่เพื่อความเสถียร
     })
 
     socket.on("connect", () => {

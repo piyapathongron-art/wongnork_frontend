@@ -237,7 +237,6 @@ const Party = () => {
 
           <PendingSettlement user={user} pendingSettlementParties={pendingSettlementParties} />
 
-          <MyJoinedGroups user={user} myJoinedGroups={myJoinedGroups} unreadCounts={unreadCounts} />
 
           <header className="sticky top-0 z-40 bg-base-100 rounded-2xl backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-base-content/5 mb-2">
             <div className="flex justify-between items-center mb-4">
@@ -254,6 +253,8 @@ const Party = () => {
             </div>
 
           </header>
+
+          <MyJoinedGroups user={user} myJoinedGroups={myJoinedGroups} unreadCounts={unreadCounts} />
 
           {/* Discovery List */}
           <div key="discovery-list" className="flex flex-col gap-6 mt-2">
