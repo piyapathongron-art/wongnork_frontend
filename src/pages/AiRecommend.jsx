@@ -135,14 +135,14 @@ const AiRecommend = () => {
             {/* Header - Compact Single Line */}
             <header className="absolute top-0 left-0 right-0 px-6 pt-8 pb-4 flex items-center gap-4 z-40">
                 <div className="flex flex-1 items-baseline gap-2 overflow-hidden">
-                    <h1 className="text-xl font-bold text-[#182806] whitespace-nowrap drop-shadow-sm">Wongnork</h1>
+                    <h1 className="text-xl font-bold text-base-content whitespace-nowrap drop-shadow-sm">Wongnork</h1>
                     <span className="text-sm font-light italic text-primary whitespace-nowrap drop-shadow-sm">Bon Appétit</span>
                 </div>
 
                 <div className="relative" ref={menuRef}>
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 bg-white/50 backdrop-blur-md hover:bg-base-200 rounded-full transition-colors text-[#182806] shadow-sm border border-[#F2E8D9]/50"
+                        className="p-2 bg-base-100/50 backdrop-blur-md hover:bg-base-200 rounded-full transition-colors text-base-content shadow-sm border border-base-content/10"
                     >
                         <MoreVertical size={20} />
                     </button>
@@ -153,14 +153,14 @@ const AiRecommend = () => {
                                 initial={{ opacity: 0, scale: 0.9, x: -10, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, x: -10, y: 10 }}
-                                className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-base-content/10 overflow-hidden z-50"
+                                className="absolute right-0 mt-2 w-48 bg-base-100 rounded-2xl shadow-xl border border-base-content/10 overflow-hidden z-50"
                             >
                                 <button
                                     onClick={() => {
                                         clearMessages();
                                         setShowMenu(false);
                                     }}
-                                    className="w-full px-4 py-3 text-left flex items-center gap-3 text-sm font-bold text-[#182806] hover:bg-base-100 transition-colors"
+                                    className="w-full px-4 py-3 text-left flex items-center gap-3 text-sm font-bold text-base-content hover:bg-base-200 transition-colors"
                                 >
                                     <Trash2 size={16} className="text-primary" />
                                     ล้างประวัติการคุย
@@ -195,7 +195,7 @@ const AiRecommend = () => {
                             >
                                 {msg.type === 'ai' && (
                                     <div className="flex items-center gap-2 mb-2">
-                                        <div className="p-1 bg-white rounded-full text-primary shadow-sm">
+                                        <div className="p-1 bg-base-100 rounded-full text-primary shadow-sm">
                                             <Sparkles size={12} fill="currentColor" className='animate-pulse' />
                                         </div>
                                         <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Wongnork AI</span>
@@ -215,7 +215,7 @@ const AiRecommend = () => {
                                             key={`${msg.id}-rec-${idx}`}
                                             variants={itemVariants}
                                             whileHover={{ y: -4 }}
-                                            className="bg-white rounded-[2rem] overflow-hidden shadow-[0_15px_40px_rgba(24,40,6,0.06)] border border-[#F2E8D9]/40"
+                                            className="bg-base-100 rounded-[2rem] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-base-content/10"
                                         >
                                             {/* Restaurant Hero Image */}
                                             {rec.recommendedMenus && rec.recommendedMenus[0]?.imageUrl && (
@@ -225,9 +225,9 @@ const AiRecommend = () => {
                                                         alt={rec.name}
                                                         className="w-full h-full object-cover"
                                                     />
-                                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
-                                                        <Star size={12} fill="#B86B25" className="text-primary" />
-                                                        <span className="text-[10px] font-bold text-[#182806]">Featured</span>
+                                                    <div className="absolute top-3 right-3 bg-base-100/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+                                                        <Star size={12} className="text-primary fill-primary" />
+                                                        <span className="text-[10px] font-bold text-base-content">Featured</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -235,20 +235,20 @@ const AiRecommend = () => {
                                             <div className="p-6">
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
-                                                        <h3 className="text-xl font-bold text-[#182806] mb-0.5">
+                                                        <h3 className="text-xl font-bold text-base-content mb-0.5">
                                                             {rec.name}
                                                         </h3>
                                                         <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Recommended</span>
                                                     </div>
                                                     <button
                                                         onClick={() => navigate(`/restaurants/${rec.restaurantId}`)}
-                                                        className="p-2.5 bg-[#182806] text-white rounded-full hover:bg-[#B86B25] transition-colors"
+                                                        className="p-2.5 bg-neutral text-base-100 rounded-full hover:bg-primary transition-colors"
                                                     >
                                                         <ArrowRight size={18} />
                                                     </button>
                                                 </div>
 
-                                                <p className="text-[#2D3E1A] text-sm leading-relaxed italic opacity-80 mb-6">
+                                                <p className="text-base-content/80 text-sm leading-relaxed italic opacity-80 mb-6">
                                                     "{rec.reason}"
                                                 </p>
 
@@ -262,7 +262,7 @@ const AiRecommend = () => {
                                                         {rec.recommendedMenus && rec.recommendedMenus.map((menu, mIdx) => (
                                                             <div
                                                                 key={mIdx}
-                                                                className="flex items-center gap-3 p-2.5 rounded-[1.2rem] bg-base-100 border border-[#F2E8D9]"
+                                                                className="flex items-center gap-3 p-2.5 rounded-[1.2rem] bg-base-200 border border-base-content/10"
                                                             >
                                                                 {menu.imageUrl && (
                                                                     <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
@@ -274,7 +274,7 @@ const AiRecommend = () => {
                                                                     </div>
                                                                 )}
                                                                 <div className="flex-1">
-                                                                    <p className="text-xs font-bold text-[#182806]">{menu.name}</p>
+                                                                    <p className="text-xs font-bold text-base-content">{menu.name}</p>
                                                                     <p className="text-[10px] text-primary font-black">
                                                                         ฿{menu.price.toLocaleString()}
                                                                     </p>
@@ -303,7 +303,7 @@ const AiRecommend = () => {
                                         key={d}
                                         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
                                         transition={{ repeat: Infinity, duration: 1, delay: d }}
-                                        className="w-1.5 h-1.5 bg-[#B86B25] rounded-full"
+                                        className="w-1.5 h-1.5 bg-primary rounded-full"
                                     />
                                 ))}
                             </div>
@@ -342,7 +342,7 @@ const AiRecommend = () => {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setInput(chip.text)}
-                                        className="whitespace-nowrap px-4 py-2 bg-white text-[#182806] rounded-full text-xs font-bold flex items-center gap-2 border border-[#F2E8D9] shadow-sm hover:border-[#B86B25]/30 transition-all"
+                                        className="whitespace-nowrap px-4 py-2 bg-base-100 text-base-content rounded-full text-xs font-bold flex items-center gap-2 border border-base-content/10 shadow-sm hover:border-primary/30 transition-all"
                                     >
                                         {chip.icon} {chip.label}
                                     </motion.button>
@@ -357,14 +357,14 @@ const AiRecommend = () => {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                 placeholder="พิมพ์สิ่งที่อยากทาน..."
-                                className="w-full bg-white border border-[#F2E8D9] rounded-full py-4 pl-6 pr-14 focus:outline-none focus:border-[#B86B25] focus:ring-4 focus:ring-[#B86B25]/5 text-[#182806] shadow-sm transition-all text-[15px]"
+                                className="w-full bg-base-100 border border-base-content/10 rounded-full py-4 pl-6 pr-14 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 text-base-content shadow-sm transition-all text-[15px]"
                             />
                             <button
                                 onClick={() => handleSend()}
                                 disabled={isLoading}
                                 className={`absolute right-2 p-3 rounded-full transition-all flex items-center justify-center ${input.trim() && !isLoading
-                                    ? 'bg-[#182806] text-white shadow-lg'
-                                    : 'bg-primary text-color-base-300'
+                                    ? 'bg-neutral text-base-100 shadow-lg'
+                                    : 'bg-base-200 text-base-content/50'
                                     }`}
                             >
                                 <Send size={18} />

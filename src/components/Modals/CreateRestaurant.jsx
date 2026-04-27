@@ -5,6 +5,7 @@ import { X, Loader2, MapPin, Store, Utensils } from 'lucide-react';
 import { apiCreateRestaurant } from '../../api/restaurant';
 import MapBox from '../MapBox';
 import InputField from '../Form/InputField';
+import { useThemeStore } from '../../stores/themeStore';
 
 const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,6 +19,8 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
             lng: 100.5018 
         }
     });
+
+    const isDark =useThemeStore((state) => state.isDark)
 
     // Watch values to display coordinates in the UI
     const [lat, lng] = [watch("lat"), watch("lng")];
@@ -51,7 +54,8 @@ const CreateRestaurant = ({ isOpen, onClose, onSuccess }) => {
 
                 {/* INTERACTIVE MAP HEADER */}
                 <div className="h-52 w-full relative flex-shrink-0">
-                    <MapBox onClick={handleMapClick} />
+                    <MapBox onClick={handleMapClick}
+                    isDark={isDark} />
                     <button 
                         onClick={onClose} 
                         className="absolute top-4 right-4 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-all"

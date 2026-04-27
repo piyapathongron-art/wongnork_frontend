@@ -223,7 +223,8 @@ const Party = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#FDF2ED] dark:bg-black overflow-hidden flex flex-col font-sans">
+    <div className="fixed inset-0 bg-base-100 overflow-hidden flex flex-col font-sans">
+      {/* 1. MAIN SCROLL CONTAINER */}
       <div
         id="scroll-container"
         onScroll={handleScroll}
@@ -256,7 +257,9 @@ const Party = () => {
 
           {myJoinedGroups.length > 0 && (
             <div className="flex flex-col gap-3 pt-2 mb-4">
-              <h2 className="px-2 text-[10px] font-black tracking-[0.2em] text-[#BC6C25] uppercase opacity-70">Your Current Groups</h2>
+              <h2 className="px-2 text-[10px] font-black tracking-[0.2em] text-primary uppercase opacity-70">
+                Your Current Groups
+              </h2>
               <div className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-1">
                 {myJoinedGroups.map((party) => {
                   const isQuickBill = !party.restaurantId;
@@ -272,14 +275,14 @@ const Party = () => {
                   );
                 })}
               </div>
-              <div className="h-px bg-[#BC6C25]/10 w-full mt-1" />
+              <div className="h-px bg-primary/10 w-full mt-1" />
             </div>
           )}
 
-          <header className="sticky top-0 z-40 bg-base-100/90 dark:bg-black/90 backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-base-content/5 mb-2">
+          <header className="sticky top-0 z-40 bg-base-300 rounded-2xl backdrop-blur-xl -mx-4 px-6 py-4 text-left border-b border-base-content/5 mb-2">
             <div className="flex justify-between items-center mb-4"><h1 className="text-2xl font-black tracking-tight text-base-content uppercase">Discover</h1>{!userLoc && !loading && (<div className="flex items-center gap-1.5 bg-warning/10 text-warning px-3 py-1 rounded-full animate-pulse"><AlertCircle size={12} strokeWidth={3} /><span className="text-[8px] font-black uppercase">Enable Location</span></div>)}</div>
             <div className="flex flex-col gap-4">
-              <div className="relative group"><div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]"><Search size={18} strokeWidth={2.5} /></div><input type="text" placeholder="ค้นหาชื่อกลุ่ม หรือชื่อร้าน..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm" /></div>
+              <div className="relative group"><div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-primary"><Search size={18} strokeWidth={2.5} /></div><input type="text" placeholder="ค้นหาชื่อกลุ่ม หรือชื่อร้าน..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm" /></div>
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">{categories.map((cat) => (<button key={cat} onClick={() => setSelectedCategory(cat)} className={`flex-none px-5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat ? "bg-[#182806] text-white border-[#182806] shadow-md" : "bg-white/50 dark:bg-zinc-900/50 text-[#BC6C25] border-[#BC6C25]/10 hover:bg-white dark:hover:bg-zinc-800"}`}>{cat}</button>))}</div>
             </div>
           </header>
@@ -293,18 +296,18 @@ const Party = () => {
 
       <div className="absolute inset-0 pointer-events-none">
         <AnimatePresence>{showBackToTop && (<motion.button initial={{ opacity: 0, y: 20, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.8 }} onClick={scrollToTop} className="absolute bottom-60 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform pointer-events-auto"><ArrowUp size={20} strokeWidth={3} /></motion.button>)}</AnimatePresence>
-        
+
         {/* 🌟 Stacked Floating Buttons */}
         <div className="absolute bottom-28 right-6 flex flex-col items-center gap-4 pointer-events-auto z-[100]">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-14 h-14 bg-white text-primary rounded-full shadow-lg flex flex-col items-center justify-center border-2 border-primary/10 active:bg-primary/5 transition-colors" onClick={() => setIsQuickBillModalOpen(true)}>
-                <Receipt className="w-6 h-6" />
-                <span className="text-[7px] font-black uppercase tracking-tighter">Quick</span>
-            </motion.button>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-14 h-14 bg-white text-primary rounded-full shadow-lg flex flex-col items-center justify-center border-2 border-primary/10 active:bg-primary/5 transition-colors" onClick={() => setIsQuickBillModalOpen(true)}>
+            <Receipt className="w-6 h-6" />
+            <span className="text-[7px] font-black uppercase tracking-tighter">Quick</span>
+          </motion.button>
 
-            <button className="w-20 h-20 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] dark:border-zinc-900 active:scale-90 transition-all" onClick={() => setIsModalOpen(true)}>
-                <UserPlus className="w-6 h-6 mb-1" />
-                <span className="text-[8px] font-black uppercase">Create</span>
-            </button>
+          <button className="w-20 h-20 bg-[#BC6C25] text-[#F7EAD7] rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-[#FDF2ED] dark:border-zinc-900 active:scale-90 transition-all" onClick={() => setIsModalOpen(true)}>
+            <UserPlus className="w-6 h-6 mb-1" />
+            <span className="text-[8px] font-black uppercase">Create</span>
+          </button>
         </div>
         <NavBar />
       </div>

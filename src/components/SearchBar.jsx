@@ -167,7 +167,7 @@ const SearchBar = ({ onSearchResultClick, onCategoryClick }) => {
                         key={index}
                         onClick={() => handleCategoryClick(item)}
                         className={`whitespace-nowrap px-6 py-2 h-10 rounded-full text-[14px] font-bold shadow-sm border border-base-content/10 active:scale-95 transition-all ${selectedCategory === item
-                            ? 'bg-secondary text-base-200'
+                            ? 'bg-accent text-base-200'
                             : 'bg-base-200/90 backdrop-blur-sm text-base-content'
                             }`}
                     >
