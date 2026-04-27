@@ -5,6 +5,7 @@ import { useAuthLogic } from "../hooks/useAuthLogic";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import VerifyEmailModal from "../components/auth/VerifyEmailModal";
 import { Link } from "react-router";
+import wongnorkLogo from "../assets/LOGO-WONGNORK2.png";
 
 const Login = () => {
   const {
@@ -30,14 +31,12 @@ const Login = () => {
   return (
     <>
       <div className="text-center mb-2 sm:mb-4 animate-fade-up">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
-          <span className="text-base-content block">WONG</span>
-          <span className="text-accent block">NORK</span>
-        </h1>
-        <p className="text-base-content font-medium mt-1 sm:mt-2 text-sm sm:text-base">
-          Eat | Share | Connect
-        </p>
-        <div className="w-32 sm:w-48 h-[1px] bg-base-content/20 mt-4 sm:mt-6 mx-auto"></div>
+        <img
+          src={wongnorkLogo}
+          alt="Logo"
+          className="w-40 scale-200 mt-5 mx-auto object-contain"
+        />
+        <div className="w-32 sm:w-48 h-px bg-base-content/20 mt-4 sm:mt-6 mx-auto"></div>
         <div className="text-[20px] sm:text-[25px] text-base-content font-bold mt-2 sm:mt-3">
           Sign in
         </div>
@@ -79,12 +78,15 @@ const Login = () => {
                 <label className="text-[9px] font-black text-base-content/50 uppercase tracking-[0.2em]">
                   Password
                 </label>
-               {/* ในหน้า Login.jsx ใต้ช่องกรอกรหัสผ่าน */}
-<div className="flex justify-end mt-1">
-  <Link to="/forgot-password" className="text-xs text-[#A65D2E] font-semibold hover:underline">
-    Forgot Password?
-  </Link>
-</div>
+                {/* ในหน้า Login.jsx ใต้ช่องกรอกรหัสผ่าน */}
+                <div className="flex justify-end mt-1">
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs text-[#A65D2E] font-semibold hover:underline"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
               </div>
               <div className="relative">
                 <Lock
