@@ -201,8 +201,8 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
   const avgRating =
     reviewItems.length > 0
       ? (
-          reviewItems.reduce((sum, r) => sum + r.rating, 0) / reviewItems.length
-        ).toFixed(1)
+        reviewItems.reduce((sum, r) => sum + r.rating, 0) / reviewItems.length
+      ).toFixed(1)
       : "New";
 
   const coverImage =
@@ -255,7 +255,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
           <span className="inline-block px-3 py-1.5 bg-[#EAF0D8] rounded-full text-[11px] font-bold text-[#556B2F] mb-3">
             {restaurant?.category || "ทั่วไป"}
           </span>
-          <h2 className="text-4xl font-extrabold mb-3 text-[#2C241E] leading-tight">
+          <h2 className="text-4xl font-extrabold mb-3 text-primary leading-tight">
             {restaurant?.name}
           </h2>
           <div className="flex items-center gap-3 text-sm text-[#736356] mb-6 font-medium">
@@ -282,7 +282,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
 
       {/* 🌟 แสดงคำอธิบาย (Description) */}
       <section className="px-6 mt-10">
-        <h3 className="text-xl font-bold text-[#2C241E] mb-3">เกี่ยวกับ</h3>
+        <h3 className="text-xl font-bold text-accent mb-3">เกี่ยวกับ</h3>
         <p className="text-[#7A6A5E] leading-relaxed font-medium text-[15px]">
           {restaurant?.description || "ยังไม่มีคำอธิบายสำหรับร้านอาหารนี้"}
         </p>
