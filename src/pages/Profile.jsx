@@ -148,7 +148,7 @@ const Profile = () => {
     return (
         <div className="w-full h-screen overflow-y-auto overflow-x-hidden bg-base-100 text-base-content pb-32 font-sans no-scrollbar">
 
-            <header className="sticky top-0 w-full z-40 flex items-center px-6 py-4 bg-base-100/90 backdrop-blur-md border-b border-base-content/5">
+            <header className="sticky top-0 w-full z-40 flex items-center px-6 py-6 bg-base-100/80 backdrop-blur-md">
                 {!isMe && (
                     <button
                         onClick={() => navigate(-1)}
@@ -159,16 +159,16 @@ const Profile = () => {
                 )}
                 <h1 className="text-xl font-black text-primary flex-1">{isMe ? 'My Profile' : 'Profile'}</h1>
                 {isMe && (
-                    <SettingButton
-                        setIsEditModalOpen={setIsEditModalOpen}
-                    />
+                    <div className="flex items-center gap-2">
+                        <SettingButton setIsEditModalOpen={setIsEditModalOpen} />
+                    </div>
                 )}
             </header>
 
-            <main className="px-6 space-y-8 pt-8">
-                <section className="flex flex-col items-center text-center space-y-5">
+            <main className="px-6 space-y-8 pt-4">
+                <section className="flex flex-col items-center text-center space-y-6">
                     <div className="relative">
-                        <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-base-100 shadow-xl bg-base-300 ring-4 ring-primary/5">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-base-200 shadow-2xl bg-base-300 ring-4 ring-primary/10 transition-transform hover:scale-105 duration-500">
                             <img
                                 alt="Profile Avatar"
                                 className="w-full h-full object-cover"
@@ -192,21 +192,30 @@ const Profile = () => {
                     <div className="flex justify-center gap-10 w-full pt-2">
                         <div className="flex flex-col items-center">
                             <span className="text-xl font-black text-primary">{reviews.length}</span>
-                            <span className="text-[10px] uppercase tracking-widest font-black text-base-content/30">Reviews</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-base-content/40">Reviews</span>
                         </div>
                         <div className="w-px h-10 bg-base-content/5" />
                         <div className="flex flex-col items-center">
                             <span className="text-xl font-black text-primary">
                                 {allMyParties.filter(p => p.status === 'COMPLETED').length}
                             </span>
-                            <span className="text-[10px] uppercase tracking-widest font-black text-base-content/30">History</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-base-content/40">Parties</span>
                         </div>
                         <div className="w-px h-10 bg-base-content/5" />
                         <div className="flex flex-col items-center">
                             <span className="text-xl font-black text-primary">{savedRestaurants.length}</span>
-                            <span className="text-[10px] uppercase tracking-widest font-black text-base-content/30">Saved</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-base-content/40">Save</span>
                         </div>
                     </div>
+
+                    {isMe && (
+                        <button
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="bg-primary text-white px-10 py-3 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all uppercase tracking-wider"
+                        >
+                            Edit Profile
+                        </button>
+                    )}
                 </section>
 
                 <PartySection

@@ -41,10 +41,10 @@ const PartySection = ({
                         const memberCount = party.members?.length || 1;
 
                         return (
-                            <div key={party.relationId || index} onClick={() => onPartyClick(party)} className="flex-none w-[160px] bg-white rounded-3xl p-3 shadow-sm border border-[#EEE2D1]/30 space-y-3 relative overflow-hidden cursor-pointer active:scale-95 transition-transform">
+                            <div key={party.relationId || index} onClick={() => onPartyClick(party)} className="flex-none w-[160px] bg-base-200 rounded-3xl p-3 shadow-sm border border-base-content/10 space-y-3 relative overflow-hidden cursor-pointer active:scale-95 transition-transform">
                                 {party.isLeader && (
-                                    <div className="absolute top-2 right-2 z-10 bg-[#FFF8F5]/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-[#F7EAD7]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[#A65D2E]">
+                                    <div className="absolute top-2 right-2 z-10 bg-base-100/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-base-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-primary">
                                             <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
                                         </svg>
                                     </div>
@@ -52,8 +52,8 @@ const PartySection = ({
                                 <div className="w-full h-24 rounded-2xl overflow-hidden bg-base-300 relative">
                                     <img alt={party.name} className="w-full h-full object-cover" src={imageUrl} />
                                     {party.status === 'PENDING_SETTLEMENT' && (
-                                        <div className="absolute inset-0 bg-orange-600/40 backdrop-blur-[2px] flex items-center justify-center p-2">
-                                            <span className="bg-white text-orange-600 text-[8px] font-black px-2 py-1 rounded-full uppercase shadow-lg border border-orange-200">Settlement Needed</span>
+                                        <div className="absolute inset-0 bg-primary/40 backdrop-blur-[2px] flex items-center justify-center p-2">
+                                            <span className="bg-white text-primary text-[8px] font-black px-2 py-1 rounded-full uppercase shadow-lg border border-primary/20">Settlement Needed</span>
                                         </div>
                                     )}
                                 </div>

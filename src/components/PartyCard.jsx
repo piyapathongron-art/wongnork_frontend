@@ -26,20 +26,20 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
 
     const getAvatar = (imgUrl, nameFallback) => {
         if (imgUrl) return imgUrl;
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(nameFallback || 'U')}&background=BC6C25&color=fff&bold=true`;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(nameFallback || 'U')}&background=FCF5ED&color=A65D2E&bold=true`;
     };
 
     return (
-        <div className={`transition-all duration-500 relative bg-base-100 rounded-[32px] p-5  flex gap-5 shadow-sm border 
+        <div className={`transition-all duration-500 relative bg-base-300 rounded-[32px] p-5  flex gap-5 shadow-sm border 
             ${isJoined
                 ? 'border-primary ring-4 ring-primary/5 scale-[1.01] z-10'
-                : 'border-base-content/5 hover:border-primary/20 hover:shadow-md transition-all duration-300'
+                : 'border-base-content/10 hover:border-primary/20 hover:shadow-md transition-all duration-300'
             }`}
         >
 
             {/* Status Dot */}
             <div className={`absolute top-5 right-5 w-2.5 h-2.5 rounded-full border-2 border-base-100 shadow-sm
-                ${party.status === 'OPEN' ? 'bg-[#4cb944] animate-pulse' : 'bg-[#de3636]'}`}
+                ${party.status === 'OPEN' ? 'bg-success animate-pulse' : 'bg-error'}`}
             />
 
             {/* Left Side: Restaurant Image */}
@@ -94,7 +94,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                             {/* Leader Slot */}
                             <div className="flex flex-col items-center gap-1 shrink-0">
                                 <div className="relative pt-2.5">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-400 rounded-full p-0.5 border border-base-100 shadow-sm z-20">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-warning rounded-full p-0.5 border border-base-100 shadow-sm z-20">
                                         <Crown size={8} fill="white" className="text-white" />
                                     </div>
                                     <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden flex items-center justify-center relative z-10 shadow-sm ring-2 ring-primary/10">
