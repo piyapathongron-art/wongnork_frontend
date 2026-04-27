@@ -16,8 +16,8 @@ const RestaurantCard = ({ restaurant }) => {
   const avgRating =
     reviewCount > 0
       ? (
-          restaurant.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-        ).toFixed(1)
+        restaurant.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+      ).toFixed(1)
       : "New";
 
   return (
@@ -34,7 +34,7 @@ const RestaurantCard = ({ restaurant }) => {
       </div>
       <div className="flex-1 flex flex-col justify-center">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-bold text-[#2B361B] text-[15px] line-clamp-1">
+          <h3 className="font-bold text-primary text-[15px] line-clamp-1">
             {restaurant.name}
           </h3>
           <ChevronRight size={16} className="text-[#A8A29F] shrink-0" />
@@ -45,7 +45,7 @@ const RestaurantCard = ({ restaurant }) => {
         <div className="flex items-center gap-3 text-[11px] text-[#8B837E] font-medium mt-auto">
           <div className="flex items-center gap-1">
             <Star size={12} fill="#F59E0B" className="text-[#F59E0B]" />
-            <span className="text-[#2B361B] font-bold">{avgRating}</span>
+            <span className=" font-bold">{avgRating}</span>
             {reviewCount > 0 && <span>({reviewCount})</span>}
           </div>
           <div className="flex items-center gap-1">

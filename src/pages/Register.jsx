@@ -27,14 +27,14 @@ const Register = () => {
     <div className="flex flex-col items-center justify-start min-h-screen w-full max-w-sm mx-auto px-4 pt-4 pb-8 overflow-y-auto no-scrollbar">
       <div className="text-center mb-2s sm:mb-4 animate-fade-up shrink-0">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
-          <span className="text-[#2D3E25] block">WONG</span>
+          <span className="text-base-content block">WONG</span>
           <span className="text-accent block">NORK</span>
         </h1>
-        <p className="text-[#2D3E25] font-medium mt-1 sm:mt-2 text-sm sm:text-base">
+        <p className="text-base-content font-medium mt-1 sm:mt-2 text-sm sm:text-base">
           Eat | Share | Connect
         </p>
         <div className="w-32 sm:w-48 h-[1px] bg-gray-300 mt-4 sm:mt-6 mx-auto"></div>
-        <div className="text-[20px] sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
+        <div className="text-base-content sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
           Sign up
         </div>
       </div>
