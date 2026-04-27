@@ -94,7 +94,7 @@ const SplitBillMenu = () => {
                     return;
                 }
             } else if (!user?.id) {
-                 console.log("⚠️ [SplitBillMenu] user?.id is missing. Waiting for user store to hydrate...");
+                console.log("⚠️ [SplitBillMenu] user?.id is missing. Waiting for user store to hydrate...");
             }
 
             setParty(partyData);
@@ -270,11 +270,11 @@ const SplitBillMenu = () => {
         return (
             <motion.div
                 layout onClick={() => handleAddMenuToBill(item)}
-                className={`p-4 rounded-[1.5rem] bg-white border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
+                className={`p-4 rounded-[1.5rem] bg-base-300 border border-[#EEE2D1] shadow-sm flex items-center gap-4 transition-all group ${isCompleted ? 'opacity-90' : 'cursor-pointer active:scale-[0.98] hover:border-[#A65D2E]/50'}`}
             >
                 {item.imageUrl ? (<img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[#EEE2D1]" />) : (<div className="w-16 h-16 rounded-xl bg-[#F7EAD7] flex items-center justify-center shrink-0 border border-[#EEE2D1]"><Utensils size={24} className="text-[#A65D2E]" /></div>)}
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-[15px] text-[#2B361B] truncate leading-tight">{item.name}</h4>
+                    <h4 className="font-bold text-[15px] text-accent truncate leading-tight">{item.name}</h4>
                     <div className="flex items-center justify-between mt-2">
                         <p className="text-[13px] font-black text-[#A65D2E]">฿{item.price.toLocaleString()}</p>
                         <div className="flex items-center gap-2">
@@ -288,12 +288,12 @@ const SplitBillMenu = () => {
     };
 
     return (
-        <div className="relative w-full h-screen bg-[#FFF8F5] text-[#2B361B] overflow-hidden">
+        <div className="relative w-full h-screen bg-base-200 text-[#2B361B] overflow-hidden">
             <header className="absolute top-0 left-0 right-0 z-40 px-6 py-4 flex items-center gap-4">
-                <div className="absolute inset-0 bg-[#FFF8F5]/70 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
-                <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-[#2B361B]" /></button>
+                <div className="absolute inset-0 bg-base-200 backdrop-blur-xl -z-10 shadow-sm" style={{ maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' }} />
+                <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-[#F7EAD7] transition-colors pointer-events-auto"><ArrowLeft size={24} className="text-accent" /></button>
                 <div className="flex-1 overflow-hidden">
-                    <h1 className="text-xl font-extrabold text-[#2B361B]">{isQuickBill ? 'รายการหารบิลด่วน' : 'เลือกเมนูเข้าบิลโต๊ะ'}</h1>
+                    <h1 className="text-xl font-extrabold text-accent">{isQuickBill ? 'รายการหารบิลด่วน' : 'เลือกเมนูเข้าบิลโต๊ะ'}</h1>
                     <p className="text-[11px] font-bold text-[#A65D2E] uppercase tracking-wider mt-1 truncate">{party.name}</p>
                 </div>
 
@@ -341,7 +341,7 @@ const SplitBillMenu = () => {
                                     {member.user.id === party.leaderId && (<div className="absolute -top-1 -right-0 bg-yellow-400 p-1 rounded-full shadow-sm border border-white pointer-events-none"><Crown size={10} className="text-white fill-current" /></div>)}
                                     {isLeader && member.user.id !== party.leaderId && !isCompleted && (<button onClick={() => handleKickMember(member.user.id, member.user.name)} className="absolute -top-1 -left-1 bg-red-500 text-white p-1 rounded-full shadow-md border border-white hover:bg-red-600 transition-colors z-10"><X size={10} strokeWidth={3} /></button>)}
                                 </div>
-                                <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-[#2B361B]'}`}>{member.user.id === user?.id ? 'คุณ' : member.user.name}</span>
+                                <span className={`text-[10px] font-bold truncate w-16 text-center ${member.user.id === user?.id ? 'text-[#A65D2E]' : 'text-base-content'}`}>{member.user.id === user?.id ? 'คุณ' : member.user.name}</span>
                             </div>
                         ))}
                     </div>
@@ -350,7 +350,7 @@ const SplitBillMenu = () => {
                 <div className={`rounded-[2rem] p-5 mb-8 border flex gap-4 items-center ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-[#EAD9CF]/40 border-[#EAD9CF]'}`}>
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">{isCompleted ? <Check size={20} className="text-green-600" /> : <Utensils size={20} className="text-[#A65D2E]" />}</div>
                     <div className="flex-1">
-                        <h3 className="font-bold text-[14px] leading-tight">{isCompleted ? 'บิลนี้ปิดยอดเรียบร้อยแล้ว' : isQuickBill ? 'เพิ่มรายการอาหารที่ต้องการหาร' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3>
+                        <h3 className="font-bold text-[14px] text-accent leading-tight">{isCompleted ? 'บิลนี้ปิดยอดเรียบร้อยแล้ว' : isQuickBill ? 'เพิ่มรายการอาหารที่ต้องการหาร' : 'กดเมนูเพื่อเพิ่มเข้าบิลโต๊ะ'}</h3>
                         <p className="text-[11px] text-[#8B837E] mt-1 leading-relaxed">{isCompleted ? 'ดูสรุปยอดบิลได้ที่ปุ่มด้านล่าง' : 'แอดรายการแล้ว เพื่อนๆ จะสามารถมากดร่วมหารได้ทันทีครับ'}</p>
                     </div>
                     {isQuickBill && !isCompleted && (
@@ -360,11 +360,11 @@ const SplitBillMenu = () => {
 
                 {!isQuickBill && (
                     <div className="space-y-4 mb-10 relative">
-                        <div className="sticky -top-10 z-30 -mx-6 px-6 py-4 bg-[#FFF8F5]/80 backdrop-blur-xl mb-2 flex flex-col gap-4 border-b border-[#BC6C25]/5">
+                        <div className="sticky -top-10 z-30 -mx-6 px-6 py-4 bg-base-200 backdrop-blur-xl mb-2 flex flex-col gap-4 border-b border-[#BC6C25]/5">
                             <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em] flex items-center gap-2"><div className="h-px flex-1 bg-[#EAD9CF]" />เมนูจากร้าน {party.restaurant?.name}<div className="h-px flex-1 bg-[#EAD9CF]" /></h3>
                             <div className="relative group"><div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#BC6C25]"><Search size={16} strokeWidth={2.5} /></div><input type="text" placeholder="ค้นหาเมนูอาหาร..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white dark:bg-zinc-800 border border-[#BC6C25]/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-[#2B361B] dark:text-white placeholder:text-[#BC6C25]/40 focus:outline-none focus:ring-2 focus:ring-[#BC6C25]/20 transition-all shadow-sm" /></div>
                         </div>
-                        <div className="space-y-3">{filteredMenuItems.length > 0 ? (filteredMenuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)) : (<div className="text-center py-10 opacity-40"><Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" /><p className="text-[10px] font-black uppercase tracking-widest">ไม่พบเมนูที่ค้นหา</p></div>)}</div>
+                        <div className="space-y-3">{filteredMenuItems.length > 0 ? (filteredMenuItems.map(menu => <MenuItemCard key={menu.id} item={menu} />)) : (<div className="text-center py-10 opacity-40 bg-base-100"><Search className="w-10 h-10 mx-auto text-[#BC6C25] mb-4 opacity-20" /><p className="text-[10px] font-black uppercase tracking-widest">ไม่พบเมนูที่ค้นหา</p></div>)}</div>
                     </div>
                 )}
             </main>

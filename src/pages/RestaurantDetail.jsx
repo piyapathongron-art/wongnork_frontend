@@ -260,7 +260,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
           </h2>
           <div className="flex items-center gap-3 text-sm text-[#736356] mb-6 font-medium">
             <Star size={16} fill="#A67045" className="text-[#A67045]" />
-            <span className="text-[#2C241E] font-bold">{avgRating}</span>
+            <span className="text-accent font-bold">{avgRating}</span>
             <span>({reviewItems.length} reviews)</span>
           </div>
 
@@ -269,7 +269,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
               href="https://www.google.com/maps"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-[#F4E8DB] py-3.5 rounded-2xl font-bold text-[#A67045] active:scale-95 transition-all shadow-sm cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 bg-primary py-3.5 rounded-2xl font-bold text-base-content active:scale-95 transition-all shadow-sm cursor-pointer"
             >
               <Navigation size={18} /> เส้นทาง
             </a>
@@ -311,7 +311,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
         />
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 px-6 py-5 bg-[#FFF8F2]/95 backdrop-blur-md border-t border-[#EEDCcc] z-50">
+      <div className="fixed bottom-0 inset-x-0 px-6 py-5 bg-base-100 backdrop-blur-md  z-50">
         <div className="flex">
           <button
             onClick={() => {
@@ -322,7 +322,7 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
                 },
               });
             }}
-            className="flex-[1.2] bg-[#A67045] text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-[#A67045]/30 active:scale-95 transition-all cursor-pointer"
+            className="flex-[1.2] bg-primary text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-[#A67045]/30 active:scale-95 transition-all cursor-pointer"
           >
             <Users size={18} /> Create Group
           </button>

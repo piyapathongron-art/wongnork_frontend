@@ -21,7 +21,7 @@ const RestaurantPartySection = ({ restaurantId }) => {
       setLoading(true);
       const res = await apiGetParties();
       const allParties = res.data?.data || [];
-      
+
       // console.log("Filtering parties for restaurant:", restaurantId);
       // console.log("All parties:", allParties);
 
@@ -32,7 +32,7 @@ const RestaurantPartySection = ({ restaurantId }) => {
           String(p.restaurantId) === String(restaurantId) &&
           (p.status === "OPEN" || p.status === "FULL"),
       );
-      
+
       // console.log("Filtered restaurant parties:", restaurantParties);
       setParties(restaurantParties);
     } catch (error) {
@@ -103,7 +103,7 @@ const RestaurantPartySection = ({ restaurantId }) => {
           ปาร์ตี้ที่กำลังเปิดอยู่
         </h3>
         <div className="bg-base-200/30 rounded-[32px] p-10 flex flex-col items-center justify-center text-center border border-dashed border-base-content/10">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+          <div className="w-16 h-16 bg-base-300 rounded-full flex items-center justify-center mb-4 shadow-sm">
             <Users size={24} className="text-base-content/20" />
           </div>
           <p className="text-sm font-bold text-base-content/60 mb-1">ยังไม่มีปาร์ตี้ที่ร้านนี้</p>
@@ -131,7 +131,7 @@ const RestaurantPartySection = ({ restaurantId }) => {
           return (
             <div key={party.id} className="min-w-[320px] max-w-[340px] flex-shrink-0">
               <PartyCard
-                party={{ ...party, dist: null }} 
+                party={{ ...party, dist: null }}
                 onJoin={() => handleJoin(party)}
                 isJoined={isJoined}
               />
