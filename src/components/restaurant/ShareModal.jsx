@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Link, MessageCircle, Send, Share2 } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const ShareModal = ({ isOpen, onClose, restaurant }) => {
   const shareUrl = restaurant?.id
@@ -38,18 +38,7 @@ const ShareModal = ({ isOpen, onClose, restaurant }) => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl);
-
-    toast.success("คัดลอกลิงก์เรียบร้อย!", {
-      icon: "🔗",
-      style: {
-        borderRadius: "16px",
-        background: "#FFF8F4",
-        color: "#A65D2E",
-        fontWeight: "bold",
-        fontSize: "14px",
-        marginBottom: "80px",
-      },
-    });
+    toast.success("คัดลอกลิงก์เรียบร้อย!", { icon: "🔗" });
   };
 
   return (

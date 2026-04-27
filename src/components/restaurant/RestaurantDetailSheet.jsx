@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bookmark, Share2, Star, Navigation } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { apiToggleSaveRestaurant, apiGetme } from "../../api/mainApi";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 // Components
 import MenuSection from "./MenuSection";

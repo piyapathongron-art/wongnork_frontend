@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../validations/schema";
 import useUserStore from "../stores/userStore";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import axios from "axios";
 

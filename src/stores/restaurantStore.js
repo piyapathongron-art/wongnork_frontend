@@ -11,7 +11,7 @@ const useRestaurantStore = create((set, get) => ({
   searchQuery: "",
   isLoading: false,
   userLocation: null,
-  isLoading: false,
+
 
   setRestaurant: (data) => set({ restaurant: data }),
   setRestaurants: (data) => {
