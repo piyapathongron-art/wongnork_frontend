@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuthLogic } from "../hooks/useAuthLogic";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import VerifyEmailModal from "../components/auth/VerifyEmailModal";
+import wongnorkLogo from "../assets/LOGO-WONGNORK2.png";
 
 const Login = () => {
   const {
@@ -29,14 +30,12 @@ const Login = () => {
   return (
     <>
       <div className="text-center mb-2 sm:mb-4 animate-fade-up">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter leading-none">
-          <span className="text-base-content block">WONG</span>
-          <span className="text-accent block">NORK</span>
-        </h1>
-        <p className="text-base-content font-medium mt-1 sm:mt-2 text-sm sm:text-base">
-          Eat | Share | Connect
-        </p>
-        <div className="w-32 sm:w-48 h-[1px] bg-base-content/20 mt-4 sm:mt-6 mx-auto"></div>
+        <img
+          src={wongnorkLogo}
+          alt="Logo"
+          className="w-40 scale-200 mt-5 mx-auto object-contain"
+        />
+        <div className="w-32 sm:w-48 h-px bg-base-content/20 mt-4 sm:mt-6 mx-auto"></div>
         <div className="text-[20px] sm:text-[25px] text-base-content font-bold mt-2 sm:mt-3">
           Sign in
         </div>
