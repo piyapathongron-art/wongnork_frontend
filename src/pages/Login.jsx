@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuthLogic } from "../hooks/useAuthLogic";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import VerifyEmailModal from "../components/auth/VerifyEmailModal";
+import { Link } from "react-router";
 
 const Login = () => {
   const {
@@ -78,12 +79,12 @@ const Login = () => {
                 <label className="text-[9px] font-black text-base-content/50 uppercase tracking-[0.2em]">
                   Password
                 </label>
-                {/* <button
-                  type="button"
-                  className="text-[9px] font-black text-accent uppercase hover:underline cursor-pointer"
-                >
-                  Forgot Password?
-                </button> */}
+               {/* ในหน้า Login.jsx ใต้ช่องกรอกรหัสผ่าน */}
+<div className="flex justify-end mt-1">
+  <Link to="/forgot-password" className="text-xs text-[#A65D2E] font-semibold hover:underline">
+    Forgot Password?
+  </Link>
+</div>
               </div>
               <div className="relative">
                 <Lock
