@@ -18,6 +18,7 @@ import {
 
 import MenuSection from "../components/restaurant/MenuSection";
 import ReviewSection from "../components/restaurant/ReviewSection";
+import RestaurantPartySection from "../components/restaurant/RestaurantPartySection";
 import {
   useLocation,
   useNavigate,
@@ -287,8 +288,13 @@ const RestaurantDetail = ({ restaurant: propRestaurant, onBack } = {}) => {
         </p>
       </section>
 
+      {/* 🌟 แสดงปาร์ตี้ที่กำลังดำเนินการ */}
+      <section className="px-6 mt-10">
+        <RestaurantPartySection restaurantId={restaurant.id} />
+      </section>
+
       {/* 🌟 ส่งเมนูไปแสดงผล */}
-      <div className="mt-12">
+      <div className="mt-4">
         <MenuSection
           menuItems={menuItems}
           restaurant={restaurant}

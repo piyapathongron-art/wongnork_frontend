@@ -11,6 +11,7 @@ import ReviewSection from "./ReviewSection";
 import ShareModal from "./ShareModal";
 import AllReviews from "./AllReviews";
 import AllMenus from "./AllMenus";
+import RestaurantPartySection from "./RestaurantPartySection";
 
 // Stores
 import useRestaurantStore from "../../stores/restaurantStore";
@@ -260,6 +261,7 @@ const RestaurantDetailSheet = ({ isOpen, restaurant, onClose, onExpand }) => {
 
                 {/* Sections */}
                 <div className="space-y-10">
+                  <RestaurantPartySection restaurantId={restaurant.id} />
                   <MenuSection
                     menuItems={menuItems}
                     restaurant={restaurant}
