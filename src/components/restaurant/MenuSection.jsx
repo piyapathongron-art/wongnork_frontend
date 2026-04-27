@@ -73,19 +73,19 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
           {sortedMenu.map((menu, index) => (
             <div
               key={menu.id || index}
-              className="shrink-0 w-[240px] snap-center rounded-[2rem] overflow-hidden bg-base-200 p-4 flex flex-col shadow-sm border border-base-300 relative group shrink-0" 
+              className="shrink-0 w-[240px] snap-center rounded-[2rem] overflow-hidden bg-base-200 p-4 flex flex-col shadow-sm border border-base-300 relative group shrink-0"
             >
               {isRealOwner && (
                 <div className="absolute top-3 right-3 flex gap-2 z-10">
                   <button onClick={() => handleEditClick(menu)}
                     className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
                     title="แก้ไขเมนู">
-                      <Pencil size={14}/>
+                    <Pencil size={14} />
                   </button>
                   <button onClick={() => handleDelete(menu.id)}
                     className="p-2 bg-white/90 hover:bg-white text-blue-600 rounded-full shadow-md transition-all"
                     title="ลบเมนู">
-                      <Trash2 size={14}/>
+                    <Trash2 size={14} />
                   </button>
                 </div>
               )}
@@ -105,7 +105,7 @@ const MenuSection = ({ menuItems, onViewAllClick, restaurant, onMenuUpdate }) =>
                   {menu.description || "เมนูแสนอร่อยจากทางร้าน"}
                 </p>
                 <div className="mt-auto flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-accent/60 bg-white/40 px-2 py-1 rounded-lg">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-base-content bg-primary px-2 py-1 rounded-lg">
                     {menu.category === "Recommend" ? "แนะนำ" : "ทั่วไป"}
                   </span>
                   <p className="font-black text-lg text-accent">

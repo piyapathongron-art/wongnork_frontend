@@ -3,6 +3,8 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import AppLayout from "../layouts/AppLayout";
 import Party from "../pages/Party";
 import RestaurantDetail from "../pages/RestaurantDetail"; // หน้า Slide-up ข้อมูลร้านอาหารที่ปักหมุด
+import ResetPassword from "../pages/ResetPassword";
+import ForgotPassword from "../pages/ForgotPassword";
 
 // Layouts
 const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/reset-password/:id/:token", element: <ResetPassword /> },
     ],
   },
 

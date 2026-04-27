@@ -1,30 +1,9 @@
-import React, {useState, useEffect} from "react";
+import React from "react";
 import { Star, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router";
-import calculateDistance from "../../utils/distance.ustils";
 
 const RestaurantCard = ({ restaurant }) => {
   const navigate = useNavigate();
-  const [userLocation, setUserlocation] = useState(null)
-
-  useEffect(() => {
-    if(navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {setUserlocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        })},
-        (error) => console.log("Location access denied")
-      )
-    }
-  }, [])
-
-  const distance = userLocation ? calculateDistance(
-    userLocation.lat,
-    userLocation.lng,
-    restaurant.lat,
-    restaurant.lng
-  ) : null
 
   // จัดการรูปภาพ
   const coverImage =
@@ -37,16 +16,16 @@ const RestaurantCard = ({ restaurant }) => {
   const avgRating =
     reviewCount > 0
       ? (
-          restaurant.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-        ).toFixed(1)
+        restaurant.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+      ).toFixed(1)
       : "New";
 
   return (
     <div
       onClick={() => navigate(`/restaurants/${restaurant.id}`)}
-      className="bg-base-100 rounded-3xl p-4 flex gap-4 shadow-sm border border-base-content/10 active:scale-95 transition-transform cursor-pointer"
+      className="bg-base-300 rounded-3xl p-4 flex gap-4 shadow-sm border border-[#EEE2D1]/50 active:scale-95 transition-transform cursor-pointer"
     >
-      <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-base-300">
+      <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#EAD9CF]">
         <img
           src={coverImage}
           alt={restaurant.name}
@@ -55,23 +34,23 @@ const RestaurantCard = ({ restaurant }) => {
       </div>
       <div className="flex-1 flex flex-col justify-center">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-bold text-base-content text-[15px] line-clamp-1">
+          <h3 className="font-bold text-primary text-[15px] line-clamp-1">
             {restaurant.name}
           </h3>
           <ChevronRight size={16} className="text-[#A8A29F] shrink-0" />
         </div>
-        <p className="text-[11px] text-accent font-bold uppercase tracking-wider mb-2">
+        <p className="text-[11px] text-[#A65D2E] font-bold uppercase tracking-wider mb-2">
           {restaurant.category || "ทั่วไป"}
         </p>
-        <div className="flex items-center gap-3 text-[11px] text-base-content/50 font-medium mt-auto">
+        <div className="flex items-center gap-3 text-[11px] text-[#8B837E] font-medium mt-auto">
           <div className="flex items-center gap-1">
             <Star size={12} fill="#F59E0B" className="text-[#F59E0B]" />
-            <span className="text-base-content font-bold">{avgRating}</span>
+            <span className=" font-bold">{avgRating}</span>
             {reviewCount > 0 && <span>({reviewCount})</span>}
           </div>
           <div className="flex items-center gap-1">
-            <MapPin size={12} className="text-accent" />
-            <span>{distance !== null ? `${distance.toFixed(1)} km` : "Calculating ..."}</span>
+            <MapPin size={12} className="text-[#A65D2E]" />
+            <span>2.5 km</span>
           </div>
         </div>
       </div>

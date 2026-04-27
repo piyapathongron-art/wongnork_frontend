@@ -33,7 +33,7 @@ const Register = () => {
           className="w-40 scale-200 -mt-20 mx-auto origin-center md:w-56 md:scale-150 md:mt-4 object-contain"
         />
         <div className="w-32 sm:w-48 h-[1px] bg-gray-300 mt-4 sm:mt-6 mx-auto"></div>
-        <div className="text-[20px] sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
+        <div className="text-base-content sm:text-[25px] text-[#2D3E25] font-bold mt-2 sm:mt-3">
           Sign up
         </div>
       </div>
