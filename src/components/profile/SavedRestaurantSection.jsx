@@ -21,14 +21,14 @@ const SavedRestaurantSection = ({ savedRestaurants, handleToggleSave, formatDate
 
                         return (
 
-                            <div key={saved.id || index} className="flex-none w-64 bg-base-100 rounded-3xl overflow-hidden shadow-sm border border-base-content/10" onClick={() => navigate(`/restaurants/${restaurant.id}`)}>
+                            <div key={saved.id || index} className="flex-none w-64 bg-base-200 rounded-3xl overflow-hidden shadow-sm border border-base-content/10" onClick={() => navigate(`/restaurants/${restaurant.id}`)}>
                                 <div className="w-full h-32 bg-base-300">
                                     <img alt={restaurant.name} className="w-full h-full object-cover" src={imageUrl} />
                                 </div>
                                 <div className="p-4 flex justify-between items-start">
                                     <div className="truncate pr-2">
                                         <h4 className="font-bold text-sm text-base-content truncate">{restaurant.name || 'ไม่ทราบชื่อร้าน'}</h4>
-                                        <p className="text-[10px] text-[#A8A29F] mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
+                                        <p className="text-[10px] text-base-content/40 mt-0.5">Saved: {formatDate(saved.savedAt)}</p>
                                     </div>
                                     <button
                                         onClick={() => handleToggleSave(restaurant.id)}

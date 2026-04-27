@@ -42,7 +42,7 @@ const NavBar = () => {
 
     return (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none">
-            <nav className="w-full max-w-[420px] bg-base-200 h-[65px] rounded-[45px] flex items-center justify-between px-5 shadow-xl border border-base-content/10 pointer-events-auto">
+            <nav className="w-full max-w-[420px] bg-base-300 h-[65px] rounded-[45px] flex items-center justify-between px-5 shadow-xl border border-base-content/10 pointer-events-auto">
 
                 {/* 1. Ai Recommend */}
                 <div
