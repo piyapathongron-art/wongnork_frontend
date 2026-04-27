@@ -71,52 +71,52 @@ const ProfileQuickViewSheet = ({ isOpen, userId, onClose, navigate }) => {
                                 onClose();
                             }
                         }}
-                        className="absolute inset-x-0 bottom-0 bg-[#FFF8F5] rounded-t-[3rem] shadow-2xl flex flex-col h-[95vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto border-t border-[#EEE2D1]"
+                        className="absolute inset-x-0 bottom-0 bg-base-100 rounded-t-[3rem] shadow-2xl flex flex-col h-[95vh] max-w-[500px] mx-auto overflow-hidden pointer-events-auto border-t border-base-content/10"
                     >
                         {/* Drag Handle */}
                         <div className="w-full flex justify-center py-4 shrink-0 cursor-grab active:cursor-grabbing">
-                            <div className="w-12 h-1.5 bg-[#EEE2D1] rounded-full" />
+                            <div className="w-12 h-1.5 bg-base-content/10 rounded-full" />
                         </div>
 
                         <div className="px-8 pb-12 flex-1 overflow-y-auto no-scrollbar">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-                                    <div className="w-24 h-24 bg-[#EAD9CF] rounded-full mb-4" />
-                                    <div className="h-6 w-32 bg-[#EAD9CF] rounded-lg mb-2" />
-                                    <div className="h-4 w-48 bg-[#EAD9CF] rounded-lg" />
+                                    <div className="w-24 h-24 bg-base-300 rounded-full mb-4" />
+                                    <div className="h-6 w-32 bg-base-300 rounded-lg mb-2" />
+                                    <div className="h-4 w-48 bg-base-300 rounded-lg" />
                                 </div>
                             ) : userData && (
                                 <div className="space-y-8">
                                     {/* User Info Header */}
                                     <div className="flex flex-col items-center text-center">
-                                        <div className="w-24 h-24 rounded-full border-4 border-white shadow-xl overflow-hidden bg-[#2D3E25] mb-4">
+                                        <div className="w-24 h-24 rounded-full border-4 border-base-100 shadow-xl overflow-hidden bg-base-300 mb-4">
                                             <img
                                                 src={userData.avatarUrl || `https://i.pravatar.cc/150?u=${userData.id}`}
                                                 alt={userData.name}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
-                                        <h2 className="text-2xl font-black text-[#2B361B] tracking-tight">{userData.name}</h2>
-                                        <p className="text-[10px] font-bold text-[#A65D2E] uppercase tracking-widest mt-1 bg-[#F7EAD7] px-3 py-1 rounded-full">
+                                        <h2 className="text-2xl font-black text-base-content tracking-tight">{userData.name}</h2>
+                                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-1 bg-primary/10 px-3 py-1 rounded-full">
                                             {userData.role === 'OWNER' ? 'Restaurant Owner' : 'Verified Member'}
                                         </p>
                                     </div>
 
                                     {/* Stats Grid */}
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-white p-5 rounded-[2rem] border border-[#EEE2D1]/50 shadow-sm text-center">
-                                            <div className="w-10 h-10 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-[#A65D2E]">
+                                        <div className="bg-base-200 p-5 rounded-[2rem] border border-base-content/5 shadow-sm text-center">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-2 text-primary">
                                                 <Star size={20} fill="currentColor" />
                                             </div>
-                                            <span className="block text-2xl font-black text-[#2B361B]">{stats.reviews}</span>
-                                            <span className="text-[9px] font-bold text-[#8B837E] uppercase tracking-wider">Reviews</span>
+                                            <span className="block text-2xl font-black text-base-content">{stats.reviews}</span>
+                                            <span className="text-[9px] font-bold text-base-content/40 uppercase tracking-wider">Reviews</span>
                                         </div>
-                                        <div className="bg-white p-5 rounded-[2rem] border border-[#EEE2D1]/50 shadow-sm text-center">
-                                            <div className="w-10 h-10 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-green-600">
+                                        <div className="bg-base-200 p-5 rounded-[2rem] border border-base-content/5 shadow-sm text-center">
+                                            <div className="w-10 h-10 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-2 text-secondary">
                                                 <Clock size={20} />
                                             </div>
-                                            <span className="block text-2xl font-black text-[#2B361B]">{stats.pastParties}</span>
-                                            <span className="text-[9px] font-bold text-[#8B837E] uppercase tracking-wider">Past Parties</span>
+                                            <span className="block text-2xl font-black text-base-content">{stats.pastParties}</span>
+                                            <span className="text-[9px] font-bold text-base-content/40 uppercase tracking-wider">Past Parties</span>
                                         </div>
                                     </div>
 
@@ -127,13 +127,13 @@ const ProfileQuickViewSheet = ({ isOpen, userId, onClose, navigate }) => {
                                                 navigate(`/profile/${userId}`);
                                                 onClose();
                                             }}
-                                            className="w-full py-5 rounded-[1.5rem] bg-[#182806] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+                                            className="w-full py-5 rounded-[1.5rem] bg-secondary text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
                                         >
                                             ดูโปรไฟล์แบบเต็ม
                                             <ChevronRight size={18} />
                                         </button>
 
-                                        <p className="text-center text-[10px] font-bold text-[#A8A29F] uppercase tracking-widest animate-bounce">
+                                        <p className="text-center text-[10px] font-bold text-base-content/30 uppercase tracking-widest animate-bounce">
                                             ↑ ลากขึ้นเพื่อดูโปรไฟล์ ↑
                                         </p>
                                     </div>
