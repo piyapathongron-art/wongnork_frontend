@@ -35,13 +35,7 @@ const PartyCard = ({ party, onJoin, onLeave, isJoined }) => {
                 ? 'border-primary ring-4 ring-primary/5 scale-[1.01] z-10'
                 : 'border-base-content/5 hover:border-primary/20 hover:shadow-md transition-all duration-300'
             }`}
-            onClick={() => {
-                if (isJoined) {
-                    onLeave();
-                } else {
-                    onJoin();
-                }
-            }}>
+        >
 
             {/* Status Dot */}
             <div className={`absolute top-5 right-5 w-2.5 h-2.5 rounded-full border-2 border-base-100 shadow-sm

@@ -318,9 +318,29 @@ const Party = () => {
       <AnimatePresence>
         {isJoinConfirmOpen && partyToJoin && (
           <div className="fixed inset-0 z-[150] flex items-center justify-center px-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !isJoining && setIsJoinConfirmOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-[#EEE2D1]">
-              <div className="relative h-40 bg-zinc-800"><img src={partyToJoin.restaurant?.images?.find(img => img.isCover)?.url || partyToJoin.restaurant?.images?.[0]?.url || "https://picsum.photos/seed/restaurant/800/400"} alt={partyToJoin.restaurant?.name} className="absolute inset-0 w-full h-full object-cover opacity-80" /><div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" /><button onClick={() => setIsJoinConfirmOpen(false)} className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors"><CloseIcon size={20} /></button><div className="absolute bottom-5 left-6 right-6"><span className="bg-[#A65D2E] text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 inline-block shadow-sm">{partyToJoin.restaurant?.category || "Restaurant"}</span><h3 className="text-white font-black text-2xl truncate leading-tight drop-shadow-md">{partyToJoin.restaurant?.name || "ร้านอาหาร"}</h3><p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">{partyToJoin.name}</p></div></div>
+
+              <div className="relative h-40 bg-zinc-800">
+                <img src={partyToJoin.restaurant?.images?.find(img => img.isCover)?.url || partyToJoin.restaurant?.images?.[0]?.url || "https://picsum.photos/seed/restaurant/800/400"} alt={partyToJoin.restaurant?.name} className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <button onClick={() => setIsJoinConfirmOpen(false)} className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors">
+                  <CloseIcon size={20} />
+                </button>
+
+                <div className="absolute bottom-5 left-6 right-6">
+                  <span className="bg-[#A65D2E] text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 inline-block shadow-sm">
+                    {partyToJoin.restaurant?.category || "Restaurant"}
+                  </span>
+                  <h3 className="text-white font-black text-2xl truncate leading-tight drop-shadow-md">
+                    {partyToJoin.restaurant?.name || "ร้านอาหาร"}
+                  </h3>
+                  <p className="text-white/70 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
+                    {partyToJoin.name}
+                  </p>
+                </div>
+              </div>
+
               <div className="p-8">
                 <div className="space-y-4 mb-8">
                   <div className="flex items-start gap-3"><div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center text-orange-500 shrink-0"><Clock size={16} /></div><div><p className="text-[10px] font-bold text-[#8B837E] uppercase">เวลานัดหมาย</p><p className="text-sm font-bold text-[#2B361B]">{new Date(partyToJoin.meetupTime).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></div>
