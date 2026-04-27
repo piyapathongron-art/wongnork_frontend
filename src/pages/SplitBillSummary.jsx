@@ -126,21 +126,16 @@ const SplitBillSummary = () => {
                     const errorMsg = joinErr.response?.data?.error || joinErr.response?.data?.message || "ไม่สามารถเข้าร่วมปาร์ตี้ได้";
                     toast.error(errorMsg);
                     setErrorObj(`Auto-Join Error: ${errorMsg}`);
-                    // navigate('/');
                     setLoading(false);
                     return;
                 }
-            } else if (!user?.id) {
-                 console.log("⚠️ [SplitBillSummary] user?.id is missing. Waiting for user store to hydrate...");
             }
 
             setParty(partyData);
 
             if (isMember || user?.role === "ADMIN") {
-                console.log("🛠️ [SplitBillSummary] Fetching split bill...");
                 const billRes = await apiGetSplitBill(id);
                 setBillSummary(billRes.data.data);
-                console.log("🛠️ [SplitBillSummary] Split bill fetched:", billRes.data.data);
             }
 
             setSettingsForm({
@@ -159,7 +154,6 @@ const SplitBillSummary = () => {
             console.error("🚨 [SplitBillSummary] Critical Error in loadData:", error);
             setErrorObj(`Critical Error: ${error.message || "ไม่สามารถดึงข้อมูลบิลได้"}`);
             toast.error("ไม่สามารถดึงข้อมูลบิลได้");
-            // navigate('/');
         } finally {
             setLoading(false);
         }
@@ -174,13 +168,25 @@ const SplitBillSummary = () => {
         if (!token || !id) return;
         const socket = getSocket(token);
         socket.emit("join_room", id);
-    }, [id]);
+
+        const handleBillUpdate = (data) => {
+            console.log("⚡ [SplitBillSummary] BILL_UPDATED received:", data);
+            if (String(data.partyId) === String(id)) {
+                loadData();
+            }
+        };
+
+        socket.on("BILL_UPDATED", handleBillUpdate);
+
+        return () => {
+            socket.off("BILL_UPDATED", handleBillUpdate);
+        };
+    }, [id, loadData]);
 
     const isLeader = party?.leaderId === user?.id;
     const isCompleted = party?.status === 'COMPLETED';
     const isPendingSettlement = party?.status === 'PENDING_SETTLEMENT';
 
-    // 🌟 Current User Payment Status
     const mySummaryInMembers = billSummary?.members?.find(m => m.user.id === user?.id);
     const myPaymentStatus = mySummaryInMembers?.paymentStatus || 'PENDING';
     const isMyPaymentLocked = myPaymentStatus === 'PAID' || myPaymentStatus === 'VERIFIED';
@@ -338,7 +344,7 @@ const SplitBillSummary = () => {
         try {
             await apiVerifyPayment(id, userId);
             toast.success("ยืนยันยอดเงินเรียบร้อย ✅");
-            setMemberToManage(null); // Close modal
+            setMemberToManage(null);
             await loadData();
         } catch (error) {
             toast.error("ไม่สามารถยืนยันได้");
@@ -352,7 +358,7 @@ const SplitBillSummary = () => {
         try {
             await apiCancelPayment(id);
             toast.success("ยกเลิกการแจ้งโอนแล้ว คุณสามารถแก้ไขรายการอาหารได้");
-            setMemberToManage(null); // Close modal
+            setMemberToManage(null);
             await loadData();
         } catch (error) {
             toast.error("ยกเลิกไม่สำเร็จ");
@@ -512,7 +518,6 @@ const SplitBillSummary = () => {
                 {activeTab === 'payments' && (
                     <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         
-                        {/* PromptPay Alert for Members */}
                         {!isLeader && !party?.leader?.promptPayNumber && (
                              <div className="p-5 rounded-3xl bg-red-50 border border-red-100 flex items-start gap-4">
                                 <div className="w-12 h-12 bg-white text-red-500 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-red-100"><AlertCircle size={24} strokeWidth={2.5} /></div>
@@ -523,7 +528,6 @@ const SplitBillSummary = () => {
                             </div>
                         )}
 
-                        {/* Payment Button for Members */}
                         {!isLeader && party?.leader?.promptPayNumber && (
                             <button 
                                 onClick={() => setIsPaymentModalOpen(true)}
@@ -542,7 +546,6 @@ const SplitBillSummary = () => {
                             </button>
                         )}
 
-                        {/* Leader Bill Settings */}
                         {isLeader && (
                             <div className="bg-white border border-[#EEE2D1] rounded-[2.5rem] p-6 shadow-sm transition-all">
                                 <div className="flex justify-between items-center mb-6">
@@ -572,7 +575,6 @@ const SplitBillSummary = () => {
                             </div>
                         )}
 
-                        {/* Payment Tracking Dashboard */}
                         <div className="flex justify-between items-center px-1">
                             <h3 className="text-[10px] font-bold text-[#8B837E] uppercase tracking-[0.2em]">สรุปการโอนเงินรายคน</h3>
                             {myPaymentStatus === 'PENDING' && mySummary.summary.netTotal > 0 && (
@@ -626,7 +628,6 @@ const SplitBillSummary = () => {
                 {isLeader && !isCompleted && (<button onClick={() => setIsCompleteModalOpen(true)} className="w-full mt-12 mb-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-sm shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"><Check size={18} strokeWidth={3} /> ปิดจ็อบปาร์ตี้และสรุปยอดบิล</button>)}
             </main>
 
-            {/* 🌟 Footer: My Total */}
             <div className="absolute bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] border-t border-[#EEE2D1] p-6 pb-10">
                 <div className="max-w-md mx-auto">
                     <div className="flex justify-between items-center mb-1">
@@ -647,7 +648,6 @@ const SplitBillSummary = () => {
                 </div>
             </div>
 
-            {/* 🚀 To the Top Button */}
             <AnimatePresence>{showBackToTop && (<motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} onClick={scrollToTop} className="fixed bottom-40 right-6 w-12 h-12 bg-white border border-[#EEE2D1] text-[#182806] rounded-full shadow-xl z-50 flex items-center justify-center active:scale-90 transition-transform"><ArrowUp size={20} /></motion.button>)}</AnimatePresence>
 
             <GroupChatOverlay isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} party={party} user={user} />
@@ -674,14 +674,13 @@ const SplitBillSummary = () => {
                 )}
             </AnimatePresence>
 
-            {/* 🌟 NEW: Member Payment Action Modal */}
             <AnimatePresence>
                 {memberToManage && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-end sm:items-center justify-center p-4">
                         <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} className="bg-base-100 w-full max-w-sm rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative">
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
-                                    <img src={memberToManage.user.avatarUrl || `https://i.pravatar.cc/150?u=${memberToManage.user.id}`} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+                                    <img src={memberToManage.user.avatarUrl || `https://i.pravatar.cc/150?u=${memberToManage.user.id}`} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt={memberToManage.user.name} />
                                     <div>
                                         <h3 className="font-black text-[#2B361B] text-lg leading-tight">{memberToManage.user.name}</h3>
                                         <p className="text-[10px] font-bold text-primary uppercase">ยอดโอน: ฿{Math.max(0, Math.ceil(memberToManage.summary.netTotal)).toLocaleString()}</p>
@@ -693,7 +692,7 @@ const SplitBillSummary = () => {
                             <div className="space-y-6">
                                 {memberToManage.paymentSlipUrl ? (
                                     <div className="relative group">
-                                        <img src={memberToManage.paymentSlipUrl} className="w-full h-64 object-contain rounded-2xl bg-base-200 border border-base-content/5" />
+                                        <img src={memberToManage.paymentSlipUrl} className="w-full h-64 object-contain rounded-2xl bg-base-200 border border-base-content/5" alt="Slip" />
                                         <button onClick={() => window.open(memberToManage.paymentSlipUrl, '_blank')} className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md p-2 rounded-xl text-primary shadow-lg active:scale-95 transition-all"><ExternalLink size={16} /></button>
                                     </div>
                                 ) : (
@@ -704,7 +703,6 @@ const SplitBillSummary = () => {
                                 )}
 
                                 <div className="flex flex-col gap-3">
-                                    {/* Action for Leader */}
                                     {isLeader && memberToManage.paymentStatus === 'PAID' && (
                                         <button 
                                             onClick={() => handleVerifyPayment(memberToManage.user.id)}
@@ -715,7 +713,6 @@ const SplitBillSummary = () => {
                                         </button>
                                     )}
 
-                                    {/* Action for Member themself */}
                                     {memberToManage.user.id === user?.id && memberToManage.paymentStatus === 'PAID' && (
                                         <button 
                                             onClick={handleCancelPayment}
@@ -736,7 +733,6 @@ const SplitBillSummary = () => {
 
             <AnimatePresence>{isCompleteModalOpen && (<div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center px-6"><motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl"><div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><Check size={40} strokeWidth={3} /></div><h3 className="text-xl font-black text-[#2B361B] mb-3">ยืนยันการสรุปยอดบิล?</h3><p className="text-sm text-[#8B837E] mb-8 leading-relaxed">เมื่อยืนยันแล้ว สมาชิกจะไม่สามารถแก้ไขรายการหรือร่วมหารเพิ่มได้อีก คุณแน่ใจใช่หรือไม่?</p><div className="flex gap-3"><button onClick={() => setIsCompleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-[#8B837E] rounded-xl font-bold text-sm active:scale-95 transition-all">ยังก่อน</button><button onClick={handleCompleteParty} disabled={actionLoading} className="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all">ใช่, ปิดจ็อบเลย</button></div></motion.div></div>)}</AnimatePresence>
 
-            {/* 🌟 NEW: Delete Item Confirmation Modal */}
             <AnimatePresence>
                 {itemToDelete && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center px-6">

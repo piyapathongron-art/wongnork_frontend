@@ -137,7 +137,20 @@ const SplitBillMenu = () => {
         if (!token || !id) return;
         const socket = getSocket(token);
         socket.emit("join_room", id);
-    }, [id]);
+
+        const handleBillUpdate = (data) => {
+            console.log("⚡ [SplitBillMenu] BILL_UPDATED received:", data);
+            if (String(data.partyId) === String(id)) {
+                loadData();
+            }
+        };
+
+        socket.on("BILL_UPDATED", handleBillUpdate);
+
+        return () => {
+            socket.off("BILL_UPDATED", handleBillUpdate);
+        };
+    }, [id, loadData]);
 
     const handleScroll = (e) => {
         if (e.target.scrollTop > 400) setShowBackToTop(true);
