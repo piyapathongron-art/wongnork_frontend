@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { apiCloudinary } from "../api/mainApi";
 
 /**
@@ -37,7 +37,7 @@ const uploadCloudinary = async (file, toastContainerId) => {
     return resp.data.secure_url;
   } catch (err) {
     console.error("Upload Cloudinary Error:", err);
-    toast.error("Upload Image Error", { containerId: toastContainerId });
+    toast.error("อัปโหลดรูปภาพไม่สำเร็จ");
     throw err;
   }
 };

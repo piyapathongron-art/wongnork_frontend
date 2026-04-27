@@ -2,11 +2,11 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import AppLayout from "../layouts/AppLayout";
 import Party from "../pages/Party";
+import RestaurantDetail from "../pages/RestaurantDetail"; // หน้า Slide-up ข้อมูลร้านอาหารที่ปักหมุด
 
 // Layouts
 const AuthLayout = lazy(() => import("../layouts/AuthLayout")); // Layout สำหรับ Login/Register
 const ProtectedRoute = lazy(() => import("../layouts/ProtectedRoute")); // Wrapper กันคนยังไม่ Login
-import RestaurantDetail from "../pages/RestaurantDetail"; // หน้า Slide-up ข้อมูลร้านอาหารที่ปักหมุด
 
 // Auth Pages
 const Login = lazy(() => import("../pages/Login"));
@@ -15,7 +15,6 @@ const Register = lazy(() => import("../pages/Register"));
 // Main Tab Pages (Bottom Nav)
 const HomeMap = lazy(() => import("../pages/HomeMap"));
 const AiRecommend = lazy(() => import("../pages/AiRecommend"));
-const MyParties = lazy(() => import("../pages/MyParties"));
 const Restaurants = lazy(() => import("../pages/Restaurants"));
 const Profile = lazy(() => import("../pages/Profile"));
 
@@ -55,7 +54,6 @@ const router = createBrowserRouter([
         element: <Restaurants />,
         children: [{ path: ":id", element: <RestaurantDetail /> }],
       },
-      { path: "/my-parties", element: <MyParties /> },
       { path: "/party", element: <Party /> },
       { path: "/ai-recommend", element: <AiRecommend /> },
       {

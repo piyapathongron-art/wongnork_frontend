@@ -4,7 +4,7 @@ import { X, Pencil, Trash2, Search } from "lucide-react"; // 🌟 เปลี�
 import useUserStore from "../../stores/userStore";
 import { apiDeleteMenu } from "../../api/menuApi";
 import AddMenuModal from "../Modals/AddMenuModal";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const AllMenus = ({
   isOpen,

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { apiGetme, apiUpdateProfile, apiToggleSaveRestaurant, apiGetPublicProfile } from '../api/mainApi';
 import uploadCloudinary from '../utils/cloudinary';
 import useUserStore from '../stores/userStore';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { LucideChefHat, AlertCircle, ArrowLeft, Settings, LogOut, Landmark, User, Camera, X, SunIcon, MoonIcon } from 'lucide-react';
 import SavedRestaurantSection from '../components/profile/SavedRestaurantSection';
 import ReviewSection from '../components/profile/ReviewSection';
@@ -11,96 +11,60 @@ import MyRestaurantsSection from '../components/profile/MyRestaurantsSection';
 import PartySection from '../components/profile/PartySection';
 import HistoryModal from '../components/profile/HistoryModal';
 import { AnimatePresence, motion } from 'framer-motion';
-import ThemeToggleButton from '../components/ThemeToggleButton';
 import { useThemeStore } from '../stores/themeStore';
-
-// Helper functions for dates
-const formatDate = (isoString) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-};
-
-const formatTime = (isoString) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-};
+import EditProfileModal from '../components/Modals/EditProfileModal';
+import AccessDeniedModal from '../components/Modals/AlertModals/AccessDeniedModal';
+import SettingButton from '../components/profile/SettingButton';
+import useFetchProfile from '../hooks/useFetchProfile';
+import useEditProfile from '../hooks/useEditProfile';
+import formatDate from '../utils/formatDate';
+import formatTime from '../utils/formatTime';
 
 const Profile = () => {
     const { id } = useParams();
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
-
     const currentUser = useUserStore((state) => state.user);
-    const logout = useUserStore((state) => state.logout);
 
-    // Determine if this is my own profile
     const isMe = !id || id === currentUser?.id;
 
-    // 🌟 State สำหรับ Modal แก้ไข
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [editForm, setEditForm] = useState({
-        name: '',
-        avatarUrl: '',
-        promptPayNumber: '',
-        promptPayName: ''
-    });
+    const {
+        userData,
+        setUserData,
+        loading,
+        setLoading,
+        error,
+        setError,
+        editForm,
+        setEditForm,
+    } = useFetchProfile(id, isMe);
 
-    // 🌟 State สำหรับ Modal ประวัติ
+    const {
+        isEditModalOpen,
+        setIsEditModalOpen,
+        isSaving,
+        previewUrl,
+        handleFileChange,
+        handleSaveProfile,
+        handleCancelEdit
+    } = useEditProfile({ userData, setUserData, editForm, setEditForm });
+
+    // สำหรับ Modal ประวัติ
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-    // 🌟 State สำหรับแจ้งเตือนเข้าปาร์ตี้คนอื่นไม่ได้
+    // สำหรับแจ้งเตือนเข้าปาร์ตี้คนอื่นไม่ได้
     const [isAccessDeniedModalOpen, setIsAccessDeniedModalOpen] = useState(false);
 
-    // 🌟 สำหรับจัดการอัปโหลดรูปภาพ
-    const fileInputRef = useRef(null);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState('');
-
-    const toggleTheme = useThemeStore((state) => state.toggleTheme)
-    const isDark = useThemeStore((state) => state.isDark)
-
-
-
-    //  ดึงข้อมูลโปรไฟล์เมื่อเข้ามาที่หน้า
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                setLoading(true);
-                const response = isMe ? await apiGetme() : await apiGetPublicProfile(id);
-                const userObj = response.data.data;
-                setUserData(userObj);
-
-                setEditForm({
-                    name: userObj.name || '',
-                    avatarUrl: userObj.avatarUrl || '',
-                    promptPayNumber: userObj.promptPayNumber || '',
-                    promptPayName: userObj.promptPayName || ''
-                });
-            } catch (err) {
-                console.error("Error fetching profile:", err);
-                setError('ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUserProfile();
-    }, [id, isMe]);
-
     const handleLogout = async () => {
-        if (logout) {
+        try {
             await logout();
+            toast.success("ออกจากระบบสำเร็จ");
+            navigate("/");
+        } catch (err) {
+            toast.error("เกิดข้อผิดพลาด");
         }
-        localStorage.removeItem('token');
-        navigate('/login');
-    };
+    }
 
-    // 🌟 ฟังก์ชันจัดการเมื่อคลิกที่ปาร์ตี้
+    // สำหรับจัดการเมื่อคลิกที่ปาร์ตี้
     const handlePartyClick = (party) => {
         // เช็คว่าเป็นเจ้าของโปรไฟล์ หรือ เป็นสมาชิกในปาร์ตี้นั้นไหม
         const isMember = party.members?.some(m => m.user.id === currentUser?.id);
@@ -113,55 +77,8 @@ const Profile = () => {
         }
     };
 
-    // 🌟 ฟังก์ชันจัดการเมื่อเลือกไฟล์รูปใหม่
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
-        }
-    };
 
-    // 🌟 ฟังก์ชันกด Save Profile
-    const handleSaveProfile = async () => {
-        setIsSaving(true);
-        try {
-            let finalAvatarUrl = editForm.avatarUrl;
-
-            if (selectedFile) {
-                finalAvatarUrl = await uploadCloudinary(selectedFile, "toast-container");
-            }
-
-            const updateData = {
-                name: editForm.name,
-                avatarUrl: finalAvatarUrl,
-                promptPayNumber: editForm.promptPayNumber,
-                promptPayName: editForm.promptPayName
-            };
-
-            await apiUpdateProfile(updateData);
-
-            setUserData(prev => ({
-                ...prev,
-                name: updateData.name,
-                avatarUrl: updateData.avatarUrl,
-                promptPayNumber: updateData.promptPayNumber,
-                promptPayName: updateData.promptPayName
-            }));
-            setIsEditModalOpen(false);
-            setSelectedFile(null);
-            setPreviewUrl('');
-            toast.success("อัปเดตโปรไฟล์เรียบร้อย!");
-
-        } catch (err) {
-            console.error("Error saving profile:", err);
-            toast.error("เกิดข้อผิดพลาดในการบันทึก");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    // 🌟 ฟังก์ชันจัดการการกดเอา Save ออก (Unsave)
+    // สำหรับจัดการการกดเอา Save ออก (Unsave)
     const handleToggleSave = async (restaurantId) => {
         try {
             // ยิง API ไปเอาออกหลังบ้าน
@@ -180,18 +97,7 @@ const Profile = () => {
         }
     };
 
-    const handleCancelEdit = () => {
-        setEditForm({
-            name: userData.name,
-            avatarUrl: userData.avatarUrl || '',
-            promptPayNumber: userData.promptPayNumber || '',
-            promptPayName: userData.promptPayName || ''
-        });
-        setPreviewUrl('');
-        setSelectedFile(null);
-        setIsEditModalOpen(false);
-    };
-
+    // สำหรับจัดการ loading
     if (loading) {
         return (
             <div className="w-full min-h-screen flex justify-center items-center bg-base-100">
@@ -200,6 +106,7 @@ const Profile = () => {
         );
     }
 
+    // สำหรับจัดการ error
     if (error || !userData) {
         return (
             <div className="w-full min-h-screen flex flex-col justify-center items-center bg-base-100 px-6">
@@ -211,6 +118,7 @@ const Profile = () => {
         );
     }
 
+    // สำหรับดึงข้อมูล
     const reviews = userData.reviews || [];
     const joinedParties = userData.joinedParties || [];
     const partiesLed = userData.partiesLed || [];
@@ -251,47 +159,9 @@ const Profile = () => {
                 )}
                 <h1 className="text-xl font-black text-primary flex-1">{isMe ? 'My Profile' : 'Profile'}</h1>
                 {isMe && (
-                    <div className='dropdown dropdown-end'>
-                        <div tabIndex={0} role='button' className='p-2 rounded-full hover:bg-base-200 text-accent transition-colors'>
-                            <Settings size={24} />
-                        </div>
-                        <ul tabIndex={0} className='dropdown-content menu bg-base-100 rounded-[2.5rem] z-50 shadow-2xl w-64 p-3 mt-4 border border-base-content/10 ring-1 ring-black/5'>
-                            <div className='px-4 py-2 mb-1'>
-                                <span className='text-[10px] font-black uppercase tracking-widest text-base-content/40'>Settings</span>
-                            </div>
-
-                            <li>
-                                <button onClick={() => setIsEditModalOpen(true)} className='flex items-center gap-3 p-3 rounded-2xl hover:bg-primary/10 text-base-content font-bold transition-all active:scale-95'>
-                                    <div className='w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary'>
-                                        <User size={18} />
-                                    </div>
-                                    <span>Edit Profile</span>
-                                </button>
-                            </li>
-
-                            <li onClick={toggleTheme}>
-                                <div className='flex justify-between items-center p-3 rounded-2xl hover:bg-base-200 active:bg-transparent group transition-all'>
-                                    <div className='flex items-center gap-3'>
-                                        <div className='w-9 h-9 rounded-full bg-base-200 group-hover:bg-primary/10 flex items-center justify-center transition-colors'>
-                                            {isDark ? <MoonIcon className="w-4 h-4 text-primary transition-colors" /> : <SunIcon className="w-4 h-4 text-primary transition-colors" />}
-                                        </div>
-                                        <span className='font-bold'>Appearance</span>
-                                    </div>
-                                </div>
-                            </li>
-
-                            <div className='h-px bg-base-content/10 my-2 mx-3' />
-
-                            <li>
-                                <button onClick={handleLogout} className='flex items-center gap-3 p-3 rounded-2xl hover:bg-red-500/10 text-red-500 font-bold transition-all active:scale-95'>
-                                    <div className='w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center text-red-500'>
-                                        <LogOut size={18} />
-                                    </div>
-                                    <span>Sign Out</span>
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
+                    <SettingButton
+                        setIsEditModalOpen={setIsEditModalOpen}
+                    />
                 )}
             </header>
 
@@ -362,102 +232,15 @@ const Profile = () => {
 
             <AnimatePresence>
                 {isEditModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={handleCancelEdit}
-                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ y: "100%" }}
-                            animate={{ y: 0 }}
-                            exit={{ y: "100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="relative bg-base-100 w-full max-w-lg rounded-t-[3rem] sm:rounded-[3rem] p-8 shadow-2xl border-t sm:border border-base-content/10 max-h-[90vh] overflow-y-auto no-scrollbar"
-                        >
-                            <div className="flex justify-between items-center mb-8">
-                                <h2 className="text-2xl font-black text-primary tracking-tight">Edit Profile</h2>
-                                <button onClick={handleCancelEdit} className="p-2 bg-base-200 rounded-full hover:bg-base-300 transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-8">
-                                <div className="flex flex-col items-center">
-                                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
-                                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-base-100 shadow-xl bg-base-300 ring-4 ring-primary/10 transition-all group-hover:ring-primary/20">
-                                            <img
-                                                src={previewUrl || editForm.avatarUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80'}
-                                                alt="Avatar Preview"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="absolute bottom-1 right-1 bg-primary text-white p-2.5 rounded-full shadow-lg border-2 border-base-100 group-hover:scale-110 transition-transform">
-                                            <Camera size={20} />
-                                        </div>
-                                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-                                    </div>
-                                    <p className="text-[10px] font-black text-base-content/30 uppercase mt-4 tracking-widest">Tap to change photo</p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-primary uppercase ml-2 tracking-widest">Display Name</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.name}
-                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                            className="w-full bg-base-200 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
-                                            placeholder="Your Display Name"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
-                                                <Landmark size={12} /> PromptPay Number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={editForm.promptPayNumber}
-                                                onChange={(e) => setEditForm({ ...editForm, promptPayNumber: e.target.value })}
-                                                className="w-full bg-base-200 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
-                                                placeholder="08x-xxx-xxxx"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-base-content/30 uppercase ml-2 tracking-widest">Account Holder Name</label>
-                                            <input
-                                                type="text"
-                                                value={editForm.promptPayName}
-                                                onChange={(e) => setEditForm({ ...editForm, promptPayName: e.target.value })}
-                                                className="w-full bg-base-200 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 ring-primary/20 transition-all outline-none"
-                                                placeholder="Firstname Lastname"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-4 pt-4">
-                                    <button
-                                        onClick={handleCancelEdit}
-                                        className="flex-1 py-4 rounded-2xl font-black text-sm bg-base-200 text-base-content hover:bg-base-300 transition-all active:scale-95"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleSaveProfile}
-                                        disabled={isSaving}
-                                        className="flex-[2] py-4 rounded-2xl font-black text-sm bg-primary text-white shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50"
-                                    >
-                                        {isSaving ? 'Saving...' : 'Save Changes'}
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
+                    <EditProfileModal
+                        editForm={editForm}
+                        setEditForm={setEditForm}
+                        previewUrl={previewUrl}
+                        handleFileChange={handleFileChange}
+                        handleSaveProfile={handleSaveProfile}
+                        isSaving={isSaving}
+                        handleCancelEdit={handleCancelEdit}
+                    />
                 )}
             </AnimatePresence>
 
@@ -472,33 +255,10 @@ const Profile = () => {
 
             <AnimatePresence>
                 {isAccessDeniedModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center px-6">
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setIsAccessDeniedModalOpen(false)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-base-100 w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl border border-base-content/10"
-                        >
-                            <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6 text-error">
-                                <AlertCircle size={40} strokeWidth={2.5} />
-                            </div>
-                            <h3 className="text-xl font-black text-base-content mb-2 tracking-tight">Access Denied ⚠️</h3>
-                            <p className="text-sm text-base-content/50 mb-8 leading-relaxed">
-                                This party is private. <br /> Only table members can access the bill.
-                            </p>
-                            <button
-                                onClick={() => setIsAccessDeniedModalOpen(false)}
-                                className="w-full py-4 rounded-2xl font-black text-sm bg-base-content text-base-100 shadow-lg active:scale-[0.98] transition-all"
-                            >
-                                Got it
-                            </button>
-                        </motion.div>
-                    </div>
+                    <AccessDeniedModal
+                        isAccessDeniedModalOpen={isAccessDeniedModalOpen}
+                        setIsAccessDeniedModalOpen={setIsAccessDeniedModalOpen}
+                    />
                 )}
             </AnimatePresence>
 

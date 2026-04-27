@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Send, Smile, User as UserIcon, Image, Loader2, X as CloseIcon } from 'lucide-react';
 import useUserStore from '../stores/userStore';
@@ -7,17 +8,17 @@ import { getSocket } from '../services/socket';
 import { apiGetMessage } from '../api/socketApi';
 import { useSocket } from '../hooks/useSocket';
 import uploadCloudinary from '../utils/cloudinary';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     const [chatInput, setChatInput] = useState('');
     const [typingUser, setTypingUser] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
-    
+
     // 🌟 New states for staged image
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    
+
     const chatEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
     const imageInputRef = useRef(null);
@@ -84,7 +85,7 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
     // 🌟 4. ส่งข้อความ (Combined Image + Text)
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
-        
+
         if ((!chatInput.trim() && !selectedImageFile) || isUploading || !party?.id || isPartyClosed) return;
 
         setIsUploading(true);
@@ -193,13 +194,13 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                                         {msgUser.name}
                                                     </span>
                                                 )}
-                                                
+
                                                 {/* Image Rendering */}
                                                 {msg.imageUrl && (
                                                     <div className={`mb-1 overflow-hidden rounded-2xl border-2 border-white shadow-sm bg-base-200 ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
-                                                        <img 
-                                                            src={msg.imageUrl} 
-                                                            alt="Chat attach" 
+                                                        <img
+                                                            src={msg.imageUrl}
+                                                            alt="Chat attach"
                                                             className="max-w-full max-h-64 object-contain cursor-pointer hover:opacity-90 transition-opacity"
                                                             onClick={() => window.open(msg.imageUrl, '_blank')}
                                                         />
@@ -250,14 +251,14 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                 {/* 🖼️ Image Preview Area */}
                                 <AnimatePresence>
                                     {imagePreview && (
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary shadow-lg group ml-2"
                                         >
                                             <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
-                                            <button 
+                                            <button
                                                 onClick={removeSelectedImage}
                                                 className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full backdrop-blur-sm hover:bg-red-500 transition-colors"
                                             >
@@ -276,22 +277,22 @@ const GroupChatOverlay = ({ isOpen, onClose, party, user }) => {
                                     onSubmit={handleSendMessage}
                                     className="flex items-center gap-3 bg-base-200 border border-base-content/10 rounded-2xl p-2 focus-within:border-primary transition-all shadow-inner"
                                 >
-                                    <input 
-                                        type="file" 
+                                    <input
+                                        type="file"
                                         ref={imageInputRef}
-                                        className="hidden" 
+                                        className="hidden"
                                         accept="image/*"
                                         onChange={handleImageSelect}
                                     />
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         disabled={isUploading}
                                         onClick={() => imageInputRef.current?.click()}
                                         className={`p-2 transition-colors ${imagePreview ? 'text-primary' : 'text-base-content/40 hover:text-primary'} disabled:opacity-50`}
                                     >
                                         <Image size={20} />
                                     </button>
-                                    
+
                                     <input
                                         type="text"
                                         value={chatInput}

@@ -119,15 +119,9 @@ const MapBox = forwardRef(
       });
     };
 
-    // 🌟 3. Render หมุด เมื่อ MapReady และมีข้อมูลร้าน
-    useEffect(() => {
-      if (isMapReady && mapRef.current) {
-        renderMarkers();
-      }
-    }, [filteredRestaurants, isMapReady]);
-
     const renderMarkers = () => {
       if (!mapRef.current) return;
+
 
       // เคลียร์หมุดเก่าทิ้งก่อน
       activeMarkersRef.current.forEach((marker) => marker.remove());
@@ -170,6 +164,13 @@ const MapBox = forwardRef(
         activeMarkersRef.current.push(newMarker);
       });
     };
+    // 🌟 3. Render หมุด เมื่อ MapReady และมีข้อมูลร้าน
+    useEffect(() => {
+      if (isMapReady && mapRef.current) {
+        renderMarkers();
+      }
+    }, [filteredRestaurants, isMapReady]);
+
 
     // 🌟 4. คำนวณพิกัดเริ่มต้น (ถ้ามี)
     const initialCenter = initialRestaurant

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Send,
@@ -16,41 +17,26 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { apiAiRecommend } from '../api/features.js';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import useUserStore from '../stores/userStore.js';
 import useAiStore from '../stores/aiStore.js';
 import { useNavigate } from 'react-router';
 import AuthModal from '../components/AuthModal';
+import useGetLocation from '../hooks/useGetLocation.js';
 
 const AiRecommend = () => {
     const { messages, addMessage, clearMessages } = useAiStore();
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [location, setLocation] = useState(null);
+
     const [showMenu, setShowMenu] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const scrollRef = useRef(null);
     const menuRef = useRef(null);
-    const user = useUserStore((state) => state.user);
     const isLogin = useUserStore((state) => state.isLogin);
     const navigate = useNavigate();
+    const { location } = useGetLocation();
 
-    // Get location on mount
-    useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setLocation({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    });
-                },
-                () => {
-                    console.warn('Geolocation not allowed');
-                }
-            );
-        }
-    }, []);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -191,7 +177,7 @@ const AiRecommend = () => {
                 className="absolute inset-0 overflow-y-auto px-6 pb-[260px] pt-28 space-y-8 no-scrollbar scroll-smooth"
             >
                 <AnimatePresence mode="popLayout">
-                    {messages.map((msg, msgIdx) => (
+                    {messages.map((msg) => (
                         <motion.div
                             key={msg.id}
                             initial="hidden"

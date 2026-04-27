@@ -1,6 +1,6 @@
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useAuthLogic } from "../hooks/useAuthLogic";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import VerifyEmailModal from "../components/auth/VerifyEmailModal";

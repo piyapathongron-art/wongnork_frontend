@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { createMenuSchema } from '../validations/schema'
 import uploadCloudinary from "../utils/cloudinary";
 import { apiCreateMenu, apiUpdateMenu } from "../api/menuApi";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 
 export const useMenuForm = (restaurantId, onSuccess, onClose, editData) => {
