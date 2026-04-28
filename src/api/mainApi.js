@@ -5,7 +5,7 @@ import useUserStore from "../stores/userStore";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 export const mainApi = axios.create({
-  baseURL: BACKEND_URL,
+  baseURL: `${BACKEND_URL}/api`,
   headers: {
     "Content-Type": "application/json",
   },
