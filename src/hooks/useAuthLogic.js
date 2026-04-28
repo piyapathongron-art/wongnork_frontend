@@ -13,6 +13,7 @@ export const useAuthLogic = () => {
   const login = useUserStore((state) => state.login);
   const googleLogin = useUserStore((state) => state.googleLogin);
   const navigate = useNavigate();
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -44,7 +45,7 @@ export const useAuthLogic = () => {
       const idToken = credentialResponse.credential;
       // 1. 🟢 ต้องยิง API ไปหา Backend ก่อนเพื่อเอาข้อมูล User และ Token ของระบบเรา
       const response = await axios.post(
-        "http://localhost:8899/api/auth/google",
+        `${BACKEND_URL}/auth/google`,
         { token: idToken },
       );
 
