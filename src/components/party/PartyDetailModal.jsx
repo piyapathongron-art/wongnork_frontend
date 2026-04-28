@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion';
-import { Clock, CloseIcon, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Clock, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function PartyDetailModal({ isJoinConfirmOpen, setIsJoinConfirmOpen, partyToJoin, isJoining, executeJoin }) {
     return (

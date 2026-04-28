@@ -16,6 +16,7 @@ import MyJoinedGroups from "../components/party/MyJoinedGroups";
 import ScrollToTop from "../components/ScrollToTop";
 import ErrorModal from "../components/party/ErrorModal";
 import SearchBarParty from "../components/party/SearchBarParty";
+import PartyDetailModal from "../components/party/PartyDetailModal";
 
 const Party = () => {
   const navigate = useNavigate();
