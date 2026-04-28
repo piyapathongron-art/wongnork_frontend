@@ -19,8 +19,9 @@ export default function ResetPassword() {
 
     setIsLoading(true);
     try {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       // 🌟 ยิง API ไปที่ Backend พร้อมส่ง id และ token ผ่าน URL
-      const response = await axios.post(`http://localhost:8899/api/auth/reset-password/${id}/${token}`, {
+      const response = await axios.post(`${BACKEND_URL}/auth/reset-password/${id}/${token}`, {
         newPassword
       });
       

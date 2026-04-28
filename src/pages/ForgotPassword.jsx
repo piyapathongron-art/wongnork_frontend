@@ -13,8 +13,9 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
     try {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       // 🌟 ยิง API ไปที่ Backend ของเรา
-      const response = await axios.post("http://localhost:8899/api/auth/forgot-password", { email });
+      const response = await axios.post(`${BACKEND_URL}/auth/forgot-password`, { email });
       toast.success(response.data.message || "ส่งลิงก์ไปที่อีเมลแล้ว!");
       setEmail("");
     } catch (error) {
