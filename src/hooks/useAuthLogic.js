@@ -5,7 +5,7 @@ import { loginSchema } from "../validations/schema";
 import useUserStore from "../stores/userStore";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import { mainApi } from "../api/mainApi";
 
 export const useAuthLogic = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,8 +43,8 @@ export const useAuthLogic = () => {
     try {
       const idToken = credentialResponse.credential;
       // 1. 🟢 ต้องยิง API ไปหา Backend ก่อนเพื่อเอาข้อมูล User และ Token ของระบบเรา
-      const response = await axios.post(
-        "http://localhost:8899/api/auth/google",
+      const response = await mainApi.post(
+        "/auth/google",
         { token: idToken },
       );
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import axios from "axios";
-import { toast } from "sonner";;
+import { mainApi } from "../api/mainApi";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
   // 🌟 ดึง id และ token ออกมาจาก URL
@@ -20,7 +20,7 @@ export default function ResetPassword() {
     setIsLoading(true);
     try {
       // 🌟 ยิง API ไปที่ Backend พร้อมส่ง id และ token ผ่าน URL
-      const response = await axios.post(`http://localhost:8899/api/auth/reset-password/${id}/${token}`, {
+      const response = await mainApi.post(`/auth/reset-password/${id}/${token}`, {
         newPassword
       });
       

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import axios from "axios"; // หรือใช้ instance API ที่คุณตั้งค่าไว้ใน src/api/mainApi.js
+import { mainApi } from "../api/mainApi";
 import { toast } from "sonner";
 
 export default function ForgotPassword() {
@@ -14,7 +14,7 @@ export default function ForgotPassword() {
     setIsLoading(true);
     try {
       // 🌟 ยิง API ไปที่ Backend ของเรา
-      const response = await axios.post("http://localhost:8899/api/auth/forgot-password", { email });
+      const response = await mainApi.post("/auth/forgot-password", { email });
       toast.success(response.data.message || "ส่งลิงก์ไปที่อีเมลแล้ว!");
       setEmail("");
     } catch (error) {

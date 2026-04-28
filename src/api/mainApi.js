@@ -1,10 +1,11 @@
 import axios from "axios";
 import useUserStore from "../stores/userStore";
 
-const PORT = 8899;
+// const PORT = 8899;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 export const mainApi = axios.create({
-  baseURL: `http://localhost:${PORT}/api`,
+  baseURL: BACKEND_URL,
   headers: {
     "Content-Type": "application/json",
   },
