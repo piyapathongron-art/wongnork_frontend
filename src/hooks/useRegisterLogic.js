@@ -26,7 +26,7 @@ export const useRegisterLogic = () => {
   const onSubmit = async (data) => {
     try {
       await registerUser(data);
-      toast.success("ลงทะเบียนสำเร็จ โปรดตรวจสอบ Email เพื่อยืนยันตัวตน");
+      toast.success("ลงทะเบียนสำเร็จ");
       navigate("/login");
     } catch (err) {
       toast.error(err.response?.data?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
