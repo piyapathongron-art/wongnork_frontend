@@ -12,7 +12,7 @@ export default function PartyDetailModal({ isJoinConfirmOpen, setIsJoinConfirmOp
                     <img src={partyToJoin.restaurant?.images?.find(img => img.isCover)?.url || partyToJoin.restaurant?.images?.[0]?.url || "https://picsum.photos/seed/restaurant/800/400"} alt={partyToJoin.restaurant?.name} className="absolute inset-0 w-full h-full object-cover opacity-80" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     <button onClick={() => setIsJoinConfirmOpen(false)} className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors">
-                        <CloseIcon size={20} />
+                        <X size={20} />
                     </button>
 
                     <div className="absolute bottom-5 left-6 right-6">
