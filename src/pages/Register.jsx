@@ -202,7 +202,7 @@ const Register = () => {
           </div>
           {/* ล่องหนให้กดทะลุ (ต้องให้เพื่อนใส่ GoogleLogin ตรงนี้ทีหลังถ้าจะใช้) */}
           <div className="absolute inset-0 z-10 opacity-[0.01] cursor-pointer flex justify-center overflow-hidden">
-            <GoogleLoginin
+            <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => toast.error("ยกเลิกการเข้าสู่ระบบ")}
               useOneTap
