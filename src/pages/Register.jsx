@@ -3,6 +3,9 @@ import { Eye, EyeOff, Loader2, User, Mail, Lock } from "lucide-react";
 import { useRegisterLogic } from "../hooks/useRegisterLogic";
 import ThemeToggleButton from "../components/ThemeToggleButton";
 import wongnorkLogo from "../assets/LOGO-WONGNORK2.png";
+import { GoogleLogin } from "@react-oauth/google";
+import { toast } from "sonner";
+import { useAuthLogic } from "../hooks/useAuthLogic";
 
 const Register = () => {
   const {
@@ -14,6 +17,8 @@ const Register = () => {
     onSubmit,
     navigate,
   } = useRegisterLogic();
+
+  const { handleGoogleSuccess } = useAuthLogic();
 
   const {
     register,
@@ -197,7 +202,12 @@ const Register = () => {
           </div>
           {/* ล่องหนให้กดทะลุ (ต้องให้เพื่อนใส่ GoogleLogin ตรงนี้ทีหลังถ้าจะใช้) */}
           <div className="absolute inset-0 z-10 opacity-[0.01] cursor-pointer flex justify-center overflow-hidden">
-            {/* พี่เอา <GoogleLogin /> มาใส่ครอบตรงนี้ได้เลยครับเหมือนหน้า Login */}
+            <GoogleLoginin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("ยกเลิกการเข้าสู่ระบบ")}
+              useOneTap
+              size="large"
+            />
           </div>
         </div>
 
